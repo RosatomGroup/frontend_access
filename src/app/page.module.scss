@@ -1,0 +1,19 @@
+.page {
+    margin-top: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.link {
+    border: solid 2px rgb(33, 123, 207);
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.link:hover {
+    background-color: rgb(33, 123, 207);
+    transition: all 300ms ease-in-out 100ms;
+}
