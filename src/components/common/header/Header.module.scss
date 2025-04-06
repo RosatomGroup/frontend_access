@@ -1,0 +1,57 @@
+.wrapper {
+    // border: 2px red solid;
+    background-color: #001529;
+    color: white;
+    width: 100%;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    justify-content: space-between;
+}
+
+.headerLogo {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.navHeader {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.countNotification_wrapper {
+    position: relative;
+}
+
+.countNotification {
+    position: absolute;
+    bottom: 12px;
+    left: 16px;
+    
+    text-align: center;
+    width: 31px;
+    height: 20px;
+    border-radius: 100px;
+    background-color: #FF4D4F;
+}
+
+.userProfile {
+    display: flex;
+    margin-left: 10px;
+    align-items: center;
+    gap: 10px;
+
+}
+
+.userIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #1890FF;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+}

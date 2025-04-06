@@ -1,9 +1,10 @@
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Geist, Geist_Mono, Roboto } from 'next/font/google';
 import '../styles/globals.css';
-import Link from 'next/link';
+// import Link from 'next/link';
+import Header from '@/components/common/header/Header';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -12,6 +13,11 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
+  subsets: ['latin'],
+});
+
+const roboto = Roboto({
+  weight: ['400', '700'],
   subsets: ['latin'],
 });
 
@@ -28,14 +34,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <Link href="/" style={{ width: '120px', height: '40px', border: 'red 2px solid' }}>
-          На главную страницу!
-        </Link>
-        <div className="wrapper">
-          <AntdRegistry>{children}</AntdRegistry>
-        </div>
-      </body>
+      <AntdRegistry>
+        <body className={`${geistSans.variable} ${geistMono.variable} ${roboto.className}`}>
+          <div className="page__wrapper">
+            <Header />
+            <main>{children}</main>
+            {/* <Footer /> */}
+          </div>
+        </body>
+      </AntdRegistry>
     </html>
   );
 }
