@@ -1,0 +1,8 @@
+.custom-menu .ant-menu-item-selected {
+    color: #1890ff !important;
+  }
+  
+  .custom-menu .ant-menu-item:not(.ant-menu-item-selected):hover {
+    color: #1890ff !important;
+    opacity: 0.8;
+  }
