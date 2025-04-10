@@ -1,0 +1,10 @@
+{
+  "rewrites": [{ "source": "/:path*", "destination": "/:path*" }],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600" }]
+    }
+  ],
+  "framework": "nextjs"
+}
