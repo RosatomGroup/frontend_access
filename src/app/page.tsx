@@ -4,8 +4,6 @@ import AppHeader from '../components/AppHeader';
 import AppLayout from '@/components/AppLayout';
 import AuthGuard from '../components/AuthGuard';
 
-import React from 'react';
-
 export default function Home() {
   return (
     <AuthGuard>

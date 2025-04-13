@@ -1,13 +1,14 @@
 'use client';
 
-import { Typography, Image, Space, Badge } from 'antd';
+import { Typography, Image, Space, Badge, message } from 'antd';
 import { useRouter } from 'next/navigation';
-import { Layout, theme, Dropdown } from 'antd';
+import { Layout, theme, Dropdown, Button, Modal } from 'antd';
 import Link from 'next/link';
 import { UserOutlined, BellOutlined, SettingOutlined, LogoutOutlined } from '@ant-design/icons';
 import { Avatar } from 'antd';
-import React from 'react';
-import type { MenuProps } from 'antd';
+// import React from 'react';
+import { useState } from 'react';
+import type { MenuProps, PopconfirmProps } from 'antd';
 
 const { Header } = Layout;
 
@@ -15,12 +16,14 @@ const { Text } = Typography;
 
 export default function AppHeader() {
   const router = useRouter();
+  const [modalOpen, setModalOpen] = useState(false);
 
   const {
     token: { colorBgContainer },
   } = theme.useToken();
 
   const handleLogout = () => {
+    setModalOpen(false)
     localStorage.removeItem('isAuthenticated');
     router.push('/login');
   };
@@ -55,7 +58,9 @@ export default function AppHeader() {
     },
     {
       key: '2',
-      label: 'Профиль',
+      label: <Link rel="noopener noreferrer" href="/profile">
+        Профиль
+      </Link>,
       icon: <UserOutlined />,
     },
 
@@ -66,7 +71,24 @@ export default function AppHeader() {
     },
     {
       key: '4',
-      label: <a onClick={handleLogout}>Выйти</a>,
+      // label: <a onClick={handleLogout}>Выйти</a>,
+      label:
+        <div>
+          <a type='text' onClick={() => setModalOpen(true)}>
+            Выйти
+          </a>
+          <Modal
+            title="Vertically centered modal dialog"
+            centered
+            open={modalOpen}
+            onOk={handleLogout}
+            onCancel={() => setModalOpen(false)}
+            okText="Да"
+            cancelText="Нет"
+          >
+            <p>Вы точно хотите выйти?</p>
+          </Modal>
+        </div>,
       icon: <LogoutOutlined />,
     },
   ];
@@ -96,7 +118,7 @@ export default function AppHeader() {
             RBAC
           </Typography.Title>
         </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 15 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 25 }}>
           <Dropdown menu={{ items: itemsNotif }}>
             <Badge count={itemsNotif.length}>
               <a onClick={(e) => e.preventDefault()}>
