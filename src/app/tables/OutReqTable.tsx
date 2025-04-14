@@ -17,19 +17,12 @@ const columns: TableColumnsType<DataType> = [
     title: '№',
     dataIndex: 'id',
   },
-
   {
     title: 'ФИО',
     dataIndex: 'name',
     filters: [
-      {
-        text: 'Иванов',
-        value: 'Иванов',
-      },
-      {
-        text: 'Петров',
-        value: 'Петров',
-      },
+      { text: 'Иванов', value: 'Иванов' },
+      { text: 'Петров', value: 'Петров' },
     ],
     filterMode: 'tree',
     filterSearch: true,
@@ -44,30 +37,20 @@ const columns: TableColumnsType<DataType> = [
     title: 'Статус',
     dataIndex: 'status',
     render: (status) => {
-      if (status.length === 28) {
-        return <Tag color="success">{status}</Tag>;
-      } else if (status.length < 20 && status.length > 15) {
+      if (status === 'в работе') {
         return <Tag color="processing">{status}</Tag>;
-      } else if (status == 'cglasby8@gov.uk') {
-        return <Tag color="error">{status}</Tag>;
-      } else return <Tag color="warning">{status}</Tag>;
+      }
+      // Добавьте другие условия для статусов по необходимости
+      return <Tag color="default">{status}</Tag>;
     },
-
     filters: [
-      {
-        text: 'Группа обеспечения испытаний',
-        value: 'Группа',
-      },
-      {
-        text: 'ОСП',
-        value: 'ОСП',
-      },
+      { text: 'в работе', value: 'в работе' },
+      // Другие возможные статусы
     ],
-    onFilter: (value, record) => record.status.startsWith(value as string),
+    onFilter: (value, record) => record.status === value,
     filterSearch: true,
     width: '10%',
   },
-
   {
     title: 'Система',
     dataIndex: 'system',
@@ -91,10 +74,9 @@ const OutReqTable: React.FC = () => {
         pageSizeOptions: ['10', '20', '50', '100'],
         onShowSizeChange: handlePageSizeChange,
         showTotal: (total, range) => `Показано ${range[0]}-${range[1]} из ${total} записей`,
-        locale: {
-          items_per_page: `/ стр`,
-        },
+        locale: { items_per_page: '/ стр' },
       }}
+      rowKey="id"
     />
   );
 };
