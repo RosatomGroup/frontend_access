@@ -8,7 +8,7 @@ import Link from 'next/link';
 
 const { Header, Content } = Layout;
 
-export default function Profile() {
+export default function ProfilePage() {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -42,7 +42,6 @@ export default function Profile() {
                 borderRadius: borderRadiusLG,
               }}
             >
-              {/* <OutReqTable /> */}
             </div>
           </Content>
         </Layout>
@@ -50,3 +49,47 @@ export default function Profile() {
     </Layout>
   );
 }
+
+// 'use client';
+
+// import { useRouter } from 'next/navigation';
+// import { useEffect } from 'react';
+// import { useProfileModal } from '@/context/ModalContext'; // Ваш контекст или хранилище
+
+// export default function ProfilePage() {
+//   const router = useRouter();
+//   const { openProfileModal } = useProfileModal();
+
+//   useEffect(() => {
+//     openProfileModal(); // Открываем модалку
+//     window.history.replaceState(null, '', window.location.pathname); // Очищаем историю
+//   }, [openProfileModal]);
+
+//   return null;
+// }
+
+// app/profile/page.tsx
+// 'use client';
+
+// export default function ProfilePage() {
+//   // Эта страница не рендерит ничего,
+//   // так как модалка управляется через AppHeader
+//   return null;
+// }
+
+// app/profile/page.tsx
+
+// 'use client';
+
+// import { Card } from 'antd';
+// import Profile from '@/components/ui/Profile';
+
+// export default function ProfilePage() {
+//   return (
+//     <div className="p-4">
+//       <Card title="Профиль пользователя" bordered={false}>
+//         <Profile />
+//       </Card>
+//     </div>
+//   );
+// }
