@@ -2,82 +2,103 @@ import React from 'react';
 import { Table, Tag } from 'antd';
 import type { TableColumnsType } from 'antd';
 import { reqOutdata } from '../reqOut';
-import { useState } from 'react';
 
 interface DataType {
+  id: number;
   name: string;
   role: string;
-  id: number;
   status: string;
   system: string;
+  submissionTime: string;
 }
 
-const columns: TableColumnsType<DataType> = [
-  {
-    title: '№',
-    dataIndex: 'id',
-  },
-  {
-    title: 'ФИО',
-    dataIndex: 'name',
-    filters: [
-      { text: 'Иванов', value: 'Иванов' },
-      { text: 'Петров', value: 'Петров' },
-    ],
-    filterMode: 'tree',
-    filterSearch: true,
-    onFilter: (value, record) => record.name.includes(value as string),
-    width: '30%',
-  },
-  {
-    title: 'Описание роли',
-    dataIndex: 'role',
-  },
-  {
-    title: 'Статус',
-    dataIndex: 'status',
-    render: (status) => {
-      if (status === 'в работе') {
-        return <Tag color="processing">{status}</Tag>;
-      }
-      // Добавьте другие условия для статусов по необходимости
-      return <Tag color="default">{status}</Tag>;
+interface OutReqTableProps {
+  tableTitle?: string;
+  showFilters?: boolean;
+}
+
+const OutReqTable: React.FC<OutReqTableProps> = ({ 
+  tableTitle = 'Заявки',
+  showFilters = true 
+}) => {
+  const columns: TableColumnsType<DataType> = [
+    {
+      title: '№',
+      dataIndex: 'id',
+      key: 'id',
+      sorter: (a, b) => a.id - b.id,
+      width: 80,
     },
-    filters: [
-      { text: 'в работе', value: 'в работе' },
-      // Другие возможные статусы
-    ],
-    onFilter: (value, record) => record.status === value,
-    filterSearch: true,
-    width: '10%',
-  },
-  {
-    title: 'Система',
-    dataIndex: 'system',
-  },
-];
-
-const OutReqTable: React.FC = () => {
-  const [pageSize, setPageSize] = useState<number>(10);
-
-  const handlePageSizeChange = (current: number, size: number) => {
-    setPageSize(size);
-  };
+    {
+      title: 'ФИО',
+      dataIndex: 'name',
+      key: 'name',
+      sorter: (a, b) => a.name.localeCompare(b.name),
+      ...(showFilters && {
+        filters: [
+          { text: 'Иванов', value: 'Иванов' },
+          { text: 'Петров', value: 'Петров' },
+        ],
+        onFilter: (value, record) => record.name.includes(value as string),
+      }),
+      width: '20%',
+    },
+    {
+      title: 'Роль',
+      dataIndex: 'role',
+      key: 'role',
+      sorter: (a, b) => a.role.localeCompare(b.role),
+    },
+    {
+      title: 'Статус',
+      dataIndex: 'status',
+      key: 'status',
+      sorter: (a, b) => a.status.localeCompare(b.status),
+      render: (status: string) => (
+        <Tag color={
+          status === 'в работе' ? 'blue' : 
+          status === 'завершено' ? 'green' : 'red'
+        }>
+          {status}
+        </Tag>
+      ),
+      ...(showFilters && {
+        filters: [
+          { text: 'В работе', value: 'в работе' },
+          { text: 'Завершено', value: 'завершено' },
+          { text: 'Отклонено', value: 'отклонено' },
+        ],
+        onFilter: (value, record) => record.status === value,
+      }),
+      width: '15%',
+    },
+    {
+      title: 'Система',
+      dataIndex: 'system',
+      key: 'system',
+      sorter: (a, b) => a.system.localeCompare(b.system),
+    },
+    {
+      title: 'Время подачи',
+      dataIndex: 'submissionTime',
+      key: 'submissionTime',
+      sorter: (a, b) => new Date(a.submissionTime).getTime() - new Date(b.submissionTime).getTime(),
+      render: (time: string) => new Date(time).toLocaleString(),
+      width: '20%',
+    },
+  ];
 
   return (
-    <Table<DataType>
-      dataSource={reqOutdata}
-      columns={columns}
-      pagination={{
-        pageSize: pageSize,
-        showSizeChanger: true,
-        pageSizeOptions: ['10', '20', '50', '100'],
-        onShowSizeChange: handlePageSizeChange,
-        showTotal: (total, range) => `Показано ${range[0]}-${range[1]} из ${total} записей`,
-        locale: { items_per_page: '/ стр' },
-      }}
-      rowKey="id"
-    />
+    <div>
+      <h2 style={{ marginBottom: 16 }}>{tableTitle}</h2>
+      <Table
+        columns={columns}
+        dataSource={reqOutdata}
+        pagination={{ pageSize: 10 }}
+        rowKey="id"
+        bordered
+      />
+    </div>
   );
 };
 

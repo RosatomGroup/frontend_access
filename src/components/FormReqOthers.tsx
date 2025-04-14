@@ -18,30 +18,21 @@ const FormReqOthers: React.FC<FormReqOthersProps> = ({ onClose }) => {
     setComponentSize(size);
   };
 
-  const openNotificationWithIcon = (type: 'success' | 'error') => {
-    api[type]({
-      message: 'Заявка успешно создана',
-      description: 'Заявка на доступ для других пользователей отправлена',
-    });
-  };
-
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
       
-      // Формируем новую запись
       const newEntry = {
         id: reqOutdata.length + 1,
         name: `${values.lastName} ${values.firstName} ${values.middleName || ''}`.trim(),
         role: values.role,
         status: 'в работе',
         system: values.system,
+        submissionTime: new Date().toISOString() // Добавляем текущее время
       };
 
-      // Добавляем в начало массива
       reqOutdata.unshift(newEntry);
 
-      // Отправляем на сервер для сохранения
       const response = await fetch('/api/updateReqOut', {
         method: 'POST',
         headers: {
@@ -51,10 +42,16 @@ const FormReqOthers: React.FC<FormReqOthersProps> = ({ onClose }) => {
       });
 
       if (response.ok) {
-        openNotificationWithIcon('success');
+        api.success({
+          message: 'Заявка успешно создана',
+          description: 'Заявка на доступ для других пользователей отправлена',
+        });
         onClose();
       } else {
-        openNotificationWithIcon('error');
+        api.error({
+          message: 'Ошибка',
+          description: 'Не удалось сохранить заявку',
+        });
       }
     } catch (error) {
       console.error('Validation failed:', error);
