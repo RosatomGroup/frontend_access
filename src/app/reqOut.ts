@@ -11,12 +11,12 @@ interface DataType {
 export const reqOutdata: DataType[] = [
   {
     "id": 6,
-    "name": "Короленко Борис Петрович",
+    "name": "Маслов Аркадий Петрович",
     "role": "администратор ЕОС 2.0",
     "status": "в работе",
     "system": "ЕОС 2.0",
     "submissionTime": "2025-04-15T12:58:29.728Z",
-    "email": "12345@mail.ru"
+    "email": "123333@mail.ru"
   },
   {
     "id": 5,
@@ -38,7 +38,7 @@ export const reqOutdata: DataType[] = [
   },
   {
     "id": 3,
-    "name": "Федянин Игорь Юрьевич",
+    "name": "Краснов Сергей Сергеевич",
     "role": "администратор ЕОС НСИ",
     "status": "в работе",
     "system": "ЕОС НСИ",
