@@ -13,6 +13,8 @@ export async function POST(request: Request) {
   role: string;
   status: string;
   system: string;
+  submissionTime: string; 
+  email: string;
 }
 
 export const reqOutdata: DataType[] = ${JSON.stringify(data, null, 2)};`;

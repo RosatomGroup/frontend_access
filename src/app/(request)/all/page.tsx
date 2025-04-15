@@ -1,15 +1,15 @@
 'use client';
 
-import { Layout, Typography, Breadcrumb, theme } from 'antd';
+import { Typography } from 'antd';
+import { Breadcrumb, Layout, theme } from 'antd';
 import OutReqTable from '../../tables/OutReqTable';
-import AppHeader from '../../../components/AppHeader';
 import AppSider from '../../../components/AppSider';
+import AppHeader from '../../../components/AppHeader';
 import Link from 'next/link';
 
 const { Header, Content } = Layout;
-const { Title } = Typography;
 
-export default function AllRequestsPage() {
+export default function AllRequests() {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -20,38 +20,30 @@ export default function AllRequestsPage() {
       <Layout style={{ minHeight: '100vh' }}>
         <AppSider />
         <Layout>
-          <Header style={{ 
-            padding: '0 16px',
-            background: colorBgContainer,
-            height: 100,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center'
-          }}>
+          <Header style={{ paddingLeft: 16, background: colorBgContainer, height: '100px' }}>
             <Breadcrumb
               style={{ margin: '16px 0' }}
               items={[
                 {
-                  title: <Link href="/" style={{ color: 'inherit' }}>Заявки</Link>,
+                  title: <Link href="/">Заявки</Link>,
                 },
                 {
                   title: 'Все заявки',
                 },
               ]}
             />
-            <Title level={4} style={{ margin: 0 }}>Все заявки</Title>
+            <Typography.Title level={4}>Все заявки</Typography.Title>
           </Header>
-          <Content style={{ margin: '0 16px' }}>
+          <Content style={{ margin: '0 16px', paddingTop: '16px' }}>
             <div
               style={{
                 padding: 24,
                 minHeight: 360,
                 background: colorBgContainer,
                 borderRadius: borderRadiusLG,
-                marginTop: 16
               }}
             >
-              <OutReqTable tableTitle="Все заявки" />
+              <OutReqTable />
             </div>
           </Content>
         </Layout>
