@@ -9,6 +9,7 @@ import { Avatar } from 'antd';
 import { useState } from 'react';
 import type { MenuProps } from 'antd';
 import Profile from '@/components/ui/Profile';
+import Settings from '@/components/ui/Settings';
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -17,6 +18,7 @@ export default function AppHeader() {
   const router = useRouter();
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const {
     token: { colorBgContainer },
@@ -39,6 +41,16 @@ export default function AppHeader() {
   const closeProfile = () => {
     setProfileOpen(false);
   };
+
+
+  const showSettings = () => {
+    setSettingsOpen(true);
+  };
+
+  const closeSettings = () => {
+    setSettingsOpen(false);
+  };
+
 
   const itemsNotif: MenuProps['items'] = [
     {
@@ -71,7 +83,7 @@ export default function AppHeader() {
     },
     {
       key: '3',
-      label: 'Настройки',
+      label: <a onClick={showSettings}>Настройки</a>,
       icon: <SettingOutlined />,
     },
     {
@@ -147,6 +159,7 @@ export default function AppHeader() {
       </Modal>
 
       <Profile open={profileOpen} onClose={closeProfile} />
+      <Settings open={settingsOpen} onClose={closeSettings}/>
     </>
   );
 }
