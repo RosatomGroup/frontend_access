@@ -6,17 +6,38 @@ import { useRouter } from 'next/navigation';
 import { Checkbox, Flex, Image, Typography } from 'antd';
 import React from 'react';
 import Link from 'next/link';
+import '@ant-design/v5-patch-for-react-19';
 
 const LoginPage: React.FC = () => {
   const router = useRouter();
+  const [messageApi, contextHolder] = message.useMessage();
 
-  const onFinish = (values: { username: string; password: string }) => {
-    if (values.username === 'admin' && values.password === 'admin') {
-      // message.success('Авторизация успешна!');
-      localStorage.setItem('isAuthenticated', 'true');
-      router.push('/');
-    } else {
-      message.error('Неверные учетные данные!');
+  const onFinish = async (values: { username: string; password: string }) => {
+    try {
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: values.username,
+          password: values.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        messageApi.success('Авторизация успешна!');
+        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('userEmail', values.username);
+        router.push('/');
+      } else {
+        messageApi.error(data.error || 'Неверные учетные данные!');
+      }
+    } catch (error) {
+      messageApi.error('Ошибка при авторизации');
+      console.log(error);
     }
   };
 
@@ -30,29 +51,27 @@ const LoginPage: React.FC = () => {
         height: '100vh',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Image width={35} preview={false} src="/./favicon.ico" alt="RBAC" />
+      {contextHolder}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '0 0 2rem 0',
+        }}
+      >
+        <Image width={50} preview={false} src="/./favicon.ico" alt="RBAC" />
         <Typography.Title
-          level={1}
+          level={2}
           style={{
             padding: '0 0 0 0.5rem',
             margin: 0,
             color: 'black',
           }}
         >
-          RBAC
+          Система автоматизации доступа к корпоративным ресурсам
         </Typography.Title>
       </div>
-      <Typography.Text
-        type="secondary"
-        style={{
-          padding: '0 0 0 0.5rem',
-          margin: '0 0 5rem 0',
-          fontSize: '18px',
-        }}
-      >
-        Система автоматизации доступа к корпоративным ресурсам
-      </Typography.Text>
 
       <Card title="Авторизация">
         <Form
@@ -63,9 +82,18 @@ const LoginPage: React.FC = () => {
         >
           <Form.Item
             name="username"
-            rules={[{ required: true, message: 'Пожалуйста, введите логин!' }]}
+            rules={[
+              {
+                type: 'email',
+                message: 'Недействительный E-mail!',
+              },
+              {
+                required: true,
+                message: 'Пожалуйста, введите Ваш E-mail!',
+              },
+            ]}
           >
-            <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="Логин" />
+            <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="Почта" />
           </Form.Item>
           <Form.Item
             name="password"
@@ -79,10 +107,10 @@ const LoginPage: React.FC = () => {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" block>
+            <Button type="primary" htmlType="submit" block style={{ marginBottom: '1rem' }}>
               Войти
             </Button>
-            или <Link href="/registration">Зарегистрироваться сейчас</Link>
+            или <Link href="/signup">Зарегистрироваться сейчас</Link>
           </Form.Item>
 
           <Form.Item>
@@ -90,7 +118,7 @@ const LoginPage: React.FC = () => {
               <Form.Item name="remember" valuePropName="checked" noStyle>
                 <Checkbox>Запомнить меня</Checkbox>
               </Form.Item>
-              <Link href="">Забыли пароль</Link>
+              <Link href="/reset">Изменить пароль</Link>
             </Flex>
           </Form.Item>
         </Form>
@@ -100,3 +128,4 @@ const LoginPage: React.FC = () => {
 };
 
 export default LoginPage;
+
