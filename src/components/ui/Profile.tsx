@@ -37,6 +37,7 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
       width={720}
       onClose={onClose}
       open={open}
+      maskClosable="false"
       styles={{
         body: {
           paddingBottom: 80,
