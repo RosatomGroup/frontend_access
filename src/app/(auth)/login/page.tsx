@@ -42,36 +42,21 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-      }}
-    >
+    <Flex vertical justify="center" align="center" style={{ height: '100vh' }} gap="middle">
       {contextHolder}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          margin: '0 0 2rem 0',
-        }}
-      >
-        <Image width={50} preview={false} src="/./favicon.ico" alt="RBAC" />
+      <Flex align="center" justify="center" style={{ marginBottom: '2rem' }}>
+        <Image width={50} preview={false} src="/favicon.ico" alt="RBAC" />
         <Typography.Title
           level={2}
           style={{
-            padding: '0 0 0 0.5rem',
+            paddingLeft: '0.5rem',
             margin: 0,
             color: 'black',
           }}
         >
           Система автоматизации доступа к корпоративным ресурсам
         </Typography.Title>
-      </div>
+      </Flex>
 
       <Card title="Авторизация">
         <Form
@@ -93,14 +78,18 @@ const LoginPage: React.FC = () => {
               },
             ]}
           >
-            <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="Почта" />
+            <Input
+              prefix={<UserOutlined className="site-form-item-icon" style={{ color: '#0958d9' }} />}
+              placeholder="Почта"
+            />
           </Form.Item>
+
           <Form.Item
             name="password"
             rules={[{ required: true, message: 'Пожалуйста, введите пароль!' }]}
           >
-            <Input
-              prefix={<LockOutlined className="site-form-item-icon" />}
+            <Input.Password
+              prefix={<LockOutlined className="site-form-item-icon" style={{ color: '#0958d9' }} />}
               type="password"
               placeholder="Пароль"
             />
@@ -123,7 +112,7 @@ const LoginPage: React.FC = () => {
           </Form.Item>
         </Form>
       </Card>
-    </div>
+    </Flex>
   );
 };
 

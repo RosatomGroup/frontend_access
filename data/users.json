@@ -1,12 +1,16 @@
 [
   {
-    "username": "admin",
+    "surname": "Админ",
+    "name": "Админ",
+    "middle_name": "Админ",
     "email": "admin@example.com",
     "password": "admin",
     "confirm": "admin"
   },
   {
-    "username": "user",
+    "surname": "Пользователь",
+    "name": "Пользователь",
+    "middle_name": "Пользователь",
     "email": "user@example.com",
     "password": "user",
     "confirm": "user"
