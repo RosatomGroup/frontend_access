@@ -127,7 +127,7 @@ const OutReqTable: React.FC = () => {
       filters: lastNames, // Используем подготовленный список фамилий
       onFilter: (value, record) => getLastName(record.name) === value,
       filterSearch: true, // Добавляем поиск в фильтрах
-      width: '20%',
+      width: '10%',
       render: (name) => {
         const [lastName, firstName, middleName] = name.split(' ');
         return (
@@ -148,7 +148,7 @@ const OutReqTable: React.FC = () => {
     {
       title: 'Почта',
       dataIndex: 'email',
-      width: '15%',
+      width: '10%',
       sorter: (a, b) => a.email.localeCompare(b.email),
     },
     {

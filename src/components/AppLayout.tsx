@@ -1,5 +1,7 @@
 'use client';
 
+'use client';
+
 import { Layout, Typography, Breadcrumb, theme, Card, Col, Row } from 'antd';
 import { Button, Flex } from 'antd';
 import { List } from 'antd';
@@ -19,18 +21,20 @@ const data = [
 
 export default function AppLayout() {
   const router = useRouter();
+
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const [isSelfFormVisible, setIsSelfFormVisible] = useState(false);
-  const [isOthersFormVisible, setIsOthersFormVisible] = useState(false);
+  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [currentForm, setCurrentForm] = useState<'self' | 'others' | 'revoke'>('self');
 
-  const showSelfForm = () => setIsSelfFormVisible(true);
-  const closeSelfForm = () => setIsSelfFormVisible(false);
-
-  const showOthersForm = () => setIsOthersFormVisible(true);
-  const closeOthersForm = () => setIsOthersFormVisible(false);
+  const showForm = (formType: 'self' | 'others' | 'revoke') => {
+    setCurrentForm(formType);
+    setIsFormVisible(true);
+  };
+  
+  const closeForm = () => setIsFormVisible(false);
 
   function onClickMyReq() {
     router.replace('/outgoing');
@@ -62,33 +66,46 @@ export default function AppLayout() {
           }}
         >
           <Flex gap="small" wrap style={{ gap: 24, display: 'flex' }}>
-            <Button type="primary" onClick={showSelfForm}>
+            <Button type="primary" onClick={() => showForm('self')}>
               Запросить доступ для себя
             </Button>
+            
             <Modal 
-              title="Запрос доступа для себя" 
-              open={isSelfFormVisible} 
-              onCancel={closeSelfForm} 
+              title="Форма запроса для себя" 
+              open={isFormVisible && currentForm === 'self'} 
+              onCancel={closeForm} 
               footer={null}
             >
-              <FormReqSelf onClose={closeSelfForm} />
+              <FormReqSelf onClose={closeForm} />
             </Modal>
-            
-            <Button type="primary" onClick={showOthersForm}>
+
+            <Button type="primary" onClick={() => showForm('others')}>
               Запросить доступ для других
             </Button>
+            
             <Modal 
-              title="Запрос доступа для других" 
-              open={isOthersFormVisible} 
-              onCancel={closeOthersForm} 
+              title="Форма запроса для других" 
+              style={{ textAlign: 'center', marginBottom: '24px' }}
+              open={isFormVisible && currentForm === 'others'} 
+              onCancel={closeForm} 
               footer={null}
             >
-              <FormReqOthers onClose={closeOthersForm} />
+              <FormReqOthers onClose={closeForm} />
             </Modal>
-            
-            <Button type="primary" onClick={showSelfForm}>
+
+            <Button type="primary" onClick={() => showForm('revoke')}>
               Отозвать доступ
             </Button>
+            
+            <Modal 
+              title="Форма отзыва доступа" 
+              open={isFormVisible && currentForm === 'revoke'} 
+              onCancel={closeForm} 
+              footer={null}
+            >
+              <FormReqSelf onClose={closeForm} />
+            </Modal>
+
             <Button type="primary" onClick={onClickMyReq}>
               Мои доступы
             </Button>
