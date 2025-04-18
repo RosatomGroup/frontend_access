@@ -1,18 +1,73 @@
 // 'use client';
 
-// import { Form, Input, Button, notification } from 'antd';
+// import { Form, Input, Button, notification, Select, Checkbox } from 'antd';
 // import type { SizeType } from 'antd/es/config-provider/SizeContext';
-// import React, { useState } from 'react';
+// import React, { useState, useEffect } from 'react';
 // import { reqOutdata } from '@/app/reqOut';
+// import rolesData from '@/app/roles.json';
 
 // interface FormReqOthersProps {
 //   onClose: () => void;
+// }
+
+// interface RoleItem {
+//   description: string;
+//   applicationName: string;
+// }
+
+// interface RolesData {
+//   items: RoleItem[];
 // }
 
 // const FormReqOthers: React.FC<FormReqOthersProps> = ({ onClose }) => {
 //   const [componentSize, setComponentSize] = useState<SizeType | 'default'>('default');
 //   const [form] = Form.useForm();
 //   const [api, contextHolder] = notification.useNotification();
+//   const [loading, setLoading] = useState(false);
+//   const [systems, setSystems] = useState<string[]>([]);
+//   const [roles, setRoles] = useState<RoleItem[]>([]);
+//   const [filteredRoles, setFilteredRoles] = useState<RoleItem[]>([]);
+//   const [isOtherUser, setIsOtherUser] = useState(false);
+
+//   useEffect(() => {
+//     setLoading(true);
+//     const typedRolesData = rolesData as RolesData;
+//     const items = typedRolesData?.items || [];
+
+//     const uniqueSystems = Array.from(
+//       new Set(items.map(item => item.applicationName))
+//     ).sort((a, b) => a.localeCompare(b));
+
+//     setSystems(uniqueSystems);
+//     setRoles(items);
+//     setLoading(false);
+
+//     // Устанавливаем значения по умолчанию
+//     form.setFieldsValue({
+//       lastName: 'Иванов',
+//       firstName: 'Иван',
+//       middleName: 'Иванович'
+//     });
+//   }, [form]);
+
+//   const handleSystemChange = (systemName: string) => {
+//     const rolesForSystem = roles.filter(
+//       role => role.applicationName === systemName
+//     );
+//     setFilteredRoles(rolesForSystem);
+//     form.setFieldsValue({ role: undefined });
+//   };
+
+//   const handleCheckboxChange = (e: string) => {
+//     setIsOtherUser(e.target.checked);
+//     if (!e.target.checked) {
+//       form.setFieldsValue({
+//         lastName: 'Иванов',
+//         firstName: 'Иван',
+//         middleName: 'Иванович'
+//       });
+//     }
+//   };
 
 //   const onFormLayoutChange = ({ size }: { size: SizeType }) => {
 //     setComponentSize(size);
@@ -28,7 +83,8 @@
 //         role: values.role,
 //         status: 'в работе',
 //         system: values.system,
-//         submissionTime: new Date().toISOString() // Добавляем текущее время
+//         submissionTime: new Date().toISOString(),
+//         email: values.email
 //       };
 
 //       reqOutdata.unshift(newEntry);
@@ -58,76 +114,179 @@
 //     }
 //   };
 
+//   const filterOption = (input: string, option?: { label: string; value: string }) =>
+//     (option?.label ?? '').toLowerCase().includes(input.toLowerCase());
+
+//   const formItemStyles = {
+//     marginBottom: 16,
+//   };
+
+//   const labelStyles = {
+//     padding: 0,
+//     marginBottom: 8,
+//     fontWeight: 500,
+//     color: 'rgba(0, 0, 0, 0.88)',
+//   };
+
+//   const inputStyles = {
+//     borderRadius: 8,
+//     border: '1px solid #d9d9d9',
+//     padding: '8px 12px',
+//     transition: 'all 0.2s',
+//     ':hover': {
+//       borderColor: '#40a9ff',
+//     },
+//     ':focus': {
+//       borderColor: '#40a9ff',
+//       boxShadow: '0 0 0 2px rgba(24, 144, 255, 0.2)',
+//       outline: 'none',
+//     },
+//   };
+
+//   const buttonStyles = {
+//     padding: '8px 32px',
+//     height: 'auto',
+//     fontSize: 16,
+//     borderRadius: 8,
+//     fontWeight: 500,
+//   };
+
 //   return (
-//     <Form
-//       form={form}
-//       labelCol={{ span: 8 }}
-//       wrapperCol={{ span: 16 }}
-//       layout="horizontal"
-//       initialValues={{ size: componentSize }}
-//       onValuesChange={onFormLayoutChange}
-//       size={componentSize as SizeType}
-//       style={{ maxWidth: 600 }}
-//     >
+//     <div style={{ maxWidth: '100%', margin: '0 50px' }}>
 //       {contextHolder}
-//       <Form.Item
-//         label="Фамилия"
-//         name="lastName"
-//         rules={[{ required: true, message: 'Пожалуйста, введите фамилию' }]}
+//       <Form
+//         form={form}
+//         layout="vertical"
+//         initialValues={{ size: componentSize }}
+//         onValuesChange={onFormLayoutChange}
+//         size={componentSize as SizeType}
 //       >
-//         <Input />
-//       </Form.Item>
-//       <Form.Item
-//         label="Имя"
-//         name="firstName"
-//         rules={[{ required: true, message: 'Пожалуйста, введите имя' }]}
-//       >
-//         <Input />
-//       </Form.Item>
-//       <Form.Item label="Отчество" name="middleName">
-//         <Input />
-//       </Form.Item>
-//       <Form.Item
-//         label="Роль"
-//         name="role"
-//         rules={[{ required: true, message: 'Пожалуйста, введите роль' }]}
-//       >
-//         <Input />
-//       </Form.Item>
-//       <Form.Item
-//         label="Почта"
-//         name="email"
-//         rules={[{ type: 'email', message: 'Пожалуйста, введите корректный email' }]}
-//       >
-//         <Input />
-//       </Form.Item>
-//       <Form.Item
-//         label="Система"
-//         name="system"
-//         rules={[{ required: true, message: 'Пожалуйста, введите систему' }]}
-//       >
-//         <Input />
-//       </Form.Item>
-//       <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-//         <Button type="primary" onClick={handleSubmit}>
-//           Отправить
-//         </Button>
-//       </Form.Item>
-//     </Form>
+//         <Form.Item
+//           label="Фамилия"
+//           name="lastName"
+//           rules={[{ required: true, message: 'Пожалуйста, введите фамилию' }]}
+//           style={formItemStyles}
+//           labelCol={{ style: labelStyles }}
+//         >
+//           <Input 
+//             style={inputStyles} 
+//             disabled={!isOtherUser} 
+//             onClick={() => !isOtherUser && setIsOtherUser(true)}
+//           />
+//         </Form.Item>
+//         <Form.Item
+//           label="Имя"
+//           name="firstName"
+//           rules={[{ required: true, message: 'Пожалуйста, введите имя' }]}
+//           style={formItemStyles}
+//           labelCol={{ style: labelStyles }}
+//         >
+//           <Input 
+//             style={inputStyles} 
+//             disabled={!isOtherUser} 
+//             onClick={() => !isOtherUser && setIsOtherUser(true)}
+//           />
+//         </Form.Item>
+//         <Form.Item 
+//           label="Отчество" 
+//           name="middleName"
+//           style={formItemStyles}
+//           labelCol={{ style: labelStyles }}
+//         >
+//           <Input 
+//             style={inputStyles} 
+//             disabled={!isOtherUser} 
+//             onClick={() => !isOtherUser && setIsOtherUser(true)}
+//           />
+//         </Form.Item>
+
+//         <Form.Item style={{ marginBottom: 24 }}>
+//           <Checkbox 
+//             checked={isOtherUser}
+//             onChange={handleCheckboxChange}
+//           >
+//             Подать заявку за другого пользователя
+//           </Checkbox>
+//         </Form.Item>
+
+//         <Form.Item
+//           label="Почта"
+//           name="email"
+//           rules={[
+//             { required: true, message: 'Пожалуйста, введите email' },
+//             { type: 'email', message: 'Пожалуйста, введите корректный email' }
+//           ]}
+//           style={formItemStyles}
+//           labelCol={{ style: labelStyles }}
+//         >
+//           <Input style={inputStyles} />
+//         </Form.Item>
+//         <Form.Item
+//           label="Система"
+//           name="system"
+//           rules={[{ required: true, message: 'Пожалуйста, выберите систему' }]}
+//           style={formItemStyles}
+//           labelCol={{ style: labelStyles }}
+//         >
+//           <Select
+//             showSearch
+//             placeholder="Выберите систему"
+//             optionFilterProp="children"
+//             loading={loading}
+//             filterOption={filterOption}
+//             options={systems.map(system => ({
+//               value: system,
+//               label: system,
+//             }))}
+//             onChange={handleSystemChange}
+//             style={{ ...inputStyles, padding: 0 }}
+//             popupMatchSelectWidth={false}
+//           />
+//         </Form.Item>
+//         <Form.Item
+//           label="Роль"
+//           name="role"
+//           rules={[{ required: true, message: 'Пожалуйста, выберите роль' }]}
+//           style={formItemStyles}
+//           labelCol={{ style: labelStyles }}
+//         >
+//           <Select
+//             showSearch
+//             placeholder={form.getFieldValue('system') ? "Выберите роль" : "Сначала выберите систему"}
+//             optionFilterProp="children"
+//             loading={loading}
+//             filterOption={filterOption}
+//             options={filteredRoles.map(role => ({
+//               value: role.description,
+//               label: role.description,
+//             }))}
+//             disabled={!form.getFieldValue('system')}
+//             style={{ ...inputStyles, padding: 0 }}
+//             popupMatchSelectWidth={false}
+//           />
+//         </Form.Item>
+//         <Form.Item style={{ textAlign: 'center', marginTop: 24 }}>
+//           <Button 
+//             type="primary" 
+//             onClick={handleSubmit}
+//             style={buttonStyles}
+//           >
+//             Отправить
+//           </Button>
+//         </Form.Item>
+//       </Form>
+//     </div>
 //   );
 // };
 
 // export default FormReqOthers;
-// FormReqOthers.tsx
 'use client';
 
-import { Form, Input, Button, notification, Select } from 'antd';
+import { Form, Input, Button, notification, Select, Checkbox, CheckboxChangeEvent } from 'antd';
 import type { SizeType } from 'antd/es/config-provider/SizeContext';
 import React, { useState, useEffect } from 'react';
 import { reqOutdata } from '@/app/reqOut';
 import rolesData from '@/app/roles.json';
-
-// const { Title } = Typography;
 
 interface FormReqOthersProps {
   onClose: () => void;
@@ -150,6 +309,7 @@ const FormReqOthers: React.FC<FormReqOthersProps> = ({ onClose }) => {
   const [systems, setSystems] = useState<string[]>([]);
   const [roles, setRoles] = useState<RoleItem[]>([]);
   const [filteredRoles, setFilteredRoles] = useState<RoleItem[]>([]);
+  const [isOtherUser, setIsOtherUser] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -163,7 +323,14 @@ const FormReqOthers: React.FC<FormReqOthersProps> = ({ onClose }) => {
     setSystems(uniqueSystems);
     setRoles(items);
     setLoading(false);
-  }, []);
+
+    // Устанавливаем значения по умолчанию
+    form.setFieldsValue({
+      lastName: 'Иванов',
+      firstName: 'Иван',
+      middleName: 'Иванович'
+    });
+  }, [form]);
 
   const handleSystemChange = (systemName: string) => {
     const rolesForSystem = roles.filter(
@@ -171,6 +338,23 @@ const FormReqOthers: React.FC<FormReqOthersProps> = ({ onClose }) => {
     );
     setFilteredRoles(rolesForSystem);
     form.setFieldsValue({ role: undefined });
+  };
+
+  const handleCheckboxChange = (e: CheckboxChangeEvent) => {
+    setIsOtherUser(e.target.checked);
+    if (!e.target.checked) {
+      form.setFieldsValue({
+        lastName: 'Иванов',
+        firstName: 'Иван',
+        middleName: 'Иванович'
+      });
+    }
+  };
+
+  const handleInputClick = () => {
+    if (!isOtherUser) {
+      setIsOtherUser(true);
+    }
   };
 
   const onFormLayoutChange = ({ size }: { size: SizeType }) => {
@@ -221,11 +405,8 @@ const FormReqOthers: React.FC<FormReqOthersProps> = ({ onClose }) => {
   const filterOption = (input: string, option?: { label: string; value: string }) =>
     (option?.label ?? '').toLowerCase().includes(input.toLowerCase());
 
-  // Стили для инпутов
+  // Оригинальные стили для инпутов
   const inputStyles = {
-    // borderRadius: '4px',
-    // border: '1px solid #d9d9d9',
-    // padding: '8px 11px',
     transition: 'all 0.3s',
     ':hover': {
       borderColor: '#40a9ff',
@@ -240,9 +421,6 @@ const FormReqOthers: React.FC<FormReqOthersProps> = ({ onClose }) => {
   return (
     <div style={{ maxWidth: '100%', margin: '0 50px' }}>
       {contextHolder}
-      {/* <Title level={3} style={{ textAlign: 'center', marginBottom: '24px' }}>
-        Форма запроса для других
-      </Title> */}
       <Form
         form={form}
         layout="vertical"
@@ -255,18 +433,40 @@ const FormReqOthers: React.FC<FormReqOthersProps> = ({ onClose }) => {
           name="lastName"
           rules={[{ required: true, message: 'Пожалуйста, введите фамилию' }]}
         >
-          <Input style={inputStyles} />
+          <Input 
+            style={inputStyles} 
+            disabled={!isOtherUser} 
+            onClick={handleInputClick}
+          />
         </Form.Item>
         <Form.Item
           label="Имя"
           name="firstName"
           rules={[{ required: true, message: 'Пожалуйста, введите имя' }]}
         >
-          <Input style={inputStyles} />
+          <Input 
+            style={inputStyles} 
+            disabled={!isOtherUser} 
+            onClick={handleInputClick}
+          />
         </Form.Item>
         <Form.Item label="Отчество" name="middleName">
-          <Input style={inputStyles} />
+          <Input 
+            style={inputStyles} 
+            disabled={!isOtherUser} 
+            onClick={handleInputClick}
+          />
         </Form.Item>
+
+        <Form.Item>
+          <Checkbox 
+            checked={isOtherUser}
+            onChange={handleCheckboxChange}
+          >
+            Подать заявку за другого пользователя
+          </Checkbox>
+        </Form.Item>
+
         <Form.Item
           label="Почта"
           name="email"

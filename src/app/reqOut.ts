@@ -10,6 +10,24 @@ interface DataType {
 
 export const reqOutdata: DataType[] = [
   {
+    "id": 8,
+    "name": "Иванов Иван Иванович",
+    "role": "Выгрузка актуальных версий ТПС из ЕОС НСИ",
+    "status": "в работе",
+    "system": "ЕОС НСИ",
+    "submissionTime": "2025-04-18T14:58:02.704Z",
+    "email": "7777@mail.ru"
+  },
+  {
+    "id": 7,
+    "name": "Иванов Иван Иванович",
+    "role": "Пользователь",
+    "status": "в работе",
+    "system": "АРИДА",
+    "submissionTime": "2025-04-18T14:52:13.173Z",
+    "email": "1234@mail.ru"
+  },
+  {
     "id": 6,
     "name": "Маслов Аркадий Петрович",
     "role": "администратор ЕОС 2.0",

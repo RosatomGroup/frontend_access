@@ -66,7 +66,7 @@ export default function AppLayout() {
           }}
         >
           <Flex gap="small" wrap style={{ gap: 24, display: 'flex' }}>
-            <Button type="primary" onClick={() => showForm('self')}>
+            {/* <Button type="primary" onClick={() => showForm('self')}>
               Запросить доступ для себя
             </Button>
             
@@ -77,15 +77,16 @@ export default function AppLayout() {
               footer={null}
             >
               <FormReqSelf onClose={closeForm} />
-            </Modal>
+            </Modal> */}
 
             <Button type="primary" onClick={() => showForm('others')}>
-              Запросить доступ для других
+              Запросить доступ
             </Button>
             
             <Modal 
-              title="Форма запроса для других" 
-              style={{ textAlign: 'center', marginBottom: '24px' }}
+              title="Форма запроса" 
+              style={{ 
+                textAlign: 'center', marginBottom: '2px' }}
               open={isFormVisible && currentForm === 'others'} 
               onCancel={closeForm} 
               footer={null}
