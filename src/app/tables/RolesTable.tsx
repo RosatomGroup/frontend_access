@@ -1,86 +1,82 @@
 import React, {useEffect, useState} from 'react';
-import type {TableColumnsType} from 'antd';
-import {Table, ConfigProvider, Grid} from 'antd';
-import {usersData} from "@/app/tables/users";
-
-const { useBreakpoint } = Grid;
+import {ConfigProvider, Table, TableColumnsType} from 'antd';
+import {rolesData} from "@/app/tables/roles";
+import useBreakpoint from "antd/es/grid/hooks/useBreakpoint";
 
 interface DataType {
     key: React.Key;
     name: string;
-    rang: string;
-    subdivision: string;
-    address: string;
+    description: string;
+    system: string;
+    owner: string;
 }
 
-const TableUser: React.FC = () => {
+const TableRole: React.FC = () => {
     const screens = useBreakpoint();
     const [pageSize, setPageSize] = useState<number>(10);
     const [columns, setColumns] = useState<TableColumnsType<DataType>>([]);
 
     const createDynamicFilters = (data: DataType[]) => {
-        if (!data || data.length === 0) return;
-
-        const uniqueRangs = [...new Set(data.map(item => item.rang))].map(rang => ({
+        const uniqueName = [...new Set(data.map(item => item.name))].map(rang => ({
             text: rang,
             value: rang,
         }));
 
-        const uniquePlaces = [...new Set(data.map(item => item.subdivision))].map(place => ({
+        const uniqueSystems = [...new Set(data.map(item => item.system))].map(place => ({
             text: place,
             value: place,
         }));
 
-        const baseColumns: TableColumnsType<DataType> = [
+        const uniqueOwners = [...new Set(data.map(item => item.owner))].map(place => ({
+            text: place,
+            value: place,
+        }));
+
+        const newColumns: TableColumnsType<DataType> = [
             {
-                title: 'ФИО',
+                title: 'Наименование',
                 dataIndex: 'name',
                 filterMode: 'tree',
                 filterSearch: true,
+                filters: uniqueName,
                 onFilter: (value, record) => record.name.includes(value as string),
                 sorter: (a, b) => a.name.localeCompare(b.name),
-                width: screens.xs ? 150 : '30%',
+                width: screens.xs ? 180 : screens.md ? '25%' : '20%',
                 fixed: screens.xs ? 'left' : false,
                 ellipsis: true,
             },
             {
-                title: 'Должность',
-                dataIndex: 'rang',
-                filters: uniqueRangs,
-                onFilter: (value, record) => record.rang === value,
-                sorter: (a, b) => a.rang.localeCompare(b.rang),
-                width: screens.xs ? 120 : undefined,
-                ellipsis: true,
+                title: 'Описание',
+                dataIndex: 'description',
+                width: screens.xs ? 150 : screens.md ? '30%' : '25%',
             },
             {
-                title: 'Подразделение',
-                dataIndex: 'subdivision',
-                filters: uniquePlaces,
-                onFilter: (value, record) => record.subdivision === value,
+                title: 'Система',
+                dataIndex: 'system',
+                filters: uniqueSystems,
+                onFilter: (value, record) => record.system === value,
                 filterSearch: true,
-                sorter: (a, b) => a.subdivision.localeCompare(b.subdivision),
-                width: screens.xs ? 120 : '30%',
+                sorter: (a, b) => a.system.localeCompare(b.system),
+                width: screens.xs ? 120 : screens.md ? '25%' : '20%',
                 ellipsis: true,
             },
             {
-                title: 'Почта',
-                dataIndex: 'address',
-                sorter: (a, b) => a.address.localeCompare(b.address),
-                width: screens.xs ? 150 : undefined,
+                title: 'Владелец',
+                dataIndex: 'owner',
+                filters: uniqueOwners,
+                onFilter: (value, record) => record.owner === value,
+                sorter: (a, b) => a.owner.localeCompare(b.owner),
+                width: screens.xs ? 120 : '15%',
                 ellipsis: true,
                 responsive: ['md'],
             },
         ];
 
-        const mobileColumns = baseColumns.filter(col =>
-            !col.responsive || (col.responsive && screens.md)
-        );
-
-        setColumns(screens.xs ? mobileColumns : baseColumns);
+        setColumns(newColumns);
     };
 
     useEffect(() => {
-        createDynamicFilters(usersData);
+        createDynamicFilters(rolesData);
     }, [screens]);
 
     const handlePageSizeChange = (current: number, size: number) => {
@@ -92,16 +88,19 @@ const TableUser: React.FC = () => {
             theme={{
                 components: {
                     Table: {
-                        cellPaddingBlock: screens.xs ? 8 : 16,
+                        cellPaddingBlock: screens.xs ? 8 : 12,
                         cellPaddingInline: screens.xs ? 8 : 16,
                     },
                 },
             }}
         >
             <Table<DataType>
-                dataSource={usersData}
+                dataSource={rolesData}
                 columns={columns}
-                scroll={screens.xs ? { x: 600 } : undefined}
+                scroll={{
+                    x: screens.xs ? 800 : undefined,
+                    y: screens.xs ? 'calc(100vh - 200px)' : undefined
+                }}
                 pagination={{
                     pageSize: pageSize,
                     showSizeChanger: true,
@@ -115,9 +114,10 @@ const TableUser: React.FC = () => {
                 }}
                 size={screens.xs ? 'small' : 'middle'}
                 bordered={!screens.xs}
+                sticky={screens.xs}
             />
         </ConfigProvider>
     );
 };
 
-export default TableUser;
+export default TableRole;
