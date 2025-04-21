@@ -7,6 +7,7 @@ import AppSider from '../../../components/AppSider';
 import Link from 'next/link';
 
 const { Header, Content } = Layout;
+const { Text } = Typography;
 
 export default function IncomingRequest() {
   const {
@@ -40,9 +41,12 @@ export default function IncomingRequest() {
                 minHeight: 360,
                 background: colorBgContainer,
                 borderRadius: borderRadiusLG,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
               }}
             >
-              <Typography.Text>Нет входящих заявок</Typography.Text>
+              <Text style={{ fontSize: '18px' }}>Нет входящих заявок</Text>
             </div>
           </Content>
         </Layout>
