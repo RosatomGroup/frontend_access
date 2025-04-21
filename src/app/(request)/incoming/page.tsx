@@ -2,9 +2,8 @@
 
 import { Typography } from 'antd';
 import { Breadcrumb, Layout, theme } from 'antd';
-import OutReqTable from '../../tables/OutReqTable';
-import AppSider from '../../../components/AppSider';
 import AppHeader from '../../../components/AppHeader';
+import AppSider from '../../../components/AppSider';
 import Link from 'next/link';
 
 const { Header, Content } = Layout;
@@ -43,7 +42,7 @@ export default function IncomingRequest() {
                 borderRadius: borderRadiusLG,
               }}
             >
-              <OutReqTable />
+              <Typography.Text>Нет входящих заявок</Typography.Text>
             </div>
           </Content>
         </Layout>

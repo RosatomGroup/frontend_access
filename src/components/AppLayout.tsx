@@ -1,14 +1,12 @@
 'use client';
 
-'use client';
-
 import { Layout, Typography, Breadcrumb, theme, Card, Col, Row } from 'antd';
 import { Button, Flex } from 'antd';
 import { List } from 'antd';
 import { Modal } from 'antd';
 import React, { useState } from 'react';
-import FormReqSelf from './FormReqSelf';
 import FormReqOthers from './FormReqOthers';
+import FormReqRevoke from './FormReqRevoke';
 import { useRouter } from 'next/navigation';
 
 const data = [
@@ -66,25 +64,13 @@ export default function AppLayout() {
           }}
         >
           <Flex gap="small" wrap style={{ gap: 24, display: 'flex' }}>
-            {/* <Button type="primary" onClick={() => showForm('self')}>
-              Запросить доступ для себя
-            </Button>
             
-            <Modal 
-              title="Форма запроса для себя" 
-              open={isFormVisible && currentForm === 'self'} 
-              onCancel={closeForm} 
-              footer={null}
-            >
-              <FormReqSelf onClose={closeForm} />
-            </Modal> */}
-
             <Button type="primary" onClick={() => showForm('others')}>
               Запросить доступ
             </Button>
             
             <Modal 
-              title="Форма запроса" 
+              title="Форма запроса доступа" 
               style={{ 
                 textAlign: 'center', marginBottom: '2px' }}
               open={isFormVisible && currentForm === 'others'} 
@@ -100,11 +86,14 @@ export default function AppLayout() {
             
             <Modal 
               title="Форма отзыва доступа" 
+              style={{ 
+                textAlign: 'center', marginBottom: '2px' }}
               open={isFormVisible && currentForm === 'revoke'} 
               onCancel={closeForm} 
               footer={null}
             >
-              <FormReqSelf onClose={closeForm} />
+              <FormReqRevoke onClose={closeForm} />
+            
             </Modal>
 
             <Button type="primary" onClick={onClickMyReq}>

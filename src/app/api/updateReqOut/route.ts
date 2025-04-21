@@ -1,28 +1,38 @@
+// src/app/api/route.ts
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
-export async function POST(request: Request) {
-  try {
-    const data = await request.json();
-    
-    // Формируем содержимое файла
-    const fileContent = `interface DataType {
+interface RequestData {
   id: number;
   name: string;
+  requestSubject: string;
   role: string;
   status: string;
   system: string;
-  submissionTime: string; 
+  submissionTime: string;
+  email: string;
+}
+
+export async function POST(request: Request) {
+  try {
+    const data: RequestData[] = await request.json();
+    
+    const fileContent = `interface DataType {
+  id: number;
+  name: string;
+  requestSubject: string;
+  role: string;
+  status: string;
+  system: string;
+  submissionTime: string;
   email: string;
 }
 
 export const reqOutdata: DataType[] = ${JSON.stringify(data, null, 2)};`;
 
-    // Путь к файлу (от корня проекта)
     const filePath = path.join(process.cwd(), 'src/app/reqOut.ts');
     
-    // Записываем файл
     fs.writeFileSync(filePath, fileContent, 'utf-8');
     
     return NextResponse.json({ success: true });
