@@ -86,6 +86,8 @@ const Settings: React.FC<SettingsProps> = ({ open, onClose, currentAvatar }) => 
       onOk={handleSave}
       onCancel={onClose}
       width={600}
+      maskClosable={false}
+      keyboard={false}
       footer={[
         <Button key="back" onClick={onClose}>
           Отмена
@@ -99,7 +101,7 @@ const Settings: React.FC<SettingsProps> = ({ open, onClose, currentAvatar }) => 
         form={form}
         layout="vertical"
         initialValues={{
-          username: 'Иванов И.И.',
+          username: 'Иванов И.ИBB.',
           email: 'ivanov@example.com',
         }}
       >

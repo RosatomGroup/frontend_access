@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['antd'],
   trailingSlash: true,
-  output: 'export',
+  // output: 'export',
   assetPrefix: '/',
   images: {
     unoptimized: true,

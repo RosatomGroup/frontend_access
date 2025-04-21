@@ -1,0 +1,40 @@
+[
+  {
+    "surname": "Админ",
+    "name": "Админ",
+    "middle_name": "Админ",
+    "email": "admin@example.com",
+    "password": "admin",
+    "confirm": "admin",
+    "phone": "53453",
+    "number": "324536456",
+    "role": "гыук"
+  },
+  {
+    "surname": "Пользователь",
+    "name": "Пользователь",
+    "middle_name": "Пользователь",
+    "email": "user@example.com",
+    "password": "user",
+    "confirm": "user"
+  },
+  {
+    "surname": "Борисов",
+    "name": "Иван",
+    "middle_name": "Пользователь",
+    "email": "123@123.ru",
+    "password": "123123123Q!",
+    "confirm": "123123123Q!"
+  },
+  {
+    "surname": "Кукушкин",
+    "name": "Олег",
+    "middle_name": "",
+    "email": "qwe@qwe.ru",
+    "password": "qweQWE1!",
+    "confirm": "qweQWE1!",
+    "phone": "43",
+    "number": "23",
+    "date": "2025-04-09"
+  }
+]

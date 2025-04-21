@@ -6,7 +6,7 @@ import { Layout, theme, Dropdown, Modal } from 'antd';
 import Link from 'next/link';
 import { UserOutlined, BellOutlined, SettingOutlined, LogoutOutlined } from '@ant-design/icons';
 import { Avatar } from 'antd';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { MenuProps } from 'antd';
 import Profile from '@/components/ui/Profile';
 import Settings from '@/components/ui/Settings';
@@ -14,20 +14,79 @@ import Settings from '@/components/ui/Settings';
 const { Header } = Layout;
 const { Text } = Typography;
 
+interface User {
+  email: string;
+  password: string;
+  name?: string;
+  surname?: string;
+  middle_name?: string;
+}
+
 export default function AppHeader() {
   const router = useRouter();
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  
 
   const {
     token: { colorBgContainer },
   } = theme.useToken();
 
-  const handleLogout = () => {
+
+  // Загружаем данные пользователя при монтировании компонента
+
+  useEffect(() => {
+    // Проверяем, что мы на клиенте
+    if (typeof window !== 'undefined') {
+      const fetchCurrentUser = async () => {
+        try {
+          const userEmail = localStorage.getItem('userEmail');
+          console.log(localStorage.getItem('userEmail'));
+          console.log("Email from localStorage:", userEmail);
+          console.log(userEmail)
+          if (userEmail) {
+            // Запрашиваем конкретного пользователя
+            const response = await fetch(`/api/users?email=${encodeURIComponent(userEmail)}`);
+            console.log(response)
+            if (response.ok) {
+              const user = await response.json();
+              console.log(`${user} список юзеров полученный по запросу`)
+              setCurrentUser(user);
+            } else {
+              console.error('User not found');
+            }
+          }
+        } catch (error) {
+          console.error('Ошибка при загрузке данных пользователя:', error);
+        }
+      };
+  
+      fetchCurrentUser();
+    }
+  }, []);
+  console.log("Этот код может выполняться на сервере или клиенте");
+
+  const formatUserName = (user: User | null) => {
+    if (!user) return 'Гость';
+    
+    // Варианты отображения имени в порядке приоритета
+    return (
+      (user.surname && user.name && user.middle_name) 
+        ? `${user.surname} ${user.name[0]}.${user.middle_name[0]}.` :
+      (user.surname && user.name) 
+        ? `${user.surname} ${user.name[0]}.` :
+      user.name || 
+      (user.email ? user.email.split('@')[0] : 'Гость')
+    );
+  };
+
+  const handleLogout = async () => {
     setLogoutModalOpen(false);
     localStorage.removeItem('isAuthenticated');
-    router.push('/login');
+    localStorage.removeItem('userEmail');
+    await router.push('/login');
   };
 
   const onClick = () => {
@@ -138,7 +197,7 @@ export default function AppHeader() {
                     shape="circle"
                     icon={<UserOutlined />}
                   />
-                  <Text style={{ color: colorBgContainer }}>Иванов И.И.</Text>
+                  <Text style={{ color: colorBgContainer }}>{formatUserName(currentUser)}</Text>
                 </Space>
               </a>
             </Dropdown>
