@@ -164,6 +164,7 @@ export default function AppLayout() {
                 size="small"
                 rowKey="id"
                 scroll={{ x: 600}}
+                showHeader={false}
                 // bordered
               />
             </Card>
@@ -177,7 +178,8 @@ export default function AppLayout() {
                 size="small"
                 locale={{ emptyText: "Нет входящих заявок" }}
                 scroll={{ x: 600}}
-                bordered
+                // bordered
+                showHeader={false}
               />
             </Card>
           </Col>
