@@ -3,10 +3,11 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Form, Input, Card, message } from 'antd';
 import { useRouter } from 'next/navigation';
-import { Checkbox, Flex, Image, Typography } from 'antd';
+import { Checkbox, Flex } from 'antd';
 import React from 'react';
 import Link from 'next/link';
 import '@ant-design/v5-patch-for-react-19';
+import AppTitleAuth from '../../../components/AppTitleAuth';
 
 const LoginPage: React.FC = () => {
   const router = useRouter();
@@ -44,21 +45,9 @@ const LoginPage: React.FC = () => {
   return (
     <Flex vertical justify="center" align="center" style={{ height: '100vh' }} gap="middle">
       {contextHolder}
-      <Flex align="center" justify="center" style={{ marginBottom: '2rem' }}>
-        <Image width={50} preview={false} src="/favicon.ico" alt="RBAC" />
-        <Typography.Title
-          level={2}
-          style={{
-            paddingLeft: '0.5rem',
-            margin: 0,
-            color: 'black',
-          }}
-        >
-          Система автоматизации доступа к корпоративным ресурсам
-        </Typography.Title>
-      </Flex>
+      <AppTitleAuth />
 
-      <Card title="Авторизация">
+      <Card title="Авторизация" style={{ boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}>
         <Form
           name="normal_login"
           initialValues={{ remember: true }}

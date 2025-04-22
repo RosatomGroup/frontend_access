@@ -1,8 +1,7 @@
 'use client';
 
-import { Form, Input, Card } from 'antd';
-import { Image, Typography } from 'antd';
-import { Button, message, Flex } from 'antd';
+import { Form, Input, Card, Image, Typography, Button, message, Flex } from 'antd';
+import AppTitleAuth from '@/components/AppTitleAuth';
 import Link from 'next/link';
 import '@ant-design/v5-patch-for-react-19';
 
@@ -86,7 +85,13 @@ const ResetPassword: React.FC = () => {
         </Typography.Title>
       </Flex>
 
-      <Card title="Сброс пароля" style={{ margin: '0 0 2rem 0' }}>
+      {/* <Card title="Сброс пароля" style={{ margin: '0 0 2rem 0' }}> */}
+      <AppTitleAuth />
+
+      <Card
+        title="Сброс пароля"
+        style={{ margin: '0 0 2rem 0', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}
+      >
         <Form
           {...formItemLayout}
           form={form}

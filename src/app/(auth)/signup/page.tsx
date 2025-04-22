@@ -1,9 +1,8 @@
 'use client';
 
-import { Form, Input, Card } from 'antd';
-import { Image, Typography } from 'antd';
-import { Button, message, Flex } from 'antd';
+import { Form, Input, Card, Image, Typography, Button, message, Flex  } from 'antd';
 import { useRouter } from 'next/navigation';
+import AppTitleAuth from '@/components/AppTitleAuth';
 import Link from 'next/link';
 import '@ant-design/v5-patch-for-react-19';
 
@@ -80,21 +79,11 @@ const Registration: React.FC = () => {
   return (
     <Flex vertical justify="center" align="center" style={{ height: '100vh' }} gap="middle">
       {contextHolder}
-      <Flex align="center" justify="center" style={{ marginBottom: '2rem' }}>
-        <Image width={50} preview={false} src="/favicon.ico" alt="RBAC" />
-        <Typography.Title
-          level={2}
-          style={{
-            paddingLeft: '0.5rem',
-            margin: 0,
-            color: 'black',
-          }}
-        >
-          Система автоматизации доступа к корпоративным ресурсам
-        </Typography.Title>
-      </Flex>
-
-      <Card title="Регистрация" style={{ margin: '0 0 2rem 0' }}>
+      <AppTitleAuth />
+      <Card
+        title="Регистрация"
+        style={{ margin: '0 0 2rem 0', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}
+      >
         <Form
           {...formItemLayout}
           form={form}

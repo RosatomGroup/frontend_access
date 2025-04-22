@@ -4,17 +4,18 @@ import { Typography } from 'antd';
 import { Breadcrumb, Layout, theme } from 'antd';
 import AppSider from '../../../components/AppSider';
 import AppHeader from '../../../components/AppHeader';
-import { List } from 'antd';
+// import { List } from 'antd';
+import ComingSoonPage from '../../../components/AppComingSoon';
 
 const { Header, Content } = Layout;
 
-const data = [
-  'Racing car sprays burning fuel into crowd.',
-  'Japanese princess to wed commoner.',
-  'Australian walks 100km after outback crash.',
-  'Man charged over missing wedding girl.',
-  'Los Angeles battles huge wildfires.',
-];
+// const data = [
+//   'Racing car sprays burning fuel into crowd.',
+//   'Japanese princess to wed commoner.',
+//   'Australian walks 100km after outback crash.',
+//   'Man charged over missing wedding girl.',
+//   'Los Angeles battles huge wildfires.',
+// ];
 
 export default function IncomingRequest() {
   const {
@@ -51,11 +52,12 @@ export default function IncomingRequest() {
               }}
             >
               <Typography.Title level={5}>О приложении</Typography.Title>
-              <List
+              {/* <List
                 size="large"
                 dataSource={data}
                 renderItem={(item) => <List.Item>{item}</List.Item>}
-              />
+              /> */}
+              <ComingSoonPage />
             </div>
           </Content>
         </Layout>
@@ -63,3 +65,4 @@ export default function IncomingRequest() {
     </Layout>
   );
 }
+
