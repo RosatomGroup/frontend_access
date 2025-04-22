@@ -1,32 +1,37 @@
 'use client';
-
 import React, { useEffect, useState, useCallback } from 'react';
-import { Button, Col, DatePicker, Drawer, Form, Input, Row, Space, Modal, message } from 'antd';
+import { Button, Divider, Avatar, Upload, Col, DatePicker, Drawer, Form, Input, Row, Space, Modal, message } from 'antd';
 import dayjs from 'dayjs';
+import { UserOutlined, UploadOutlined } from '@ant-design/icons';
+import type { UploadProps, RcFile } from 'antd/es/upload';
+
+interface UserData {
+  email: string;
+  name: string;
+  surname: string;
+  middle_name?: string;
+  phone?: string;
+  number?: string;
+  role?: string;
+  date?: dayjs.Dayjs;
+  avatar?: string;
+}
 
 interface ProfileProps {
   open: boolean;
   onClose: () => void;
+  onUserUpdate?: (user: UserData) => void;
 }
 
-interface UserData {
-  name: string;
-  surname: string;
-  number: string;
-  email: string;
-  phone: string;
-  role: string;
-  date?: dayjs.Dayjs;
-}
-
-const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
+const Profile: React.FC<ProfileProps> = ({ open, onClose, onUserUpdate }) => {
   const [form] = Form.useForm<UserData>();
   const [initialValues, setInitialValues] = useState<UserData>({} as UserData);
   const [isDirty, setIsDirty] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const dateFormatList = ['DD/MM/YYYY', 'DD/MM/YY', 'DD-MM-YYYY', 'DD-MM-YY'];
+  const [avatar, setAvatar] = useState('');
   const [messageApi, contextHolder] = message.useMessage();
+  const dateFormatList = ['DD/MM/YYYY', 'DD/MM/YY', 'DD-MM-YYYY', 'DD-MM-YY'];
 
   const resetForm = useCallback(() => {
     form.resetFields();
@@ -53,6 +58,7 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
             };
             form.setFieldsValue(formattedUser);
             setInitialValues(formattedUser);
+            setAvatar(user.avatar || '');
             setIsDirty(false);
           }
         }
@@ -90,7 +96,8 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
     try {
       const formattedValues = {
         ...values,
-        date: values.date?.format('YYYY-MM-DD')
+        date: values.date?.format('YYYY-MM-DD'),
+        avatar: avatar // Добавляем текущий аватар
       };
 
       const response = await fetch('/api/profile', {
@@ -107,6 +114,12 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
 
       const data = await response.json();
       messageApi.success('Данные успешно сохранены!');
+
+      // Обновляем данные в родительском компоненте
+      if (onUserUpdate) {
+        onUserUpdate(data.user);
+      }
+
       setIsDirty(false);
       onClose();
     } catch (error) {
@@ -117,6 +130,66 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
         messageApi.error('Неизвестная ошибка при сохранении данных');
       }
     }
+  };
+
+  const handleChange: UploadProps['onChange'] = async (info) => {
+    if (info.file.status === 'uploading') {
+      setLoading(true);
+      return;
+    }
+
+    if (info.file.status === 'done') {
+      try {
+        const formData = new FormData();
+        formData.append('avatar', info.file.originFileObj as Blob);
+        formData.append('email', localStorage.getItem('userEmail') || '');
+
+        const response = await fetch('/api/upload-avatar', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setAvatar(data.avatarUrl);
+          setIsDirty(true);
+          message.success('Аватар успешно обновлен');
+
+          // Обновляем данные в родительском компоненте
+          if (onUserUpdate) {
+            onUserUpdate(data.user);
+          }
+        }
+      } catch (error) {
+        console.error('Ошибка загрузки аватара:', error);
+        message.error('Не удалось загрузить аватар');
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const beforeUpload = (file: RcFile) => {
+    const isImage = file.type.startsWith('image/');
+    if (!isImage) {
+      message.error('Вы можете загрузить только изображения!');
+      return Upload.LIST_IGNORE;
+    }
+    const isLt2M = file.size / 1024 / 1024 < 2;
+    if (!isLt2M) {
+      message.error('Изображение должно быть меньше 2MB!');
+      return Upload.LIST_IGNORE;
+    }
+    return true;
+  };
+
+  const uploadProps: UploadProps = {
+    name: 'avatar',
+    multiple: false,
+    showUploadList: false,
+    beforeUpload,
+    onChange: handleChange,
+    accept: 'image/*',
   };
 
   const handleCloseAttempt = () => {
@@ -168,8 +241,23 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
           form={form}
           onValuesChange={handleValuesChange}
         >
+          <Divider orientation="left">Аватар</Divider>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
+            <Avatar
+              size={64}
+              src={avatar}
+              icon={<UserOutlined />}
+              style={{ backgroundColor: '#1677ff' }}
+            />
+            <Upload {...uploadProps}>
+              <Button icon={<UploadOutlined />} loading={loading}>
+                Загрузить новое фото
+              </Button>
+            </Upload>
+          </div>
+          <Divider orientation="left">Личная информация</Divider>
           <Row gutter={16}>
-            <Col span={12}>
+            <Col span={8}>
               <Form.Item
                 name="name"
                 label="Имя"
@@ -178,7 +266,15 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
                 <Input placeholder="Введите имя" />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col span={8}>
+              <Form.Item
+                name="middle_name"
+                label="Отчество"
+              >
+                <Input placeholder="Введите отчество" />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
               <Form.Item
                 name="surname"
                 label="Фамилия"
@@ -225,9 +321,8 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
                 name="role"
                 label="Роль в системе"
               >
-                <Input placeholder="Введите роль" />
+                <Input placeholder="User" disabled />
               </Form.Item>
-
             </Col>
             <Col span={12}>
               <Form.Item
@@ -237,7 +332,6 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
                 <DatePicker format={dateFormatList} style={{ width: '100%' }} />
               </Form.Item>
             </Col>
-
           </Row>
         </Form>
       </Drawer>

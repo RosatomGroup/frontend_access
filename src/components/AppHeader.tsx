@@ -1,77 +1,47 @@
 'use client';
-
-import { Typography, Image, Space, Badge } from 'antd';
+import { Typography, Image, Space, Badge, message } from 'antd';
 import { useRouter } from 'next/navigation';
 import { Layout, theme, Dropdown, Modal } from 'antd';
 import Link from 'next/link';
 import { UserOutlined, BellOutlined, SettingOutlined, LogoutOutlined } from '@ant-design/icons';
 import { Avatar } from 'antd';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { MenuProps } from 'antd';
 import Profile from '@/components/ui/Profile';
 import Settings from '@/components/ui/Settings';
+import dayjs from 'dayjs';
 
 const { Header } = Layout;
 const { Text } = Typography;
 
 interface User {
   email: string;
-  password: string;
-  name?: string;
-  surname?: string;
+  name: string;
+  surname: string;
   middle_name?: string;
+  phone?: string;
+  number?: string;
+  role?: string;
+  date?: dayjs.Dayjs;
+  avatar?: string;
 }
 
+ 
 export default function AppHeader() {
   const router = useRouter();
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  
+  const [messageApi, contextHolder] = message.useMessage();
 
   const {
     token: { colorBgContainer },
   } = theme.useToken();
 
 
-  // Загружаем данные пользователя при монтировании компонента
-
-  useEffect(() => {
-    // Проверяем, что мы на клиенте
-    if (typeof window !== 'undefined') {
-      const fetchCurrentUser = async () => {
-        try {
-          const userEmail = localStorage.getItem('userEmail');
-          console.log(localStorage.getItem('userEmail'));
-          console.log("Email from localStorage:", userEmail);
-          console.log(userEmail)
-          if (userEmail) {
-            // Запрашиваем конкретного пользователя
-            const response = await fetch(`/api/users?email=${encodeURIComponent(userEmail)}`);
-            console.log(response)
-            if (response.ok) {
-              const user = await response.json();
-              console.log(`${user} список юзеров полученный по запросу`)
-              setCurrentUser(user);
-            } else {
-              console.error('User not found');
-            }
-          }
-        } catch (error) {
-          console.error('Ошибка при загрузке данных пользователя:', error);
-        }
-      };
-  
-      fetchCurrentUser();
-    }
-  }, []);
-  console.log("Этот код может выполняться на сервере или клиенте");
-
-  const formatUserName = (user: User | null) => {
+  const formatUserName = useCallback((user: User | null) => {
     if (!user) return 'Гость';
-    
-    // Варианты отображения имени в порядке приоритета
     return (
       (user.surname && user.name && user.middle_name) 
         ? `${user.surname} ${user.name[0]}.${user.middle_name[0]}.` :
@@ -80,7 +50,33 @@ export default function AppHeader() {
       user.name || 
       (user.email ? user.email.split('@')[0] : 'Гость')
     );
+  }, []);
+
+  const fetchUserData = useCallback(async () => {
+    try {
+      const userEmail = localStorage.getItem('userEmail');
+      if (userEmail) {
+        const response = await fetch(`/api/profile?email=${encodeURIComponent(userEmail)}`);
+        if (response.ok) {
+          const user = await response.json();
+          setCurrentUser(user);
+        }
+      }
+    } catch (error) {
+      console.error('Ошибка при загрузке данных пользователя:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      fetchUserData();
+    }
+  }, [fetchUserData]);
+
+  const updateUserData = (updatedUser: User) => {
+    setCurrentUser(updatedUser);
   };
+
 
   const handleLogout = async () => {
     setLogoutModalOpen(false);
@@ -152,6 +148,14 @@ export default function AppHeader() {
     },
   ];
 
+
+  // useEffect(() => {
+  //   if (currentUser?.avatar) {
+  //     setAvatarUrl(currentUser.avatar);
+  //   }
+  // }, [currentUser, profileOpen]);
+
+
   return (
     <>
       <Layout>
@@ -190,17 +194,20 @@ export default function AppHeader() {
             </Dropdown>
 
             <Dropdown menu={{ items }}>
-              <a onClick={(e) => e.preventDefault()}>
-                <Space>
-                  <Avatar
-                    style={{ backgroundColor: '#1677ff' }}
-                    shape="circle"
-                    icon={<UserOutlined />}
-                  />
-                  <Text style={{ color: colorBgContainer }}>{formatUserName(currentUser)}</Text>
-                </Space>
-              </a>
-            </Dropdown>
+            <a onClick={(e) => e.preventDefault()}>
+              <Space>
+                <Avatar
+                  src={currentUser?.avatar || '/data/images/orig.webp'}
+                  style={{ backgroundColor: '#1677ff' }}
+                  shape="circle"
+                  icon={<UserOutlined />}
+                />
+                <Text style={{ color: colorBgContainer }}>
+                  {formatUserName(currentUser)}
+                </Text>
+              </Space>
+            </a>
+          </Dropdown>
           </div>
         </Header>
       </Layout>
@@ -217,8 +224,12 @@ export default function AppHeader() {
         <p>Вы точно хотите выйти?</p>
       </Modal>
 
-      <Profile open={profileOpen} onClose={closeProfile} />
-      <Settings open={settingsOpen} onClose={closeSettings}/>
+      <Profile 
+        open={profileOpen} 
+        onClose={closeProfile}
+        onUserUpdate={updateUserData}
+      />
+      <Settings open={settingsOpen} onClose={closeSettings} />
     </>
   );
 }

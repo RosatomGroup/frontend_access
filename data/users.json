@@ -27,14 +27,15 @@
     "confirm": "123123123Q!"
   },
   {
-    "surname": "Кукушкин",
-    "name": "Олег",
-    "middle_name": "",
+    "surname": "Годунов",
+    "name": "Алексей",
     "email": "qwe@qwe.ru",
     "password": "qweQWE1!",
     "confirm": "qweQWE1!",
-    "phone": "43",
-    "number": "23",
-    "date": "2025-04-09"
+    "phone": "5456",
+    "number": "34242",
+    "date": "1989-06-05",
+    "middle_name": "Михайлович",
+    "avatar": "/images-profiles/avatar-1745351676800-705.png"
   }
 ]
