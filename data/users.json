@@ -9,7 +9,7 @@
     "phone": "53453",
     "number": "324536456",
     "role": "гыук",
-    "avatar": "/images-profiles/avatar-1745354803744-8004.jpg"
+    "avatar": "/images-profiles/avatar-1745360228476-8608.jpg"
   },
   {
     "surname": "Пользователь",
@@ -41,5 +41,16 @@
     "date": "1989-06-05",
     "middle_name": "Михайлович",
     "avatar": "/images-profiles/avatar-1745351676800-705.png"
+  },
+  {
+    "surname": "Лобанов",
+    "name": "Дмитрий",
+    "email": "lobanov@ya.ru",
+    "password": "qweQWE1!",
+    "confirm": "qweQWE1!",
+    "number": "34223",
+    "phone": "4343",
+    "date": "2025-04-08",
+    "avatar": "/images-profiles/avatar-1745360677195-7427.png"
   }
 ]
