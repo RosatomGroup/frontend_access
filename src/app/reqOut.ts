@@ -11,26 +11,6 @@ interface DataType {
 
 export const reqOutdata: DataType[] = [
   {
-    "id": 9,
-    "name": "Иванов Иван Иванович",
-    "requestSubject": "Отозвать доступ",
-    "role": "Пользователь",
-    "status": "в работе",
-    "system": "АРИДА",
-    "submissionTime": "2025-04-21T20:33:13.577Z",
-    "email": "1234@mail.ru"
-  },
-  {
-    "id": 8,
-    "name": "Иванов Иван Иванович",
-    "requestSubject": "Предоставить доступ",
-    "role": "Выгрузка актуальных версий ТПС из ЕОС НСИ",
-    "status": "в работе",
-    "system": "ЕОС НСИ",
-    "submissionTime": "2025-04-18T14:58:02.704Z",
-    "email": "7777@mail.ru"
-  },
-  {
     "id": 7,
     "name": "Иванов Иван Иванович",
     "requestSubject": "Предоставить доступ",
