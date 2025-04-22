@@ -33,7 +33,6 @@ export default function AppHeader() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [messageApi, contextHolder] = message.useMessage();
 
   const {
     token: { colorBgContainer },
@@ -148,14 +147,6 @@ export default function AppHeader() {
     },
   ];
 
-
-  // useEffect(() => {
-  //   if (currentUser?.avatar) {
-  //     setAvatarUrl(currentUser.avatar);
-  //   }
-  // }, [currentUser, profileOpen]);
-
-
   return (
     <>
       <Layout>
@@ -197,10 +188,12 @@ export default function AppHeader() {
             <a onClick={(e) => e.preventDefault()}>
               <Space>
                 <Avatar
-                  src={currentUser?.avatar || '/data/images/orig.webp'}
+                  src={currentUser?.avatar}
+                  // src={currentUser?.avatar || '/images/defaults.webp'}
+                  icon={<UserOutlined style={{ fontSize: '20px' }}/>}
                   style={{ backgroundColor: '#1677ff' }}
                   shape="circle"
-                  icon={<UserOutlined />}
+                  onError={() => false}
                 />
                 <Text style={{ color: colorBgContainer }}>
                   {formatUserName(currentUser)}

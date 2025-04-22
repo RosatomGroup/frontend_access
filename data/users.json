@@ -8,15 +8,19 @@
     "confirm": "admin",
     "phone": "53453",
     "number": "324536456",
-    "role": "гыук"
+    "role": "гыук",
+    "avatar": "/images-profiles/avatar-1745354803744-8004.jpg"
   },
   {
     "surname": "Пользователь",
-    "name": "Пользователь",
+    "name": "Иван",
     "middle_name": "Пользователь",
     "email": "user@example.com",
     "password": "user",
-    "confirm": "user"
+    "confirm": "user",
+    "avatar": "/images-profiles/avatar-1745356222147-1194.png",
+    "number": "234",
+    "phone": "5435"
   },
   {
     "surname": "Борисов",

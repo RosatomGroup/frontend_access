@@ -29,7 +29,7 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose, onUserUpdate }) => {
   const [isDirty, setIsDirty] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [avatar, setAvatar] = useState('');
+  const [avatar, setAvatar] = useState<string | undefined>(undefined);
   const [messageApi, contextHolder] = message.useMessage();
   const dateFormatList = ['DD/MM/YYYY', 'DD/MM/YY', 'DD-MM-YYYY', 'DD-MM-YY'];
 
@@ -244,10 +244,18 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose, onUserUpdate }) => {
           <Divider orientation="left">Аватар</Divider>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
             <Avatar
-              size={64}
+              size={72}
               src={avatar}
-              icon={<UserOutlined />}
-              style={{ backgroundColor: '#1677ff' }}
+              // src={avatar || '/images/orig.webp'}
+              icon={<UserOutlined style={{ fontSize: '24px' }}/>}
+              style={{ 
+                backgroundColor: '#1677ff',
+              }}
+              onError={() => false}
+              // onError={() => {
+              //   setAvatar('/images/orig.webp');
+              //   return false;
+              // }}
             />
             <Upload {...uploadProps}>
               <Button icon={<UploadOutlined />} loading={loading}>
@@ -300,11 +308,10 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose, onUserUpdate }) => {
             </Col>
             <Col span={12}>
               <Form.Item
-                name="phone"
-                label="Телефон"
-                rules={[{ required: true, message: 'Пожалуйста, введите телефон' }]}
+                name="role"
+                label="Роль в системе"
               >
-                <Input placeholder="Введите телефон" />
+                <Input placeholder="User" disabled />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -316,12 +323,14 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose, onUserUpdate }) => {
                 <Input placeholder="Введите табельный номер" />
               </Form.Item>
             </Col>
+
             <Col span={12}>
               <Form.Item
-                name="role"
-                label="Роль в системе"
+                name="phone"
+                label="Телефон"
+                rules={[{ required: true, message: 'Пожалуйста, введите телефон' }]}
               >
-                <Input placeholder="User" disabled />
+                <Input placeholder="Введите телефон" />
               </Form.Item>
             </Col>
             <Col span={12}>
