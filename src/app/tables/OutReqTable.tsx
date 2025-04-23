@@ -118,6 +118,7 @@ const OutReqTable: React.FC = () => {
 
   return (
         <Table
+          scroll={{ x: 800}}
           columns={columns}
           dataSource={reqOutdata}
           pagination={{ pageSize: 10 }}
