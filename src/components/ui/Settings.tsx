@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Modal, Form, Input, Switch, Divider, message } from 'antd';
+import { Button, Modal, Form, Switch, Divider, message } from 'antd';
 import type { SwitchChangeEventHandler } from 'antd/es/switch';
 
 interface SettingsProps {
@@ -8,7 +8,7 @@ interface SettingsProps {
   currentAvatar?: string;
 }
 
-const Settings: React.FC<SettingsProps> = ({ open, onClose, currentAvatar }) => {
+const Settings: React.FC<SettingsProps> = ({ open, onClose }) => {
   const [form] = Form.useForm();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [darkModeEnabled, setDarkModeEnabled] = useState(false);
@@ -25,9 +25,10 @@ const Settings: React.FC<SettingsProps> = ({ open, onClose, currentAvatar }) => 
   const handleSave = () => {
     form
       .validateFields()
-      .then((values) => {
+      .then(() => {
         message.success('Настройки сохранены');
         onClose();
+        setLoading(false);
       })
       .catch((info) => {
         console.log('Validate Failed:', info);

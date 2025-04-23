@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Typography, Space } from 'antd';
-import ProcessImage from '../app/images/Process.png';
 import Image from 'next/image';
 
 const { Title, Text } = Typography;
@@ -36,9 +35,11 @@ const ComingSoonPage: React.FC = () => {
       <Row justify="center" align="middle" gutter={[32, 32]}>
         <Col>
           <Image
-            src={ProcessImage}
+            src={'/images/Process.png'}
             alt="Coming Soon"
-            style={{ width: '100%', maxWidth: '500px', height: 'auto' }}
+            width={500}  // Физическая ширина изображения
+            height={300} // Физическая высота
+            style={{ width: '100%', maxWidth: '500px', height: 'auto' }} // Стили для адаптивности
           />
         </Col>
         <Col>

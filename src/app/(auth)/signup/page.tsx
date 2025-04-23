@@ -1,6 +1,6 @@
 'use client';
 
-import { Form, Input, Card, Image, Typography, Button, message, Flex  } from 'antd';
+import { Form, Input, Card, Button, message, Flex  } from 'antd';
 import { useRouter } from 'next/navigation';
 import AppTitleAuth from '@/components/AppTitleAuth';
 import Link from 'next/link';

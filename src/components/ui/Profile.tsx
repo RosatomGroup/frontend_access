@@ -86,6 +86,7 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose, onUserUpdate }) => {
       const values = await form.validateFields();
       await onEditProfile(values);
     } catch (error) {
+      console.error("Ошибка валидации:", error);
       messageApi.error('Пожалуйста, заполните все обязательные поля');
     } finally {
       setLoading(false);

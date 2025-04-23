@@ -1,5 +1,5 @@
 'use client';
-import { Typography, Image, Space, Badge, message } from 'antd';
+import { Typography, Image, Space, Badge } from 'antd';
 import { useRouter } from 'next/navigation';
 import { Layout, theme, Dropdown, Modal } from 'antd';
 import Link from 'next/link';

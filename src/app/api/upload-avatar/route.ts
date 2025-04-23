@@ -2,6 +2,17 @@ import { NextResponse } from 'next/server';
 import path from 'path';
 import { promises as fs } from 'fs';
 
+interface UserData {
+  email: string;
+  name: string;
+  surname: string;
+  middle_name?: string;
+  phone?: string;
+  number?: string;
+  role?: string;
+  avatar?: string;
+}
+
 // Константы путей
 const AVATARS_DIR = path.join(process.cwd(), 'public', 'images-profiles');
 const USERS_PATH = path.join(process.cwd(), 'data', 'users.json');
@@ -65,7 +76,7 @@ export async function POST(request: Request) {
     // Читаем и обновляем данные пользователей
     const usersData = await fs.readFile(USERS_PATH, 'utf8');
     const users = JSON.parse(usersData);
-    const userIndex = users.findIndex((user: any) => user.email === email);
+    const userIndex = users.findIndex((user: UserData) => user.email === email);
 
     if (userIndex === -1) {
       // Удаляем загруженный файл, если пользователь не найден

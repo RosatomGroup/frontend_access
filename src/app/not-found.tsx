@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { Button, Typography } from 'antd';
 import '@ant-design/v5-patch-for-react-19';
 import Image from 'next/image';
-import ErrorImage from '../app/images/404error.png';
 
 const { Title, Text } = Typography;
 
@@ -25,9 +24,11 @@ export default function NotFound() {
       <Text style={{ fontSize: '18px' }}>Похоже, этой страницы не существует.</Text>
 
       <Image
-        src={ErrorImage}
+        src={'/images/404error.png'}
         alt="Error 404"
         style={{ width: '100%', maxWidth: '500px', height: 'auto' }}
+        width={500}
+        height={300}
       />
 
       <Link href="/">

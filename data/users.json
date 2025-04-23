@@ -1,7 +1,7 @@
 [
   {
-    "surname": "Админ",
-    "name": "Админ",
+    "surname": "ADSDa",
+    "name": "dfsdfsfd",
     "middle_name": "Админ",
     "email": "admin@example.com",
     "password": "admin",
@@ -9,7 +9,8 @@
     "phone": "53453",
     "number": "324536456",
     "role": "гыук",
-    "avatar": "/images-profiles/avatar-1745360228476-8608.jpg"
+    "avatar": "/images-profiles/avatar-1745443771209-452.jpg",
+    "date": "2025-04-08"
   },
   {
     "surname": "Пользователь",
@@ -18,9 +19,10 @@
     "email": "user@example.com",
     "password": "user",
     "confirm": "user",
-    "avatar": "/images-profiles/avatar-1745356222147-1194.png",
+    "avatar": "/images-profiles/avatar-1745442740043-1037.webp",
     "number": "234",
-    "phone": "5435"
+    "phone": "5435",
+    "date": "2025-04-15"
   },
   {
     "surname": "Борисов",

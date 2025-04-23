@@ -6,6 +6,7 @@ const nextConfig = {
   // output: 'export',
   assetPrefix: '/',
   images: {
+    // domains: ['localhost'],
     unoptimized: true,
   },
   headers: async () => {
