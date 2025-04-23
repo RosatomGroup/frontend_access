@@ -1,40 +1,145 @@
 'use client';
 
-import { Layout, Typography, Breadcrumb, theme, Card, Col, Row } from 'antd';
-import { Button, Flex } from 'antd';
-import { List } from 'antd';
-import { Modal } from 'antd';
-import React, { useState } from 'react';
-import FormReqSelf from './FormReqSelf';
+import { 
+  Layout, 
+  Typography, 
+  Breadcrumb, 
+  theme, 
+  Card, 
+  Col, 
+  Row, 
+  Button, 
+  Flex, 
+  Modal, 
+  Table,
+} from 'antd';
+import type { TableColumnsType } from 'antd';
+import FormReqOthers from './FormReqOthers';
+import FormReqRevoke from './FormReqRevoke';
 import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
+import { reqOutdata } from '@/app/reqOut';
 
-import '@ant-design/v5-patch-for-react-19';
+const { Title } = Typography;
 
-const data = [
-  'Racing car sprays burning fuel into crowd.',
-  'Japanese princess to wed commoner.',
-  'Australian walks 100km after outback crash.',
-  'Man charged over missing wedding girl.',
-  'Los Angeles battles huge wildfires.',
-];
+interface RequestData {
+  id: number;
+  name: string;
+  requestSubject: string;
+  system: string;
+  role: string;
+  submissionTime: string;
+  email: string;
+  status: string;
+}
 
 export default function AppLayout() {
   const router = useRouter();
-
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
-
   const [isFormVisible, setIsFormVisible] = useState(false);
+  const [currentForm, setCurrentForm] = useState<'grant' | 'revoke'>('grant');
 
-  const showForm = () => setIsFormVisible(true);
+  // Получаем последние 5 заявок
+  const lastRequests = reqOutdata
+    .sort((a, b) => new Date(b.submissionTime).getTime() - new Date(a.submissionTime).getTime())
+    .slice(0, 5);
+
+  // Конфигурация колонок для таблицы
+  const columns: TableColumnsType<RequestData> = [
+    {
+      dataIndex: 'id',
+      key: 'id',
+      width: 83,
+      render: (id: number, record: RequestData) => (
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span style={{ 
+            paddingTop: '22px',
+            margin: '0',
+            color: '#1890ff', 
+            fontWeight: '500',
+            fontSize: '13px',
+          }}>
+            Заявка №{id}
+          </span>
+          <span style={{
+            margin: '0',
+            color: '#8c8c8c',
+            fontSize: '12px',
+            marginTop: '4px'
+          }}>
+            {formatSubmissionTime(record.submissionTime)}
+          </span>
+        </div>
+      )
+    },
+    {
+      dataIndex: 'name',
+      key: 'name',
+      width: 185,
+      render: (name: string) => (
+        <div style={{ padding: '0', margin: '0' }}>{name}</div>
+      )
+    },
+    {
+      dataIndex: 'requestSubject',
+      key: 'requestSubject',
+      width: 135,
+      render: (subject: string) => (
+        <div style={{ padding: '0', margin: '0' }}>{subject}</div>
+      )
+    },
+    {
+      dataIndex: 'system',
+      key: 'system',
+      width: 70,
+      render: (system: string) => (
+        <div style={{ padding: '0', margin: '0' }}>{system}</div>
+      )
+    },
+    {
+      dataIndex: 'role',
+      key: 'role',
+      width: 150,
+      render: (role: string) => (
+        <div style={{ padding: '0', margin: '0' }}>{role}</div>
+      )
+    }
+  ];
+
+  // Функция для форматирования времени
+  function formatSubmissionTime(dateString: string) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 24) {
+      return `${diffInHours} hours ago`;
+    } else {
+      const diffInDays = Math.floor(diffInHours / 24);
+      return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
+    }
+  }
+
+  const showForm = (formType: 'grant' | 'revoke') => {
+    setCurrentForm(formType);
+    setIsFormVisible(true);
+  };
+  
   const closeForm = () => setIsFormVisible(false);
 
   function onClickMyReq() {
-    {
-      router.replace('/outgoing');
-    }
+    router.replace('/outgoing');
   }
+
+  // Стили для заголовков модальных окон
+  const modalTitleStyle = {
+    textAlign: 'center' as const,
+    fontSize: '20px',
+    fontWeight: 500,
+    marginBottom: '20px'
+  };
 
   return (
     <Layout>
@@ -42,15 +147,11 @@ export default function AppLayout() {
         <Breadcrumb
           style={{ margin: '16px 0' }}
           items={[
-            {
-              title: 'Главная',
-            },
-            {
-              title: 'Заявки',
-            },
+            { title: 'Главная' },
+            { title: 'Заявки' },
           ]}
         />
-        <Typography.Title level={4}>Главная</Typography.Title>
+        <Title level={4}>Главная</Title>
       </Layout.Header>
       <Layout.Content style={{ margin: '0 16px', paddingTop: '16px' }}>
         <div
@@ -62,27 +163,34 @@ export default function AppLayout() {
           }}
         >
           <Flex gap="small" wrap style={{ gap: 24, display: 'flex' }}>
-            <Button type="primary" onClick={showForm}>
-              Запросить доступ для себя
+            <Button type="primary" onClick={() => showForm('grant')}>
+              Запросить доступ
             </Button>
-            <Modal title="Форма запроса" open={isFormVisible} onCancel={closeForm} footer={null}>
-              {' '}
-              <FormReqSelf onClose={closeForm} />
+            
+            <Modal 
+              title={<div style={modalTitleStyle}>Форма запроса доступа</div>}
+              open={isFormVisible && currentForm === 'grant'} 
+              onCancel={closeForm} 
+              footer={null}
+              centered
+            >
+              <FormReqOthers onClose={closeForm} />
             </Modal>
-            <Button type="primary" onClick={showForm}>
-              Запросить доступ для других
-            </Button>
-            <Modal title="Форма запроса" open={isFormVisible} onCancel={closeForm} footer={null}>
-              {' '}
-              <FormReqSelf onClose={closeForm} />
-            </Modal>
-            <Button type="primary" onClick={showForm}>
+
+            <Button type="primary" onClick={() => showForm('revoke')}>
               Отозвать доступ
             </Button>
-            <Modal title="Форма запроса" open={isFormVisible} onCancel={closeForm} footer={null}>
-              {' '}
-              <FormReqSelf onClose={closeForm} />
+            
+            <Modal 
+              title={<div style={modalTitleStyle}>Форма отзыва доступа</div>}
+              open={isFormVisible && currentForm === 'revoke'} 
+              onCancel={closeForm} 
+              footer={null}
+              centered
+            >
+              <FormReqRevoke onClose={closeForm} />
             </Modal>
+
             <Button type="primary" onClick={onClickMyReq}>
               Мои доступы
             </Button>
@@ -90,20 +198,48 @@ export default function AppLayout() {
         </div>
         <Row gutter={16}>
           <Col span={12}>
-            <Card title="Отправленные заявки" variant="borderless">
-              <List
-                size="large"
-                dataSource={data}
-                renderItem={(item) => <List.Item>{item}</List.Item>}
+            <Card 
+              title="Последние отправленные заявки" 
+              variant="borderless"
+              styles={{
+                header: {
+                  textAlign: 'center',
+                  fontSize: '16px',
+                  fontWeight: 500
+                }
+              }}
+              >
+              <Table
+                dataSource={lastRequests}
+                columns={columns}
+                pagination={false}
+                size="small"
+                rowKey="id"
+                scroll={{ x: 600}}
+                showHeader={false}
               />
             </Card>
           </Col>
           <Col span={12}>
-            <Card title="Входящие заявки" variant="borderless">
-              <List
-                size="large"
-                dataSource={data}
-                renderItem={(item) => <List.Item>{item}</List.Item>}
+            <Card 
+              title="Последние входящие заявки" 
+              variant="borderless"
+              styles={{
+                header: {
+                  textAlign: 'center',
+                  fontSize: '16px',
+                  fontWeight: 500
+                }
+              }}
+              >
+              <Table
+                dataSource={[]}
+                columns={columns}
+                pagination={false}
+                size="small"
+                locale={{ emptyText: "Нет входящих заявок" }}
+                scroll={{ x: 600}}
+                showHeader={false}
               />
             </Card>
           </Col>
