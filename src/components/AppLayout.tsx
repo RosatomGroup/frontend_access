@@ -45,9 +45,14 @@ export default function AppLayout() {
       title: 'Заявка',
       dataIndex: 'id',
       key: 'id',
-      width: 80,
+      width: 110,
       align: 'center' as const,
-      render: (id: number) => <span>Заявка №{id}</span>
+      render: (id: number) => <span style={{ 
+        color: '#1890ff',
+        fontWeight: '500',
+        fontSize: '14px',
+        marginBottom: '4px'
+      }}>Заявка №{id}</span>
     },
     {
       title: 'ФИО',
@@ -60,14 +65,14 @@ export default function AppLayout() {
       title: 'Тема запроса',
       dataIndex: 'requestSubject',
       key: 'requestSubject',
-      width: 160,
+      width: 155,
       ellipsis: true
     },
     {
       title: 'Система',
       dataIndex: 'system',
       key: 'system',
-      width: 100,
+      width: 80,
       align: 'center' as const
     },
     {
