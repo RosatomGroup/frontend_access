@@ -156,7 +156,7 @@ export default function AppLayout() {
         </div>
         <Row gutter={16}>
           <Col span={12}>
-            <Card title="Последние отправленные заявки" bordered={false}>
+            <Card title="Последние отправленные заявки" variant="borderless">
               <Table
                 dataSource={lastRequests}
                 columns={columns}
@@ -170,7 +170,7 @@ export default function AppLayout() {
             </Card>
           </Col>
           <Col span={12}>
-            <Card title="Последние входящие заявки" bordered={false}>
+            <Card title="Последние входящие заявки" variant="borderless">
               <Table
                 dataSource={[]}
                 columns={columns}
@@ -178,7 +178,7 @@ export default function AppLayout() {
                 size="small"
                 locale={{ emptyText: "Нет входящих заявок" }}
                 scroll={{ x: 600}}
-                // bordered
+                bordered
                 showHeader={false}
               />
             </Card>
