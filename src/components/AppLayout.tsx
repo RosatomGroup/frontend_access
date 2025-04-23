@@ -11,8 +11,9 @@ import {
   Button, 
   Flex, 
   Modal, 
-  Table 
+  Table,
 } from 'antd';
+import type { TableColumnsType } from 'antd';
 import FormReqOthers from './FormReqOthers';
 import FormReqRevoke from './FormReqRevoke';
 import { useRouter } from 'next/navigation';
@@ -20,6 +21,17 @@ import React, { useState } from 'react';
 import { reqOutdata } from '@/app/reqOut';
 
 const { Title } = Typography;
+
+interface RequestData {
+  id: number;
+  name: string;
+  requestSubject: string;
+  system: string;
+  role: string;
+  submissionTime: string;
+  email: string;
+  status: string;
+}
 
 export default function AppLayout() {
   const router = useRouter();
@@ -34,55 +46,81 @@ export default function AppLayout() {
     .sort((a, b) => new Date(b.submissionTime).getTime() - new Date(a.submissionTime).getTime())
     .slice(0, 5);
 
-  // // Заглушка для входящих заявок
-  // const incomingRequests = [
-  //   "Нет входящих заявок"
-  // ];
-
   // Конфигурация колонок для таблицы
-  const columns = [
+  const columns: TableColumnsType<RequestData> = [
     {
-      title: 'Заявка',
       dataIndex: 'id',
       key: 'id',
-      width: 110,
-      align: 'center' as const,
-      render: (id: number) => <span style={{ 
-        color: '#1890ff',
-        fontWeight: '500',
-        fontSize: '14px',
-        marginBottom: '4px'
-      }}>Заявка №{id}</span>
+      width: 83,
+      render: (id: number, record: RequestData) => (
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span style={{ 
+            paddingTop: '22px',
+            margin: '0',
+            color: '#1890ff', 
+            fontWeight: '500',
+            fontSize: '13px',
+          }}>
+            Заявка №{id}
+          </span>
+          <span style={{
+            margin: '0',
+            color: '#8c8c8c',
+            fontSize: '12px',
+            marginTop: '4px'
+          }}>
+            {formatSubmissionTime(record.submissionTime)}
+          </span>
+        </div>
+      )
     },
     {
-      title: 'ФИО',
       dataIndex: 'name',
       key: 'name',
-      width: 200,
-      ellipsis: true
+      width: 185,
+      render: (name: string) => (
+        <div style={{ padding: '0', margin: '0' }}>{name}</div>
+      )
     },
     {
-      title: 'Тема запроса',
       dataIndex: 'requestSubject',
       key: 'requestSubject',
-      width: 155,
-      ellipsis: true
+      width: 135,
+      render: (subject: string) => (
+        <div style={{ padding: '0', margin: '0' }}>{subject}</div>
+      )
     },
     {
-      title: 'Система',
       dataIndex: 'system',
       key: 'system',
-      width: 80,
-      align: 'center' as const
+      width: 70,
+      render: (system: string) => (
+        <div style={{ padding: '0', margin: '0' }}>{system}</div>
+      )
     },
     {
-      title: 'Роль',
       dataIndex: 'role',
       key: 'role',
-      width: 180,
-      ellipsis: true
+      width: 150,
+      render: (role: string) => (
+        <div style={{ padding: '0', margin: '0' }}>{role}</div>
+      )
     }
   ];
+
+  // Функция для форматирования времени
+  function formatSubmissionTime(dateString: string) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 24) {
+      return `${diffInHours} hours ago`;
+    } else {
+      const diffInDays = Math.floor(diffInHours / 24);
+      return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
+    }
+  }
 
   const showForm = (formType: 'grant' | 'revoke') => {
     setCurrentForm(formType);
@@ -175,7 +213,7 @@ export default function AppLayout() {
                 dataSource={lastRequests}
                 columns={columns}
                 pagination={false}
-                size="middle"
+                size="small"
                 rowKey="id"
                 scroll={{ x: 600}}
                 showHeader={false}
@@ -198,7 +236,7 @@ export default function AppLayout() {
                 dataSource={[]}
                 columns={columns}
                 pagination={false}
-                size="middle"
+                size="small"
                 locale={{ emptyText: "Нет входящих заявок" }}
                 scroll={{ x: 600}}
                 showHeader={false}
