@@ -1,4 +1,3 @@
-// src/components/AppLayout.tsx
 'use client';
 
 import { 
@@ -156,12 +155,22 @@ export default function AppLayout() {
         </div>
         <Row gutter={16}>
           <Col span={12}>
-            <Card title="Последние отправленные заявки" variant="borderless">
+            <Card 
+              title="Последние отправленные заявки" 
+              variant="borderless"
+              styles={{
+                header: {
+                  textAlign: 'center',
+                  fontSize: '16px',
+                  fontWeight: 500
+                }
+              }}
+              >
               <Table
                 dataSource={lastRequests}
                 columns={columns}
                 pagination={false}
-                size="small"
+                size="middle"
                 rowKey="id"
                 scroll={{ x: 600}}
                 showHeader={false}
@@ -169,12 +178,22 @@ export default function AppLayout() {
             </Card>
           </Col>
           <Col span={12}>
-            <Card title="Последние входящие заявки" variant="borderless">
+            <Card 
+              title="Последние входящие заявки" 
+              variant="borderless"
+              styles={{
+                header: {
+                  textAlign: 'center',
+                  fontSize: '16px',
+                  fontWeight: 500
+                }
+              }}
+              >
               <Table
                 dataSource={[]}
                 columns={columns}
                 pagination={false}
-                size="small"
+                size="middle"
                 locale={{ emptyText: "Нет входящих заявок" }}
                 scroll={{ x: 600}}
                 showHeader={false}

@@ -2,6 +2,7 @@
 'use client';
 
 import { notification } from 'antd';
+import '@ant-design/v5-patch-for-react-19';
 import type { SizeType } from 'antd/es/config-provider/SizeContext';
 import { reqOutdata } from '@/app/reqOut';
 import { useRequestForm } from '@/hooks/useRequestForm';
