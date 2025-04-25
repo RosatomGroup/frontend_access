@@ -2,9 +2,9 @@
 
 import { Typography } from 'antd';
 import { Breadcrumb, Layout, theme } from 'antd';
-import TableUser from '../../tables/UsersTable';
 import AppSider from '../../../components/AppSider';
 import AppHeader from '../../../components/AppHeader';
+import ComingSoonPage from '@/components/AppComingSoon';
 
 const { Header, Content } = Layout;
 
@@ -42,7 +42,7 @@ export default function IncomingRequest() {
                 borderRadius: borderRadiusLG,
               }}
             >
-              <TableUser />
+              <ComingSoonPage />
             </div>
           </Content>
         </Layout>
@@ -50,3 +50,4 @@ export default function IncomingRequest() {
     </Layout>
   );
 }
+
