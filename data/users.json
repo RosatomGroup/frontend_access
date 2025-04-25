@@ -9,17 +9,17 @@
     "phone": "53453",
     "number": "324536456",
     "role": "гыук",
-    "avatar": "/images-profiles/avatar-1745444454736-8777.png",
+    "avatar": "https://s3.twcstorage.ru/32436990-pavel/avatars/admin-1745591377874.png",
     "date": "2025-04-08"
   },
   {
-    "surname": "Пользователь",
+    "surname": "Котиков",
     "name": "Иван",
     "middle_name": "Пользователь",
     "email": "user@example.com",
     "password": "user",
     "confirm": "user",
-    "avatar": "/images-profiles/avatar-1745442740043-1037.webp",
+    "avatar": "https://s3.twcstorage.ru/32436990-pavel/avatars/user-1745591262473.webp",
     "number": "234",
     "phone": "5435",
     "date": "2025-04-15"
@@ -42,7 +42,7 @@
     "number": "34242",
     "date": "1989-06-05",
     "middle_name": "Михайлович",
-    "avatar": "/images-profiles/avatar-1745351676800-705.png"
+    "avatar": "http://localhost:3000/images-profiles/avatar-1745590553642-4537.png"
   },
   {
     "surname": "Лобанов",
@@ -53,6 +53,17 @@
     "number": "34223",
     "phone": "4343",
     "date": "2025-04-08",
-    "avatar": "/images-profiles/avatar-1745360677195-7427.png"
+    "avatar": "https://s3.twcstorage.ru/32436990-pavel/avatars/lobanov-1745591650086.png"
+  },
+  {
+    "surname": "Синицын",
+    "name": "Иван",
+    "middle_name": "",
+    "email": "bird@ya.ru",
+    "password": "qweQWE1!",
+    "confirm": "qweQWE1!",
+    "avatar": "https://s3.twcstorage.ru/32436990-pavel/avatars/bird-1745591585305.png",
+    "number": "345345",
+    "phone": "4535"
   }
 ]

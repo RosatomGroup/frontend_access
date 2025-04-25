@@ -26,7 +26,7 @@ interface User {
   avatar?: string;
 }
 
- 
+
 export default function AppHeader() {
   const router = useRouter();
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
@@ -42,12 +42,12 @@ export default function AppHeader() {
   const formatUserName = useCallback((user: User | null) => {
     if (!user) return 'Гость';
     return (
-      (user.surname && user.name && user.middle_name) 
+      (user.surname && user.name && user.middle_name)
         ? `${user.surname} ${user.name[0]}.${user.middle_name[0]}.` :
-      (user.surname && user.name) 
-        ? `${user.surname} ${user.name[0]}.` :
-      user.name || 
-      (user.email ? user.email.split('@')[0] : 'Гость')
+        (user.surname && user.name)
+          ? `${user.surname} ${user.name[0]}.` :
+          user.name ||
+          (user.email ? user.email.split('@')[0] : 'Гость')
     );
   }, []);
 
@@ -185,22 +185,22 @@ export default function AppHeader() {
             </Dropdown>
 
             <Dropdown menu={{ items }}>
-            <a onClick={(e) => e.preventDefault()}>
-              <Space>
-                <Avatar
-                  src={currentUser?.avatar}
-                  // src={currentUser?.avatar || '/images/defaults.webp'}
-                  icon={<UserOutlined style={{ fontSize: '20px' }}/>}
-                  style={{ backgroundColor: '#1677ff' }}
-                  shape="circle"
-                  onError={() => false}
-                />
-                <Text style={{ color: colorBgContainer }}>
-                  {formatUserName(currentUser)}
-                </Text>
-              </Space>
-            </a>
-          </Dropdown>
+              <a onClick={(e) => e.preventDefault()}>
+                <Space>
+                  <Avatar
+                    src={currentUser?.avatar}
+                    // src={currentUser?.avatar || '/images/defaults.webp'}
+                    icon={<UserOutlined style={{ fontSize: '20px' }} />}
+                    style={{ backgroundColor: '#1677ff' }}
+                    shape="circle"
+                    onError={() => false}
+                  />
+                  <Text style={{ color: colorBgContainer }}>
+                    {formatUserName(currentUser)}
+                  </Text>
+                </Space>
+              </a>
+            </Dropdown>
           </div>
         </Header>
       </Layout>
@@ -217,8 +217,8 @@ export default function AppHeader() {
         <p>Вы точно хотите выйти?</p>
       </Modal>
 
-      <Profile 
-        open={profileOpen} 
+      <Profile
+        open={profileOpen}
         onClose={closeProfile}
         onUserUpdate={updateUserData}
       />
