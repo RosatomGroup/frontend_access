@@ -77,7 +77,7 @@ const TableRole: React.FC = () => {
 
     useEffect(() => {
         createDynamicFilters(rolesData);
-    }, [screens]);
+    }, [screens, createDynamicFilters]);
 
     const handlePageSizeChange = (current: number, size: number) => {
         setPageSize(size);
