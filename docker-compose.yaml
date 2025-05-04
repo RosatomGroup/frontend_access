@@ -1,0 +1,11 @@
+services:
+  rbac:
+    build: .
+    ports: 
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_S3_ENDPOINT=${NEXT_PUBLIC_S3_ENDPOINT}
+      - NEXT_PUBLIC_S3_BUCKET=${NEXT_PUBLIC_S3_BUCKET}
+      - NEXT_PUBLIC_S3_REGION=${NEXT_PUBLIC_S3_REGION}
+      - S3_ACCESS_KEY=${S3_ACCESS_KEY}
+      - S3_SECRET_KEY=${S3_SECRET_KEY}
