@@ -1,6 +1,7 @@
 services:
   rbac:
     build: .
+    container_name: rbac
     ports: 
       - "3000:3000"
     environment:
