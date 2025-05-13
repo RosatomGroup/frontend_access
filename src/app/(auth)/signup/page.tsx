@@ -1,21 +1,18 @@
 'use client';
 
-import { Form, Input, Card, Button, message, Flex  } from 'antd';
+import { Form, Input, Card, Button, message, Flex } from 'antd';
+import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import AppTitleAuth from '@/components/AppTitleAuth';
 import Link from 'next/link';
 import '@ant-design/v5-patch-for-react-19';
 
 interface FormValues {
-  username: string;
+  surname: string;
+  name: string;
+  middle_name: string;
   email: string;
   password: string;
-  confirm: string;
-}
-
-interface ApiResponse {
-  error?: string;
-  [key: string]: unknown;
 }
 
 const formItemLayout = {
@@ -49,30 +46,25 @@ const Registration: React.FC = () => {
 
   const onFinish = async (values: FormValues) => {
     try {
-      const response = await fetch('/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(values),
+      const response = await axios.post('http://localhost:3001/auth/register', {
+        surname: values.surname,
+        name: values.name,
+        middle_name: values.middle_name,
+        email: values.email,
+        password: values.password,
       });
 
-      const data: ApiResponse = await response.json();
-
-      if (response.ok) {
-        messageApi.success(
-          `Регистрация прошла успешно!\nВы будете перенаправлены на страницу авторизации`,
-        );
-        setTimeout(() => {
-          router.push('/login');
-        }, 1500);
-        form.resetFields();
-      } else {
-        messageApi.error(data.error || 'Ошибка при регистрации');
-      }
+      console.log('Успешная регистрация:', response.data);
+      messageApi.success('Регистрация прошла успешно!');
+      setTimeout(() => router.push('/login'), 1500);
+      form.resetFields();
     } catch (error) {
-      messageApi.error('Ошибка при отправке данных');
-      console.log(error);
+      console.error('Ошибка регистрации:', error);
+      if (axios.isAxiosError(error)) {
+        messageApi.error(error.response?.data?.message || 'Ошибка при регистрации');
+      } else {
+        messageApi.error('Неизвестная ошибка');
+      }
     }
   };
 
