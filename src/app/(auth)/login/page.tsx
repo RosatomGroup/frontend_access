@@ -1,45 +1,62 @@
 'use client';
 
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Form, Input, Card, message } from 'antd';
+import { Button, Form, Input, Card, message, Checkbox, Flex } from 'antd';
 import { useRouter } from 'next/navigation';
-import { Checkbox, Flex } from 'antd';
 import React from 'react';
 import Link from 'next/link';
 import '@ant-design/v5-patch-for-react-19';
 import AppTitleAuth from '../../../components/AppTitleAuth';
+import axios from 'axios';
 
 const LoginPage: React.FC = () => {
   const router = useRouter();
   const [messageApi, contextHolder] = message.useMessage();
+  const [loading, setLoading] = React.useState(false);
+  const [form] = Form.useForm();
 
-  const onFinish = async (values: { username: string; password: string }) => {
+  const handleSubmit = async (values: { email: string; password: string }) => {
     try {
-      const response = await fetch('/api/auth', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: values.username,
+      setLoading(true);
+
+      const response = await axios.post(
+        'http://localhost:3001/auth/login',
+        {
+          email: values.email,
           password: values.password,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        messageApi.success('Авторизация успешна!');
-        localStorage.setItem('isAuthenticated', 'true');
-        localStorage.setItem('userEmail', values.username);
-        router.push('/');
-      } else {
-        messageApi.error(data.error || 'Неверные учетные данные!');
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+      if (!response.data.access_token) {
+        throw new Error('Нет токена в ответе');
       }
+
+      localStorage.setItem('token', response.data.access_token);
+      localStorage.setItem('userEmail', values.email);
+
+      messageApi.success('Авторизация успешна!');
+
+      router.push('/');
     } catch (error) {
-      messageApi.error('Ошибка при авторизации');
-      console.log(error);
+      console.error('Ошибка авторизации:', error);
+
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || 'Неверные учетные данные';
+        messageApi.error(errorMessage);
+      } else {
+        messageApi.error('Ошибка при авторизации' + String(error));
+      }
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const onFinish = (values: { email: string; password: string }) => {
+    handleSubmit(values);
   };
 
   return (
@@ -49,13 +66,14 @@ const LoginPage: React.FC = () => {
 
       <Card title="Авторизация" style={{ boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}>
         <Form
+          form={form}
           name="normal_login"
           initialValues={{ remember: true }}
           onFinish={onFinish}
           style={{ maxWidth: 360 }}
         >
           <Form.Item
-            name="username"
+            name="email"
             rules={[
               {
                 type: 'email',
@@ -85,7 +103,14 @@ const LoginPage: React.FC = () => {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" block style={{ marginBottom: '1rem' }}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              block
+              style={{ marginBottom: '1rem' }}
+              loading={loading}
+              disabled={loading}
+            >
               Войти
             </Button>
             или <Link href="/signup">Зарегистрироваться сейчас</Link>

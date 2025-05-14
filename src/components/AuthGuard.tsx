@@ -6,18 +6,20 @@ import React, { useEffect, useState } from 'react';
 const AuthGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const pathname = usePathname();
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
-    const authStatus = localStorage.getItem('isAuthenticated') === 'true';
-    setIsAuthenticated(authStatus);
+    const token = localStorage.getItem('token');
+    const isAuth = !!token;
 
-    if (!authStatus && pathname !== '/login') {
+    if (!isAuth && pathname !== '/login') {
       router.push('/login');
+    } else {
+      setAuthChecked(true);
     }
   }, [router, pathname]);
 
-  if (!isAuthenticated && pathname !== '/login') {
+  if (!authChecked) {
     return null;
   }
 
@@ -25,3 +27,4 @@ const AuthGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 export default AuthGuard;
+
