@@ -1,186 +1,169 @@
 'use client';
 
-import { Form, Input, Card, Image, Typography, Button, message, Flex } from 'antd';
+import { Form, Input, Card, Button, message, Flex } from 'antd';
 import AppTitleAuth from '@/components/AppTitleAuth';
 import Link from 'next/link';
 import '@ant-design/v5-patch-for-react-19';
+import { useSearchParams } from 'next/navigation';
+import axios from 'axios';
+import { useState } from 'react';
 
 interface FormValues {
   email: string;
-  oldPassword: string;
   newPassword: string;
   confirm: string;
+  token?: string;
 }
-
-const formItemLayout = {
-  labelCol: {
-    xs: { span: 24 },
-    sm: { span: 8 },
-  },
-  wrapperCol: {
-    xs: { span: 24 },
-    sm: { span: 16 },
-  },
-};
-
-const tailFormItemLayout = {
-  wrapperCol: {
-    xs: {
-      span: 24,
-      offset: 0,
-    },
-    sm: {
-      span: 16,
-      offset: 8,
-    },
-  },
-};
 
 const ResetPassword: React.FC = () => {
   const [form] = Form.useForm<FormValues>();
   const [messageApi, contextHolder] = message.useMessage();
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token');
+  const [isLoading, setIsLoading] = useState(false);
 
   const onFinish = async (values: FormValues) => {
+    setIsLoading(true);
     try {
-      const response = await fetch('/api/reset-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // if (token) {
+      //   const response = await axios.post('http://localhost:3001/reset/request', {
+      //     token,
+      //     newPassword: values.newPassword,
+      //   });
+
+      //   if (response.status === 200) {
+      //     messageApi.success('Пароль успешно изменен!');
+      //     form.resetFields();
+      //   } else {
+      //     messageApi.error(response.data.error || 'Ошибка при изменении пароля');
+      //   }
+      // } else {
+
+      const response = await axios.post(
+        'http://localhost:3001/reset/request',
+        {
           email: values.email,
-          oldPassword: values.oldPassword,
-          newPassword: values.newPassword,
-        }),
-      });
+        },
+        {
+          validateStatus: (status) => status === 201 || status === 404,
+        },
+      );
 
-      const data = await response.json();
-
-      if (response.ok) {
-        messageApi.success('Пароль успешно изменен!');
+      if (response.status === 201) {
+        messageApi.success('Письмо с инструкциями отправлено на ваш email!');
         form.resetFields();
-      } else {
-        messageApi.error(data.error || 'Ошибка при изменении пароля');
+      } else if (response.status === 404) {
+        messageApi.error('Пользователь с таким email не зарегистрирован');
       }
-    } catch (error) {
-      messageApi.error('Ошибка при отправке данных');
-      console.error(error);
+    } catch (error: any) {
+      if (error.response) {
+        if (error.response.status === 404) {
+          messageApi.error('Пользователь с таким email не зарегистрирован');
+        } else {
+          messageApi.error(
+            error.response.data?.message || 'Произошла ошибка при обработке запроса',
+          );
+        }
+      } else if (error.request) {
+        messageApi.error('Не удалось соединиться с сервером');
+      } else {
+        messageApi.error('Ошибка при отправке запроса');
+      }
+      console.error('Ошибка:', error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <Flex vertical justify="center" align="center" style={{ height: '100vh' }} gap="middle">
+    <Flex
+      vertical
+      justify="center"
+      align="center"
+      style={{ minHeight: '100vh', padding: '1rem' }}
+      gap="middle"
+    >
       {contextHolder}
-      <Flex align="center" justify="center" style={{ marginBottom: '2rem' }}>
-        <Image width={50} preview={false} src="/favicon.ico" alt="RBAC" />
-        <Typography.Title
-          level={2}
-          style={{
-            paddingLeft: '0.5rem',
-            margin: 0,
-            color: 'black',
-          }}
-        >
-          Система автоматизации доступа к корпоративным ресурсам
-        </Typography.Title>
-      </Flex>
-
-      {/* <Card title="Сброс пароля" style={{ margin: '0 0 2rem 0' }}> */}
       <AppTitleAuth />
 
       <Card
-        title="Сброс пароля"
-        style={{ margin: '0 0 2rem 0', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}
+        // title="Сброс пароля"
+        title={token ? 'Введите новый пароль' : 'Забыли пароль?'}
+        style={{ width: '100%', maxWidth: 500, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}
       >
-        <Form
-          {...formItemLayout}
-          form={form}
-          name="reset"
-          onFinish={onFinish}
-          style={{ minWidth: 500 }}
-          scrollToFirstError
-        >
-          <Form.Item
-            name="email"
-            label="E-mail"
-            rules={[
-              {
-                type: 'email',
-                message: 'Недействительный E-mail!',
-              },
-              {
-                required: true,
-                message: 'Пожалуйста, введите Ваш E-mail!',
-              },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            name="oldPassword"
-            label="Старый пароль"
-            rules={[
-              {
-                required: true,
-                message: 'Пожалуйста, введите пароль!',
-              },
-            ]}
-            hasFeedback
-          >
-            <Input.Password />
-          </Form.Item>
-
-          <Form.Item
-            name="newPassword"
-            label="Новый пароль"
-            rules={[
-              { required: true, message: 'Пожалуйста, введите пароль!' },
-              { min: 8, message: 'Пароль должен быть не менее 8 символов!' },
-              {
-                pattern: /[A-Z]/,
-                message: 'Пароль должен содержать хотя бы одну заглавную букву!',
-              },
-              { pattern: /[0-9]/, message: 'Пароль должен содержать хотя бы одну цифру!' },
-              {
-                pattern: /[!@#$%^&*]/,
-                message: 'Пароль должен содержать хотя бы один спецсимвол!',
-              },
-            ]}
-            hasFeedback
-          >
-            <Input.Password />
-          </Form.Item>
-
-          <Form.Item
-            name="confirm"
-            label="Подтвердите пароль"
-            dependencies={['newPassword']}
-            hasFeedback
-            rules={[
-              {
-                required: true,
-                message: 'Пожалуйста, подтвердите пароль!',
-              },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue('newPassword') === value) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(new Error('Пароли не совпадают!'));
+        <Form form={form} name="reset" onFinish={onFinish} layout="vertical" scrollToFirstError>
+          {!token && (
+            <Form.Item
+              name="email"
+              label="E-mail"
+              rules={[
+                {
+                  type: 'email',
+                  message: 'Недействительный E-mail!',
                 },
-              }),
-            ]}
-          >
-            <Input.Password />
-          </Form.Item>
+                {
+                  required: true,
+                  message: 'Пожалуйста, введите Ваш E-mail!',
+                },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+          )}
+          {token && (
+            <>
+              <Form.Item
+                name="newPassword"
+                label="Новый пароль"
+                rules={[
+                  { required: true, message: 'Пожалуйста, введите пароль!' },
+                  { min: 8, message: 'Пароль должен быть не менее 8 символов!' },
+                  {
+                    pattern: /[A-Z]/,
+                    message: 'Пароль должен содержать хотя бы одну заглавную букву!',
+                  },
+                  { pattern: /[0-9]/, message: 'Пароль должен содержать хотя бы одну цифру!' },
+                  {
+                    pattern: /[!@#$%^&*]/,
+                    message: 'Пароль должен содержать хотя бы один спецсимвол!',
+                  },
+                ]}
+                hasFeedback
+              >
+                <Input.Password />
+              </Form.Item>
 
-          <Form.Item {...tailFormItemLayout}>
-            <Button type="primary" htmlType="submit">
-              Сбросить пароль
+              <Form.Item
+                name="confirm"
+                label="Подтвердите пароль"
+                dependencies={['newPassword']}
+                hasFeedback
+                rules={[
+                  {
+                    required: true,
+                    message: 'Пожалуйста, подтвердите пароль!',
+                  },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (!value || getFieldValue('newPassword') === value) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject(new Error('Пароли не совпадают!'));
+                    },
+                  }),
+                ]}
+              >
+                <Input.Password />
+              </Form.Item>
+            </>
+          )}
+
+          <Form.Item>
+            <Button type="primary" htmlType="submit" loading={isLoading} block>
+              {token ? 'Сохранить пароль' : 'Отправить инструкции'}
             </Button>
           </Form.Item>
-          <Form.Item {...tailFormItemLayout}>
+          <Form.Item>
             <Link href="/login">Войти в аккаунт</Link>
           </Form.Item>
         </Form>

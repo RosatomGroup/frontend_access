@@ -9,13 +9,21 @@ import '@ant-design/v5-patch-for-react-19';
 import AppTitleAuth from '../../../components/AppTitleAuth';
 import axios from 'axios';
 
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 const LoginPage: React.FC = () => {
   const router = useRouter();
   const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = React.useState(false);
   const [form] = Form.useForm();
 
-  const handleSubmit = async (values: { email: string; password: string }) => {
+  const handleSubmit = async (values: { email: string; password: string; remember: boolean }) => {
     try {
       setLoading(true);
 
@@ -24,23 +32,31 @@ const LoginPage: React.FC = () => {
         {
           email: values.email,
           password: values.password,
+          rememberMe: values.remember,
         },
         {
           headers: {
             'Content-Type': 'application/json',
           },
+          withCredentials: true,
         },
       );
-      if (!response.data.access_token) {
+
+      console.log('Полный ответ сервера:', response);
+
+      const accessToken = response.data.accessToken || response.data.access_token;
+      if (!accessToken) {
         throw new Error('Нет токена в ответе');
       }
 
-      localStorage.setItem('token', response.data.access_token);
-      localStorage.setItem('userEmail', values.email);
+      if (values.remember) {
+        localStorage.setItem('accessToken', accessToken);
+      } else {
+        sessionStorage.setItem('accessToken', accessToken);
+      }
 
       messageApi.success('Авторизация успешна!');
-
-      router.push('/');
+      setTimeout(() => router.push('/incoming'), 500);
     } catch (error) {
       console.error('Ошибка авторизации:', error);
 
@@ -55,10 +71,6 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  const onFinish = (values: { email: string; password: string }) => {
-    handleSubmit(values);
-  };
-
   return (
     <Flex vertical justify="center" align="center" style={{ height: '100vh' }} gap="middle">
       {contextHolder}
@@ -69,7 +81,7 @@ const LoginPage: React.FC = () => {
           form={form}
           name="normal_login"
           initialValues={{ remember: true }}
-          onFinish={onFinish}
+          onFinish={handleSubmit}
           style={{ maxWidth: 360 }}
         >
           <Form.Item

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import AppTitleAuth from '@/components/AppTitleAuth';
 import Link from 'next/link';
 import '@ant-design/v5-patch-for-react-19';
+import React from 'react';
 
 interface FormValues {
   surname: string;
@@ -15,37 +16,15 @@ interface FormValues {
   password: string;
 }
 
-const formItemLayout = {
-  labelCol: {
-    xs: { span: 24 },
-    sm: { span: 8 },
-  },
-  wrapperCol: {
-    xs: { span: 24 },
-    sm: { span: 16 },
-  },
-};
-
-const tailFormItemLayout = {
-  wrapperCol: {
-    xs: {
-      span: 24,
-      offset: 0,
-    },
-    sm: {
-      span: 16,
-      offset: 8,
-    },
-  },
-};
-
 const Registration: React.FC = () => {
   const [form] = Form.useForm<FormValues>();
   const router = useRouter();
   const [messageApi, contextHolder] = message.useMessage();
+  const [loading, setLoading] = React.useState(false);
 
   const onFinish = async (values: FormValues) => {
     try {
+      setLoading(true);
       const response = await axios.post('http://localhost:3001/auth/register', {
         surname: values.surname,
         name: values.name,
@@ -55,7 +34,12 @@ const Registration: React.FC = () => {
       });
 
       console.log('Успешная регистрация:', response.data);
-      messageApi.success('Регистрация прошла успешно!');
+      localStorage.setItem('accessToken', response.data.accessToken);
+      localStorage.setItem('refreshToken', response.data.refreshToken);
+
+      messageApi.success(
+        'Регистрация прошла успешно! Вы будете перенравлены на страницу авторизации',
+      );
       setTimeout(() => router.push('/login'), 1500);
       form.resetFields();
     } catch (error) {
@@ -65,25 +49,33 @@ const Registration: React.FC = () => {
       } else {
         messageApi.error('Неизвестная ошибка');
       }
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <Flex vertical justify="center" align="center" style={{ height: '100vh' }} gap="middle">
+    <Flex
+      vertical
+      justify="center"
+      align="center"
+      style={{
+        minHeight: '100vh',
+        padding: '1rem',
+      }}
+      gap="middle"
+    >
       {contextHolder}
       <AppTitleAuth />
       <Card
         title="Регистрация"
-        style={{ margin: '0 0 2rem 0', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}
+        style={{
+          width: '100%',
+          maxWidth: '500px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+        }}
       >
-        <Form
-          {...formItemLayout}
-          form={form}
-          name="register"
-          onFinish={onFinish}
-          style={{ minWidth: 500 }}
-          scrollToFirstError
-        >
+        <Form form={form} name="register" onFinish={onFinish} layout="vertical" scrollToFirstError>
           <Form.Item
             label="Фамилия"
             name="surname"
@@ -184,12 +176,19 @@ const Registration: React.FC = () => {
             </Row>
           </Form.Item> */}
 
-          <Form.Item {...tailFormItemLayout}>
-            <Button type="primary" htmlType="submit">
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              block
+              size="large"
+              loading={loading}
+              disabled={loading}
+            >
               Зарегистрироваться
             </Button>
           </Form.Item>
-          <Form.Item {...tailFormItemLayout}>
+          <Form.Item style={{ textAlign: 'center', marginBottom: 0 }}>
             <Link href="/login">Уже есть аккаунт?</Link>
           </Form.Item>
         </Form>
