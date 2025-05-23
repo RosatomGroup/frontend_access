@@ -1,4 +1,4 @@
-import {Layout} from 'antd';
+import { Layout } from 'antd';
 import '@ant-design/v5-patch-for-react-19';
 import AppSider from '../components/AppSider';
 import AppHeader from '../components/AppHeader';
@@ -6,16 +6,16 @@ import AppLayout from '@/components/AppLayout';
 import AuthGuard from '../components/AuthGuard';
 
 export default function Home() {
-    return (
-        <AuthGuard>
-            <Layout>
-                <AppHeader/>
-                <Layout style={{minHeight: '100vh'}}>
-                    <AppSider/>
-                    <AppLayout/>
-                </Layout>
-            </Layout>
-        </AuthGuard>
-    );
+  return (
+    <AuthGuard>
+      <Layout>
+        <AppHeader />
+        <Layout style={{ minHeight: '100vh' }}>
+          <AppSider />
+          <AppLayout />
+        </Layout>
+      </Layout>
+    </AuthGuard>
+  );
 }
 

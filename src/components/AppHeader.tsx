@@ -10,6 +10,8 @@ import type { MenuProps } from 'antd';
 import Profile from '@/components/ui/Profile';
 import Settings from '@/components/ui/Settings';
 import dayjs from 'dayjs';
+import '@ant-design/v5-patch-for-react-19';
+import axios from 'axios';
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -26,7 +28,6 @@ interface User {
   avatar?: string;
 }
 
-
 export default function AppHeader() {
   const router = useRouter();
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
@@ -38,17 +39,13 @@ export default function AppHeader() {
     token: { colorBgContainer },
   } = theme.useToken();
 
-
   const formatUserName = useCallback((user: User | null) => {
     if (!user) return 'Гость';
-    return (
-      (user.surname && user.name && user.middle_name)
-        ? `${user.surname} ${user.name[0]}.${user.middle_name[0]}.` :
-        (user.surname && user.name)
-          ? `${user.surname} ${user.name[0]}.` :
-          user.name ||
-          (user.email ? user.email.split('@')[0] : 'Гость')
-    );
+    return user.surname && user.name && user.middle_name
+      ? `${user.surname} ${user.name[0]}.${user.middle_name[0]}.`
+      : user.surname && user.name
+        ? `${user.surname} ${user.name[0]}.`
+        : user.name || (user.email ? user.email.split('@')[0] : 'Гость');
   }, []);
 
   const fetchUserData = useCallback(async () => {
@@ -76,12 +73,16 @@ export default function AppHeader() {
     setCurrentUser(updatedUser);
   };
 
-
   const handleLogout = async () => {
     setLogoutModalOpen(false);
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('userEmail');
-    await router.push('/login');
+    try {
+      await axios.post('http://localhost:3001/auth/logout', {}, { withCredentials: true });
+      localStorage.removeItem('userEmail');
+      router.push('/login');
+      router.refresh();
+    } catch (error) {
+      console.error('Ошибка при выходе из системы:', error);
+    }
   };
 
   const onClick = () => {
@@ -96,7 +97,6 @@ export default function AppHeader() {
     setProfileOpen(false);
   };
 
-
   const showSettings = () => {
     setSettingsOpen(true);
   };
@@ -104,7 +104,6 @@ export default function AppHeader() {
   const closeSettings = () => {
     setSettingsOpen(false);
   };
-
 
   const itemsNotif: MenuProps['items'] = [
     {
@@ -195,9 +194,7 @@ export default function AppHeader() {
                     shape="circle"
                     onError={() => false}
                   />
-                  <Text style={{ color: colorBgContainer }}>
-                    {formatUserName(currentUser)}
-                  </Text>
+                  <Text style={{ color: colorBgContainer }}>{formatUserName(currentUser)}</Text>
                 </Space>
               </a>
             </Dropdown>
@@ -217,12 +214,9 @@ export default function AppHeader() {
         <p>Вы точно хотите выйти?</p>
       </Modal>
 
-      <Profile
-        open={profileOpen}
-        onClose={closeProfile}
-        onUserUpdate={updateUserData}
-      />
+      <Profile open={profileOpen} onClose={closeProfile} onUserUpdate={updateUserData} />
       <Settings open={settingsOpen} onClose={closeSettings} />
     </>
   );
 }
+

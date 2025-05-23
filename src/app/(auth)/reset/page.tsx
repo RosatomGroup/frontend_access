@@ -6,7 +6,8 @@ import Link from 'next/link';
 import '@ant-design/v5-patch-for-react-19';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface FormValues {
   email: string;
@@ -19,57 +20,57 @@ const ResetPassword: React.FC = () => {
   const [form] = Form.useForm<FormValues>();
   const [messageApi, contextHolder] = message.useMessage();
   const searchParams = useSearchParams();
-  const token = searchParams.get('token');
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const t = searchParams.get('token');
+    console.log('Токен из URL:', t);
+    setToken(t);
+  }, [searchParams]);
 
   const onFinish = async (values: FormValues) => {
+    const normalizedEmail = values.email?.toLowerCase();
+    if (isLoading) return;
     setIsLoading(true);
     try {
-      // if (token) {
-      //   const response = await axios.post('http://localhost:3001/reset/request', {
-      //     token,
-      //     newPassword: values.newPassword,
-      //   });
+      if (token) {
+        const response = await axios.post(
+          'http://localhost:3001/reset/confirm',
+          {
+            token,
+            newPassword: values.newPassword,
+          },
+          { headers: { 'Content-Type': 'application/json' } },
+        );
 
-      //   if (response.status === 200) {
-      //     messageApi.success('Пароль успешно изменен!');
-      //     form.resetFields();
-      //   } else {
-      //     messageApi.error(response.data.error || 'Ошибка при изменении пароля');
-      //   }
-      // } else {
-
-      const response = await axios.post(
-        'http://localhost:3001/reset/request',
-        {
-          email: values.email,
-        },
-        {
-          validateStatus: (status) => status === 201 || status === 404,
-        },
-      );
-
-      if (response.status === 201) {
-        messageApi.success('Письмо с инструкциями отправлено на ваш email!');
-        form.resetFields();
-      } else if (response.status === 404) {
-        messageApi.error('Пользователь с таким email не зарегистрирован');
-      }
-    } catch (error: any) {
-      if (error.response) {
-        if (error.response.status === 404) {
-          messageApi.error('Пользователь с таким email не зарегистрирован');
+        if (response.status === 201) {
+          messageApi.success('Пароль успешно изменён!');
+          router.push('/login');
+          form.resetFields();
+          setToken(null);
         } else {
-          messageApi.error(
-            error.response.data?.message || 'Произошла ошибка при обработке запроса',
-          );
+          messageApi.error(response.data.error || 'Ошибка при изменении пароля');
         }
-      } else if (error.request) {
-        messageApi.error('Не удалось соединиться с сервером');
       } else {
-        messageApi.error('Ошибка при отправке запроса');
+        const response = await axios.post(
+          'http://localhost:3001/reset/request',
+          { email: normalizedEmail },
+          {
+            validateStatus: (status) => status === 201 || status === 404,
+          },
+        );
+
+        if (response.status === 201) {
+          messageApi.success('Письмо с инструкциями отправлено на ваш email!');
+          form.resetFields();
+        } else if (response.status === 404) {
+          messageApi.error('Пользователь с таким email не зарегистрирован');
+        }
       }
-      console.error('Ошибка:', error.message);
+    } catch (err) {
+      messageApi.error('Произошла ошибка при отправке запроса');
     } finally {
       setIsLoading(false);
     }
@@ -87,7 +88,6 @@ const ResetPassword: React.FC = () => {
       <AppTitleAuth />
 
       <Card
-        // title="Сброс пароля"
         title={token ? 'Введите новый пароль' : 'Забыли пароль?'}
         style={{ width: '100%', maxWidth: 500, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}
       >

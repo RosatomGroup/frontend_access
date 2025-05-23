@@ -25,25 +25,27 @@ const Registration: React.FC = () => {
   const onFinish = async (values: FormValues) => {
     try {
       setLoading(true);
-      const response = await axios.post('http://localhost:3001/auth/register', {
-        surname: values.surname,
-        name: values.name,
-        middle_name: values.middle_name,
-        email: values.email,
-        password: values.password,
-      });
+      const normalizedEmail = values.email.toLowerCase().trim();
 
-      console.log('Успешная регистрация:', response.data);
-      localStorage.setItem('accessToken', response.data.accessToken);
-      localStorage.setItem('refreshToken', response.data.refreshToken);
+      const response = await axios.post(
+        'http://localhost:3001/auth/register',
+        {
+          surname: values.surname,
+          name: values.name,
+          middle_name: values.middle_name,
+          email: normalizedEmail,
+          password: values.password,
+        },
+        { withCredentials: true },
+      );
 
       messageApi.success(
         'Регистрация прошла успешно! Вы будете перенравлены на страницу авторизации',
       );
-      setTimeout(() => router.push('/login'), 1500);
+      setTimeout(() => router.push('/login'), 2500);
       form.resetFields();
     } catch (error) {
-      console.error('Ошибка регистрации:', error);
+      console.log('Ошибка регистрации:', error);
       if (axios.isAxiosError(error)) {
         messageApi.error(error.response?.data?.message || 'Ошибка при регистрации');
       } else {
@@ -158,23 +160,6 @@ const Registration: React.FC = () => {
           >
             <Input.Password />
           </Form.Item>
-
-          {/* <Form.Item label="Captcha" extra="We must make sure that your are a human.">
-            <Row gutter={8}>
-              <Col span={12}>
-                <Form.Item
-                  name="captcha"
-                  noStyle
-                  rules={[{ required: true, message: 'Please input the captcha you got!' }]}
-                >
-                  <Input />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Button>Get captcha</Button>
-              </Col>
-            </Row>
-          </Form.Item> */}
 
           <Form.Item>
             <Button

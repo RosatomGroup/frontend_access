@@ -9,14 +9,6 @@ import '@ant-design/v5-patch-for-react-19';
 import AppTitleAuth from '../../../components/AppTitleAuth';
 import axios from 'axios';
 
-axios.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
 const LoginPage: React.FC = () => {
   const router = useRouter();
   const [messageApi, contextHolder] = message.useMessage();
@@ -27,44 +19,36 @@ const LoginPage: React.FC = () => {
     try {
       setLoading(true);
 
+      const normalizedEmail = values.email.toLowerCase().trim();
+
       const response = await axios.post(
         'http://localhost:3001/auth/login',
         {
-          email: values.email,
+          email: normalizedEmail,
           password: values.password,
           rememberMe: values.remember,
         },
         {
-          headers: {
-            'Content-Type': 'application/json',
-          },
           withCredentials: true,
         },
       );
 
-      console.log('Полный ответ сервера:', response);
-
-      const accessToken = response.data.accessToken || response.data.access_token;
-      if (!accessToken) {
-        throw new Error('Нет токена в ответе');
-      }
-
-      if (values.remember) {
-        localStorage.setItem('accessToken', accessToken);
-      } else {
-        sessionStorage.setItem('accessToken', accessToken);
-      }
-
-      messageApi.success('Авторизация успешна!');
-      setTimeout(() => router.push('/incoming'), 500);
+      messageApi.success('Вы вошли в систему!');
+      router.push('/');
     } catch (error) {
-      console.error('Ошибка авторизации:', error);
-
+      console.log('Ошибка авторизации:', error);
       if (axios.isAxiosError(error)) {
-        const errorMessage = error.response?.data?.message || 'Неверные учетные данные';
-        messageApi.error(errorMessage);
+        if (error.response?.status === 401) {
+          messageApi.error('Пользователь не найден или неверный пароль');
+        } else if (error.response?.status === 400) {
+          messageApi.error('Пароль должен быть не менее 8 символов');
+        } else if (error.response?.status === 403) {
+          messageApi.error('Доступ запрещен');
+        } else {
+          messageApi.error(error.response?.data?.message || 'Произошла ошибка авторизации');
+        }
       } else {
-        messageApi.error('Ошибка при авторизации' + String(error));
+        messageApi.error('Ошибка авторизации');
       }
     } finally {
       setLoading(false);
@@ -105,7 +89,10 @@ const LoginPage: React.FC = () => {
 
           <Form.Item
             name="password"
-            rules={[{ required: true, message: 'Пожалуйста, введите пароль!' }]}
+            rules={[
+              { required: true, message: 'Пожалуйста, введите пароль!' },
+              { min: 8, message: 'Пароль должен быть не менее 8 символов' },
+            ]}
           >
             <Input.Password
               prefix={<LockOutlined className="site-form-item-icon" style={{ color: '#0958d9' }} />}
