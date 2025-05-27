@@ -1,57 +1,26 @@
 'use client';
 
-import {
-    Breadcrumb,
-    Button,
-    ConfigProvider,
-    Form,
-    Input,
-    Layout,
-    message,
-    Modal,
-    Select,
-    theme,
-    Typography,
-} from 'antd';
+import {Breadcrumb, Button, ConfigProvider, Form, Input, Layout, message, Modal, theme, Typography,} from 'antd';
 import AppSider from '../../../components/AppSider';
 import AppHeader from '../../../components/AppHeader';
 import {PlusOutlined} from '@ant-design/icons';
-import TableRole from '@/app/tables/RolesTable';
 import ruRU from 'antd/locale/ru_RU';
-import {useEffect, useState} from 'react';
+import TableResource from '@/app/tables/ResourceTable';
+import {useState} from 'react';
 import AuthGuard from '@/components/AuthGuard';
-import {createRole, fetchResources, Resource} from '@/api/roles';
+import {createResource} from '@/api/resource';
 
 const {Header, Content} = Layout;
-const {Option} = Select;
 
-export default function RoleManagement() {
+export default function ResourcePage() {
     const {
         token: {colorBgContainer, borderRadiusLG},
     } = theme.useToken();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [form] = Form.useForm();
-    const [resources, setResources] = useState<Resource[]>([]);
     const [loading, setLoading] = useState(false);
-    const [tableLoading, setTableLoading] = useState(false);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
-
-    useEffect(() => {
-        loadResources();
-    }, []);
-
-    const loadResources = async () => {
-        try {
-            setLoading(true);
-            const data = await fetchResources();
-            setResources(data);
-        } catch (error) {
-            message.error('Ошибка загрузки списка систем');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const showModal = () => {
         setIsModalOpen(true);
@@ -59,25 +28,25 @@ export default function RoleManagement() {
 
     const handleOk = async () => {
         try {
-            setTableLoading(true);
+            setLoading(true);
             const values = await form.validateFields();
 
-            await createRole({
+            await createResource({
                 name: values.name,
                 description: values.description,
-                resourceId: values.resourceId,
+                link: values.link,
+                owner: values.owner
             });
 
-            message.success('Роль успешно создана');
+            message.success('Ресурс успешно создан');
             setIsModalOpen(false);
             form.resetFields();
             setRefreshTrigger(prev => prev + 1);
         } catch (error) {
-            if (error instanceof Error) {
-                message.error(error.message);
-            }
+            message.error('Ошибка при создании ресурса');
+            console.error(error);
         } finally {
-            setTableLoading(false);
+            setLoading(false);
         }
     };
 
@@ -101,11 +70,11 @@ export default function RoleManagement() {
                                         title: 'Управление',
                                     },
                                     {
-                                        title: 'Роли',
+                                        title: 'Ресурсы',
                                     },
                                 ]}
                             />
-                            <Typography.Title level={4}>Роли</Typography.Title>
+                            <Typography.Title level={4}>Ресурсы</Typography.Title>
                         </Header>
                         <Content style={{margin: '0 16px', paddingTop: '16px'}}>
                             <div
@@ -118,19 +87,18 @@ export default function RoleManagement() {
                             >
                                 <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: 16}}>
                                     <Typography.Title level={4} style={{margin: 0}}>
-                                        Роли
+                                        Ресурсы
                                     </Typography.Title>
                                     <Button
                                         type="primary"
                                         icon={<PlusOutlined/>}
                                         onClick={showModal}
-                                        loading={loading}
                                     >
-                                        Добавить роль
+                                        Добавить ресурс
                                     </Button>
                                 </div>
                                 <ConfigProvider locale={ruRU}>
-                                    <TableRole loading={tableLoading} refreshTrigger={refreshTrigger}/>
+                                    <TableResource refreshTrigger={refreshTrigger} />
                                 </ConfigProvider>
                             </div>
                         </Content>
@@ -138,51 +106,56 @@ export default function RoleManagement() {
                 </Layout>
 
                 <Modal
-                    title="Добавить новую роль"
+                    title="Добавить новый ресурс"
                     open={isModalOpen}
                     onOk={handleOk}
                     onCancel={handleCancel}
                     okText="Сохранить"
                     cancelText="Отмена"
-                    width={600}
-                    confirmLoading={tableLoading}
+                    confirmLoading={loading}
+                    width={700}
                 >
                     <Form form={form} layout="vertical" autoComplete="off">
                         <Form.Item
                             name="name"
-                            label="Название роли"
+                            label="Название ресурса"
                             rules={[
-                                {required: true, message: 'Пожалуйста, введите название роли'},
+                                {required: true, message: 'Пожалуйста, введите название ресурса'},
                                 {max: 100, message: 'Максимальная длина 100 символов'}
                             ]}
                         >
-                            <Input placeholder="Введите название роли"/>
+                            <Input placeholder="Введите название ресурса"/>
                         </Form.Item>
                         <Form.Item
                             name="description"
-                            label="Описание роли"
+                            label="Описание"
                             rules={[
-                                {required: true, message: 'Пожалуйста, введите описание роли'},
+                                {required: true, message: 'Пожалуйста, введите описание'},
                                 {max: 255, message: 'Максимальная длина 255 символов'}
                             ]}
                         >
-                            <Input.TextArea rows={4} placeholder="Введите описание роли"/>
+                            <Input.TextArea rows={4} placeholder="Введите описание ресурса"/>
                         </Form.Item>
                         <Form.Item
-                            name="resourceId"
-                            label="Система"
-                            rules={[{required: true, message: 'Пожалуйста, выберите систему'}]}
+                            name="link"
+                            label="Ссылка"
+                            rules={[
+                                {required: true, message: 'Пожалуйста, введите ссылку'},
+                                {type: 'url', message: 'Введите корректный URL'},
+                                {max: 255, message: 'Максимальная длина 255 символов'}
+                            ]}
                         >
-                            <Select
-                                placeholder="Выберите систему"
-                                loading={loading}
-                            >
-                                {resources.map((resource) => (
-                                    <Option key={resource.id} value={resource.id}>
-                                        {resource.name}
-                                    </Option>
-                                ))}
-                            </Select>
+                            <Input placeholder="https://example.com"/>
+                        </Form.Item>
+                        <Form.Item
+                            name="owner"
+                            label="Владелец"
+                            rules={[
+                                {required: true, message: 'Пожалуйста, укажите владельца'},
+                                {max: 255, message: 'Максимальная длина 255 символов'}
+                            ]}
+                        >
+                            <Input placeholder="Введите владельца ресурса"/>
                         </Form.Item>
                     </Form>
                 </Modal>

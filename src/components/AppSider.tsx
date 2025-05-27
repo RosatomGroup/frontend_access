@@ -35,7 +35,7 @@ const AppSider = () => {
         children: [
           { key: 'users', label: 'Пользователи' },
           { key: 'roles', label: 'Роли' },
-          { key: 'systems', label: 'Системы' },
+          { key: 'resources', label: 'Системы' },
         ],
       },
       {

@@ -11,7 +11,7 @@ import React from 'react';
 interface FormValues {
   surname: string;
   name: string;
-  middle_name: string;
+  middleName: string;
   email: string;
   password: string;
 }
@@ -32,7 +32,7 @@ const Registration: React.FC = () => {
         {
           surname: values.surname,
           name: values.name,
-          middle_name: values.middle_name,
+          middleName: values.middleName,
           email: normalizedEmail,
           password: values.password,
         },

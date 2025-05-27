@@ -1,35 +1,58 @@
 import React, {useEffect, useState} from 'react';
-import type {TableColumnsType} from 'antd';
-import {Table, ConfigProvider, Grid} from 'antd';
-import {usersData} from "@/app/tables/users";
+import {ConfigProvider, Grid, message, Spin, Table, TableColumnsType} from 'antd';
+import {fetchUsers, User} from "@/api/users";
 
-const { useBreakpoint } = Grid;
+const {useBreakpoint} = Grid;
 
-interface DataType {
+interface DataType extends User {
     key: React.Key;
-    name: string;
-    rang: string;
-    subdivision: string;
-    address: string;
 }
 
-const TableUser: React.FC = () => {
+interface TableUserProps {
+    refreshTrigger?: number;
+}
+
+const TableUser: React.FC<TableUserProps> = ({ refreshTrigger }) => {
     const screens = useBreakpoint();
     const [pageSize, setPageSize] = useState<number>(10);
+    const [data, setData] = useState<DataType[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
     const [columns, setColumns] = useState<TableColumnsType<DataType>>([]);
+
+    const loadData = async () => {
+        try {
+            setLoading(true);
+            const users = await fetchUsers();
+            const formattedData = users.map((user) => ({
+                ...user,
+                key: user.id,
+            }));
+            setData(formattedData);
+            createDynamicFilters(formattedData);
+        } catch (error) {
+            message.error('Ошибка загрузки данных пользователей');
+            console.error('Ошибка загрузки пользователей:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const createDynamicFilters = (data: DataType[]) => {
         if (!data || data.length === 0) return;
 
-        const uniqueRangs = [...new Set(data.map(item => item.rang))].map(rang => ({
-            text: rang,
-            value: rang,
-        }));
+        const uniqueRangs = [...new Set(data.map(item => item.rang))]
+            .filter(Boolean)
+            .map(rang => ({
+                text: rang as string,
+                value: rang as string,
+            }));
 
-        const uniquePlaces = [...new Set(data.map(item => item.subdivision))].map(place => ({
-            text: place,
-            value: place,
-        }));
+        const uniqueSubdivisions = [...new Set(data.map(item => item.subdivision))]
+            .filter(Boolean)
+            .map(subdivision => ({
+                text: subdivision as string,
+                value: subdivision as string,
+            }));
 
         const baseColumns: TableColumnsType<DataType> = [
             {
@@ -38,7 +61,7 @@ const TableUser: React.FC = () => {
                 filterMode: 'tree',
                 filterSearch: true,
                 onFilter: (value, record) => record.name.includes(value as string),
-                sorter: (a, b) => a.name.localeCompare(b.name),
+                sorter: (a, b) => (a.name || '').localeCompare(b.name || ''),
                 width: screens.xs ? 150 : '30%',
                 fixed: screens.xs ? 'left' : false,
                 ellipsis: true,
@@ -48,39 +71,44 @@ const TableUser: React.FC = () => {
                 dataIndex: 'rang',
                 filters: uniqueRangs,
                 onFilter: (value, record) => record.rang === value,
-                sorter: (a, b) => a.rang.localeCompare(b.rang),
+                sorter: (a, b) => (a.rang || '').localeCompare(b.rang || ''),
                 width: screens.xs ? 120 : undefined,
                 ellipsis: true,
             },
             {
                 title: 'Подразделение',
                 dataIndex: 'subdivision',
-                filters: uniquePlaces,
+                filters: uniqueSubdivisions,
                 onFilter: (value, record) => record.subdivision === value,
                 filterSearch: true,
-                sorter: (a, b) => a.subdivision.localeCompare(b.subdivision),
+                sorter: (a, b) => (a.subdivision || '').localeCompare(b.subdivision || ''),
                 width: screens.xs ? 120 : '30%',
                 ellipsis: true,
             },
             {
                 title: 'Почта',
-                dataIndex: 'address',
-                sorter: (a, b) => a.address.localeCompare(b.address),
+                dataIndex: 'email',
+                sorter: (a, b) => (a.email || '').localeCompare(b.email || ''),
                 width: screens.xs ? 150 : undefined,
                 ellipsis: true,
                 responsive: ['md'],
             },
         ];
 
-        const mobileColumns = baseColumns.filter(col =>
-            !col.responsive || (col.responsive && screens.md)
+        setColumns(screens.xs ?
+            baseColumns.filter(col => !col.responsive || (col.responsive && screens.md)) :
+            baseColumns
         );
-
-        setColumns(screens.xs ? mobileColumns : baseColumns);
     };
 
     useEffect(() => {
-        createDynamicFilters(usersData);
+        loadData();
+    }, [refreshTrigger]);
+
+    useEffect(() => {
+        if (data.length > 0) {
+            createDynamicFilters(data);
+        }
     }, [screens]);
 
     const handlePageSizeChange = (current: number, size: number) => {
@@ -98,24 +126,26 @@ const TableUser: React.FC = () => {
                 },
             }}
         >
-            <Table<DataType>
-                dataSource={usersData}
-                columns={columns}
-                scroll={screens.xs ? { x: 600 } : undefined}
-                pagination={{
-                    pageSize: pageSize,
-                    showSizeChanger: true,
-                    pageSizeOptions: ['10', '20', '50', '100'],
-                    onShowSizeChange: handlePageSizeChange,
-                    showTotal: (total, range) => `Показано ${range[0]}-${range[1]} из ${total} записей`,
-                    locale: {
-                        items_per_page: `/ стр`,
-                    },
-                    size: screens.xs ? 'small' : 'default',
-                }}
-                size={screens.xs ? 'small' : 'middle'}
-                bordered={!screens.xs}
-            />
+            <Spin spinning={loading}>
+                <Table<DataType>
+                    dataSource={data}
+                    columns={columns}
+                    scroll={screens.xs ? {x: 800} : undefined}
+                    pagination={{
+                        pageSize: pageSize,
+                        showSizeChanger: true,
+                        pageSizeOptions: ['10', '20', '50', '100'],
+                        onShowSizeChange: handlePageSizeChange,
+                        showTotal: (total, range) => `Показано ${range[0]}-${range[1]} из ${total} записей`,
+                        locale: {
+                            items_per_page: `/ стр`,
+                        },
+                        size: screens.xs ? 'small' : 'default',
+                    }}
+                    size={screens.xs ? 'small' : 'middle'}
+                    bordered={!screens.xs}
+                />
+            </Spin>
         </ConfigProvider>
     );
 };
