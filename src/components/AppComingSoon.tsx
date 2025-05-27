@@ -25,7 +25,7 @@ const ComingSoonPage: React.FC = () => {
         minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
         seconds: Math.floor((distance % (1000 * 60)) / 1000),
       });
-    }, 1000);
+    }, 100);
 
     return () => clearInterval(interval);
   }, []);
@@ -37,8 +37,8 @@ const ComingSoonPage: React.FC = () => {
           <Image
             src={'/images/Process.png'}
             alt="Coming Soon"
-            width={500}  // Физическая ширина изображения
-            height={300} // Физическая высота
+            width={500}
+            height={300}
             style={{ width: '100%', maxWidth: '500px', height: 'auto' }} // Стили для адаптивности
           />
         </Col>

@@ -5,6 +5,7 @@ import AppSider from '../../../components/AppSider';
 import AppHeader from '../../../components/AppHeader';
 import ComingSoonPage from '../../../components/AppComingSoon';
 import AuthGuard from '@/components/AuthGuard';
+import AppLoadingComponent from '@/components/AppLoading';
 
 const { Header, Content } = Layout;
 const { Title } = Typography;
@@ -18,6 +19,7 @@ export default function DocsPage() {
 
   return (
     <AuthGuard>
+      <AppLoadingComponent />
       <Layout>
         <AppHeader />
         <Layout style={{ minHeight: '100vh' }}>

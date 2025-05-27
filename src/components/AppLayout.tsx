@@ -1,16 +1,16 @@
 'use client';
 
-import { 
-  Layout, 
-  Typography, 
-  Breadcrumb, 
-  theme, 
-  Card, 
-  Col, 
-  Row, 
-  Button, 
-  Flex, 
-  Modal, 
+import {
+  Layout,
+  Typography,
+  Breadcrumb,
+  theme,
+  Card,
+  Col,
+  Row,
+  Button,
+  Flex,
+  Modal,
   Table,
 } from 'antd';
 import type { TableColumnsType } from 'antd';
@@ -19,6 +19,7 @@ import FormReqRevoke from './FormReqRevoke';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { reqOutdata } from '@/app/reqOut';
+import AppLoadingComponent from './AppLoading';
 
 const { Title } = Typography;
 
@@ -54,58 +55,54 @@ export default function AppLayout() {
       width: 83,
       render: (id: number, record: RequestData) => (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <span style={{ 
-            paddingTop: '22px',
-            margin: '0',
-            color: '#1890ff', 
-            fontWeight: '500',
-            fontSize: '13px',
-          }}>
+          <span
+            style={{
+              paddingTop: '22px',
+              margin: '0',
+              color: '#1890ff',
+              fontWeight: '500',
+              fontSize: '13px',
+            }}
+          >
             Заявка №{id}
           </span>
-          <span style={{
-            margin: '0',
-            color: '#8c8c8c',
-            fontSize: '12px',
-            marginTop: '4px'
-          }}>
+          <span
+            style={{
+              margin: '0',
+              color: '#8c8c8c',
+              fontSize: '12px',
+              marginTop: '4px',
+            }}
+          >
             {formatSubmissionTime(record.submissionTime)}
           </span>
         </div>
-      )
+      ),
     },
     {
       dataIndex: 'name',
       key: 'name',
       width: 185,
-      render: (name: string) => (
-        <div style={{ padding: '0', margin: '0' }}>{name}</div>
-      )
+      render: (name: string) => <div style={{ padding: '0', margin: '0' }}>{name}</div>,
     },
     {
       dataIndex: 'requestSubject',
       key: 'requestSubject',
       width: 135,
-      render: (subject: string) => (
-        <div style={{ padding: '0', margin: '0' }}>{subject}</div>
-      )
+      render: (subject: string) => <div style={{ padding: '0', margin: '0' }}>{subject}</div>,
     },
     {
       dataIndex: 'system',
       key: 'system',
       width: 70,
-      render: (system: string) => (
-        <div style={{ padding: '0', margin: '0' }}>{system}</div>
-      )
+      render: (system: string) => <div style={{ padding: '0', margin: '0' }}>{system}</div>,
     },
     {
       dataIndex: 'role',
       key: 'role',
       width: 150,
-      render: (role: string) => (
-        <div style={{ padding: '0', margin: '0' }}>{role}</div>
-      )
-    }
+      render: (role: string) => <div style={{ padding: '0', margin: '0' }}>{role}</div>,
+    },
   ];
 
   // Функция для форматирования времени
@@ -113,7 +110,7 @@ export default function AppLayout() {
     const date = new Date(dateString);
     const now = new Date();
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
+
     if (diffInHours < 24) {
       return `${diffInHours} hours ago`;
     } else {
@@ -126,7 +123,7 @@ export default function AppLayout() {
     setCurrentForm(formType);
     setIsFormVisible(true);
   };
-  
+
   const closeForm = () => setIsFormVisible(false);
 
   function onClickMyReq() {
@@ -138,18 +135,16 @@ export default function AppLayout() {
     textAlign: 'center' as const,
     fontSize: '20px',
     fontWeight: 500,
-    marginBottom: '20px'
+    marginBottom: '20px',
   };
 
   return (
     <Layout>
+      <AppLoadingComponent />
       <Layout.Header style={{ paddingLeft: 16, background: colorBgContainer, height: '100px' }}>
         <Breadcrumb
           style={{ margin: '16px 0' }}
-          items={[
-            { title: 'Главная' },
-            { title: 'Заявки' },
-          ]}
+          items={[{ title: 'Главная' }, { title: 'Заявки' }]}
         />
         <Title level={4}>Главная</Title>
       </Layout.Header>
@@ -166,11 +161,11 @@ export default function AppLayout() {
             <Button type="primary" onClick={() => showForm('grant')}>
               Запросить доступ
             </Button>
-            
-            <Modal 
+
+            <Modal
               title={<div style={modalTitleStyle}>Форма запроса доступа</div>}
-              open={isFormVisible && currentForm === 'grant'} 
-              onCancel={closeForm} 
+              open={isFormVisible && currentForm === 'grant'}
+              onCancel={closeForm}
               footer={null}
               centered
             >
@@ -180,11 +175,11 @@ export default function AppLayout() {
             <Button type="primary" onClick={() => showForm('revoke')}>
               Отозвать доступ
             </Button>
-            
-            <Modal 
+
+            <Modal
               title={<div style={modalTitleStyle}>Форма отзыва доступа</div>}
-              open={isFormVisible && currentForm === 'revoke'} 
-              onCancel={closeForm} 
+              open={isFormVisible && currentForm === 'revoke'}
+              onCancel={closeForm}
               footer={null}
               centered
             >
@@ -198,47 +193,47 @@ export default function AppLayout() {
         </div>
         <Row gutter={16}>
           <Col span={12}>
-            <Card 
-              title="Последние отправленные заявки" 
+            <Card
+              title="Последние отправленные заявки"
               variant="borderless"
               styles={{
                 header: {
                   textAlign: 'center',
                   fontSize: '16px',
-                  fontWeight: 500
-                }
+                  fontWeight: 500,
+                },
               }}
-              >
+            >
               <Table
                 dataSource={lastRequests}
                 columns={columns}
                 pagination={false}
                 size="small"
                 rowKey="id"
-                scroll={{ x: 600}}
+                scroll={{ x: 600 }}
                 showHeader={false}
               />
             </Card>
           </Col>
           <Col span={12}>
-            <Card 
-              title="Последние входящие заявки" 
+            <Card
+              title="Последние входящие заявки"
               variant="borderless"
               styles={{
                 header: {
                   textAlign: 'center',
                   fontSize: '16px',
-                  fontWeight: 500
-                }
+                  fontWeight: 500,
+                },
               }}
-              >
+            >
               <Table
                 dataSource={[]}
                 columns={columns}
                 pagination={false}
                 size="small"
-                locale={{ emptyText: "Нет входящих заявок" }}
-                scroll={{ x: 600}}
+                locale={{ emptyText: 'Нет входящих заявок' }}
+                scroll={{ x: 600 }}
                 showHeader={false}
               />
             </Card>
