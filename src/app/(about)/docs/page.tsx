@@ -1,12 +1,11 @@
 'use client';
 
-import { Typography, Breadcrumb, Layout, theme, message } from 'antd';
+import { Typography, Breadcrumb, Layout, theme, message, Spin } from 'antd';
 import AppSider from '../../../components/AppSider';
 import AppHeader from '../../../components/AppHeader';
 import AuthGuard from '@/components/AuthGuard';
-import AppLoadingComponent from '@/components/AppLoading';
 import React, { useEffect, useState, useRef } from 'react';
-import { UploadOutlined } from '@ant-design/icons';
+import { DeleteOutlined, DownloadOutlined, UploadOutlined } from '@ant-design/icons';
 import { Button, Upload } from 'antd';
 import type { UploadChangeParam, UploadFile } from 'antd/es/upload/interface';
 import { Input } from 'antd';
@@ -25,8 +24,10 @@ export default function DocsPage() {
   const uploadRef = useRef<any>(null);
   const [editingFileUid, setEditingFileUid] = useState<string | null>(null);
   const [newFileName, setNewFileName] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    setLoading(true);
     fetch('http://localhost:3001/documents')
       .then((res) => res.json())
       .then((data) => {
@@ -41,6 +42,9 @@ export default function DocsPage() {
       })
       .catch(() => {
         message.error('Ошибка при загрузке списка документов');
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, []);
 
@@ -63,12 +67,16 @@ export default function DocsPage() {
 
       if (!response.ok) throw new Error('Ошибка сервера');
 
+      const updated = await response.json();
+
       setFileList((prev) =>
         prev.map((f) =>
           f.uid === file.uid
             ? {
                 ...f,
                 name: newFileName.trim(),
+                filename: updated.filename,
+                url: updated.url,
               }
             : f,
         ),
@@ -82,7 +90,6 @@ export default function DocsPage() {
 
   return (
     <AuthGuard>
-      <AppLoadingComponent />
       <Layout>
         <AppHeader />
         <Layout style={{ minHeight: '100vh' }}>
@@ -103,115 +110,136 @@ export default function DocsPage() {
               <Title level={4}>{nameOfPage}</Title>
             </Header>
             <Content style={{ margin: '0 16px', paddingTop: '16px' }}>
-              <div
-                style={{
-                  padding: 24,
-                  minHeight: 360,
-                  background: colorBgContainer,
-                  borderRadius: borderRadiusLG,
-                }}
-              >
-                <Upload
-                  ref={uploadRef}
-                  action="http://localhost:3001/documents/upload"
-                  listType="picture"
-                  fileList={fileList}
-                  onRemove={async (file) => {
-                    try {
-                      if (!file.filename) {
-                        message.error('Неизвестное имя файла для удаления');
-                        return;
-                      }
-                      await fetch(`http://localhost:3001/documents/${file.filename}`, {
-                        method: 'DELETE',
-                      });
-                      setFileList((prev) => prev.filter((item) => item.uid !== file.uid));
-                      message.success('Файл успешно удален');
-                    } catch (error) {
-                      message.error('Ошибка при удалении файла');
-                    }
-                  }}
-                  onChange={({ file, fileList: newFileList }: UploadChangeParam<UploadFile>) => {
-                    if (file.status === 'done' && file.response) {
-                      const updatedList = newFileList.map((f) => {
-                        if (f.uid === file.uid) {
-                          return {
-                            ...f,
-                            url: file.response.url,
-                            name: file.response.originalname,
-                          };
-                        }
-                        return f;
-                      });
-                      setFileList(updatedList);
-                    } else {
-                      setFileList(newFileList);
-                    }
-                  }}
-                  showUploadList={{
-                    showRemoveIcon: true,
-                    showDownloadIcon: false,
-                    showPreviewIcon: false,
-                  }}
-                  itemRender={(originNode, file, fileList, actions) => {
-                    return (
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                        }}
-                      >
-                        {file.uid === editingFileUid ? (
-                          <>
-                            {console.log('Рендер Input для файла:', file)}
-                            <Input
-                              autoFocus
-                              value={newFileName}
-                              onChange={(e) => setNewFileName(e.target.value)}
-                              onBlur={() => saveNewName(file)}
-                              onPressEnter={() => saveNewName(file)}
-                              style={{ width: 200 }}
-                            />
-                          </>
-                        ) : (
-                          <span
-                            style={{ cursor: 'pointer', color: '#1677ff' }}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              console.log('Клик по имени файла:', file);
-                              startEditing(file);
-                            }}
-                            title="Нажмите, чтобы переименовать"
-                          >
-                            {file.name}
-                          </span>
-                        )}
-                        <span>
-                          <a
-                            href={file.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ marginRight: 8 }}
-                          >
-                            Скачать
-                          </a>
-                          <a onClick={() => actions.remove?.()}>Удалить</a>
-                        </span>
-                      </div>
-                    );
+              <Spin spinning={loading} size="large">
+                <div
+                  style={{
+                    padding: 24,
+                    minHeight: 360,
+                    background: colorBgContainer,
+                    borderRadius: borderRadiusLG,
                   }}
                 >
-                  <Button
-                    type="primary"
-                    icon={<UploadOutlined />}
-                    style={{ float: 'right', marginBottom: 8 }}
+                  <Upload
+                    ref={uploadRef}
+                    action="http://localhost:3001/documents/upload"
+                    listType="picture"
+                    fileList={fileList}
+                    onRemove={async (file) => {
+                      try {
+                        if (!file.filename) {
+                          message.error('Неизвестное имя файла для удаления');
+                          return;
+                        }
+                        await fetch(`http://localhost:3001/documents/${file.filename}`, {
+                          method: 'DELETE',
+                        });
+                        setFileList((prev) => prev.filter((item) => item.uid !== file.uid));
+                        message.success('Файл успешно удален');
+                      } catch (error) {
+                        message.error('Ошибка при удалении файла');
+                      }
+                    }}
+                    onChange={({ file, fileList: newFileList }: UploadChangeParam<UploadFile>) => {
+                      if (file.status === 'done' && file.response) {
+                        const updatedList = newFileList.map((f) => {
+                          if (f.uid === file.uid) {
+                            return {
+                              ...f,
+                              name: file.response.originalname,
+                              filename: file.response.filename,
+                              url: file.response.url,
+                              status: 'done',
+                            };
+                          }
+                          return f;
+                        });
+                        setFileList(updatedList);
+                        message.success('Файл успешно загружен');
+                      } else if (file.status === 'error') {
+                        message.error(`Ошибка при загрузке файла: ${file.name}`);
+                      } else {
+                        setFileList(newFileList);
+                      }
+                    }}
+                    showUploadList={{
+                      showRemoveIcon: true,
+                      showDownloadIcon: false,
+                      showPreviewIcon: false,
+                    }}
+                    itemRender={(originNode, file, fileList, actions) => {
+                      return (
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginBottom: '10px',
+                            padding: '10px',
+                            border: '1px solid rgba(0, 0, 0, 0.1)',
+                            borderRadius: '8px',
+                          }}
+                        >
+                          {file.uid === editingFileUid ? (
+                            <>
+                              <Input
+                                autoFocus
+                                value={newFileName}
+                                onChange={(e) => setNewFileName(e.target.value)}
+                                onBlur={() => saveNewName(file)}
+                                onPressEnter={() => saveNewName(file)}
+                                style={{ width: 300 }}
+                              />
+                            </>
+                          ) : (
+                            <span
+                              style={{ cursor: 'pointer', color: 'rgba(0, 0, 0, 0.8)' }}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                startEditing(file);
+                              }}
+                              title="Нажмите, чтобы переименовать"
+                            >
+                              {file.name}
+                            </span>
+                          )}
+                          <span>
+                            <Button
+                              type="primary"
+                              ghost
+                              icon={<DownloadOutlined />}
+                              href={file.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ marginRight: 8 }}
+                            >
+                              Скачать
+                            </Button>
+
+                            <Button
+                              type="primary"
+                              icon={<DeleteOutlined />}
+                              danger
+                              ghost
+                              onClick={() => actions.remove?.()}
+                            >
+                              Удалить
+                            </Button>
+                          </span>
+                        </div>
+                      );
+                    }}
                   >
-                    Загрузить документ
-                  </Button>
-                </Upload>
-              </div>
+                    <Button
+                      type="primary"
+                      icon={<UploadOutlined />}
+                      style={{ float: 'right', marginBottom: 8 }}
+                    >
+                      Загрузить документ
+                    </Button>
+                  </Upload>
+                </div>
+              </Spin>
             </Content>
           </Layout>
         </Layout>
