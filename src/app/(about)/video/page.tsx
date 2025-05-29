@@ -10,6 +10,7 @@ import { useEffect, useState, useRef } from 'react';
 import { DeleteOutlined, UploadOutlined } from '@ant-design/icons';
 import { Button, Upload, Input } from 'antd';
 import type { UploadChangeParam, UploadFile } from 'antd/es/upload/interface';
+import { App as AntdApp } from 'antd';
 
 const { Header, Content } = Layout;
 
@@ -104,167 +105,171 @@ export default function IncomingRequest() {
 
   return (
     <AuthGuard>
-      <Layout>
-        {/* <AppLoadingComponent /> */}
-        <AppHeader />
-        <Layout style={{ minHeight: '100vh' }}>
-          <AppSider />
-          <Layout>
-            <Header style={{ paddingLeft: 16, background: colorBgContainer, height: '100px' }}>
-              <Breadcrumb
-                style={{ margin: '16px 0' }}
-                items={[
-                  {
-                    title: 'О системе',
-                  },
-                  {
-                    title: 'Видео',
-                  },
-                ]}
-              />
-              <Typography.Title level={4}>Видео</Typography.Title>
-            </Header>
-            <Content style={{ margin: '0 16px', paddingTop: '16px' }}>
-              <Spin spinning={loading} size="large">
-                <div
-                  style={{
-                    padding: 24,
-                    minHeight: 360,
-                    background: colorBgContainer,
-                    borderRadius: borderRadiusLG,
-                  }}
-                >
-                  <Upload
-                    name="file"
-                    ref={uploadRef}
-                    action="http://localhost:3001/videos/upload"
-                    listType="text"
-                    fileList={fileList}
-                    beforeUpload={(file) => {
-                      const isVideo = file.type.startsWith('video/');
-                      if (!isVideo) {
-                        message.error('Можно загружать только видеофайлы');
-                      }
-                      return isVideo || Upload.LIST_IGNORE;
+      <AntdApp>
+        <Layout>
+          <AppHeader />
+          <Layout style={{ minHeight: '100vh' }}>
+            <AppSider />
+            <Layout>
+              <Header style={{ paddingLeft: 16, background: colorBgContainer, height: '100px' }}>
+                <Breadcrumb
+                  style={{ margin: '16px 0' }}
+                  items={[
+                    {
+                      title: 'О системе',
+                    },
+                    {
+                      title: 'Видео',
+                    },
+                  ]}
+                />
+                <Typography.Title level={4}>Видео</Typography.Title>
+              </Header>
+              <Content style={{ margin: '0 16px', paddingTop: '16px' }}>
+                <Spin spinning={loading} size="large">
+                  <div
+                    style={{
+                      padding: 24,
+                      minHeight: 360,
+                      background: colorBgContainer,
+                      borderRadius: borderRadiusLG,
                     }}
-                    onRemove={async (file) => {
-                      try {
-                        if (!file.filename) {
-                          message.error('Неизвестное имя файла для удаления');
-                          return;
-                        }
-                        await fetch(`http://localhost:3001/videos/${file.filename}`, {
-                          method: 'DELETE',
-                        });
-                        setFileList((prev) => prev.filter((item) => item.uid !== file.uid));
-                        message.success('Видео успешно удалено');
-                      } catch (error) {
-                        message.error('Ошибка при удалении видео');
-                      }
-                    }}
-                    onChange={({ file, fileList: newFileList }: UploadChangeParam<UploadFile>) => {
-                      if (file.status === 'done' && file.response) {
-                        const updatedList = newFileList.map((f) => {
-                          if (f.uid === file.uid) {
-                            return {
-                              ...f,
-                              name: file.response.originalname,
-                              filename: file.response.filename,
-                              url: file.response.url,
-                              status: 'done',
-                            };
-                          }
-                          return f;
-                        });
-                        setFileList(updatedList);
-                        message.success('Видео успешно загружено');
-                      } else if (file.status === 'error') {
-                        message.error(`Ошибка при загрузке видео: ${file.name}`);
-                      } else {
-                        setFileList(newFileList);
-                      }
-                    }}
-                    showUploadList={false}
                   >
-                    <Button
-                      type="primary"
-                      icon={<UploadOutlined />}
-                      style={{ float: 'right', marginBottom: 8 }}
+                    <Upload
+                      name="file"
+                      ref={uploadRef}
+                      action="http://localhost:3001/videos/upload"
+                      listType="text"
+                      fileList={fileList}
+                      beforeUpload={(file) => {
+                        const isVideo = file.type.startsWith('video/');
+                        if (!isVideo) {
+                          message.error('Можно загружать только видеофайлы');
+                        }
+                        return isVideo || Upload.LIST_IGNORE;
+                      }}
+                      onRemove={async (file) => {
+                        try {
+                          if (!file.filename) {
+                            message.error('Неизвестное имя файла для удаления');
+                            return;
+                          }
+                          await fetch(`http://localhost:3001/videos/${file.filename}`, {
+                            method: 'DELETE',
+                          });
+                          setFileList((prev) => prev.filter((item) => item.uid !== file.uid));
+                          message.success('Видео успешно удалено');
+                        } catch (error) {
+                          message.error('Ошибка при удалении видео');
+                        }
+                      }}
+                      onChange={({
+                        file,
+                        fileList: newFileList,
+                      }: UploadChangeParam<UploadFile>) => {
+                        if (file.status === 'done' && file.response) {
+                          const updatedList = newFileList.map((f) => {
+                            if (f.uid === file.uid) {
+                              return {
+                                ...f,
+                                name: file.response.originalname,
+                                filename: file.response.filename,
+                                url: file.response.url,
+                                status: 'done',
+                              };
+                            }
+                            return f;
+                          });
+                          setFileList(updatedList);
+                          message.success('Видео успешно загружено');
+                        } else if (file.status === 'error') {
+                          message.error(`Ошибка при загрузке видео: ${file.name}`);
+                        } else {
+                          setFileList(newFileList);
+                        }
+                      }}
+                      showUploadList={false}
                     >
-                      Загрузить видео
-                    </Button>
-                  </Upload>
-
-                  {fileList.map((file) => (
-                    <div key={file.uid} style={{ marginBottom: '20px' }}>
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          marginBottom: '10px',
-                          padding: '10px',
-                          border: '1px solid rgba(0, 0, 0, 0.1)',
-                          borderRadius: '8px',
-                        }}
+                      <Button
+                        type="primary"
+                        icon={<UploadOutlined />}
+                        style={{ float: 'right', marginBottom: 8 }}
                       >
-                        {file.uid === editingFileUid ? (
-                          <Input
-                            autoFocus
-                            value={newFileName}
-                            onChange={(e) => setNewFileName(e.target.value)}
-                            onBlur={() => saveNewName(file)}
-                            onPressEnter={() => saveNewName(file)}
-                            style={{ width: 300 }}
-                          />
-                        ) : (
-                          <span
-                            style={{ cursor: 'pointer', color: 'rgba(0, 0, 0, 0.8)' }}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              startEditing(file);
-                            }}
-                            title="Нажмите, чтобы переименовать"
-                          >
-                            {file.name}
-                          </span>
-                        )}
-                        <span>
-                          {file.url && (
+                        Загрузить видео
+                      </Button>
+                    </Upload>
+
+                    {fileList.map((file) => (
+                      <div key={file.uid} style={{ marginBottom: '20px' }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginBottom: '10px',
+                            padding: '10px',
+                            border: '1px solid rgba(0, 0, 0, 0.1)',
+                            borderRadius: '8px',
+                          }}
+                        >
+                          {file.uid === editingFileUid ? (
+                            <Input
+                              autoFocus
+                              value={newFileName}
+                              onChange={(e) => setNewFileName(e.target.value)}
+                              onBlur={() => saveNewName(file)}
+                              onPressEnter={() => saveNewName(file)}
+                              style={{ width: 300 }}
+                            />
+                          ) : (
+                            <span
+                              style={{ cursor: 'pointer', color: 'rgba(0, 0, 0, 0.8)' }}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                startEditing(file);
+                              }}
+                              title="Нажмите, чтобы переименовать"
+                            >
+                              {file.name}
+                            </span>
+                          )}
+                          <span>
+                            {file.url && (
+                              <Button
+                                type="primary"
+                                ghost
+                                style={{ marginRight: 8 }}
+                                href={file.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                Открыть
+                              </Button>
+                            )}
+
                             <Button
                               type="primary"
+                              icon={<DeleteOutlined />}
+                              danger
                               ghost
-                              style={{ marginRight: 8 }}
-                              href={file.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                              onClick={() => {
+                                handleDelete(file);
+                              }}
                             >
-                              Открыть
+                              Удалить
                             </Button>
-                          )}
-
-                          <Button
-                            type="primary"
-                            icon={<DeleteOutlined />}
-                            danger
-                            ghost
-                            onClick={() => {
-                              handleDelete(file);
-                            }}
-                          >
-                            Удалить
-                          </Button>
-                        </span>
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </Spin>
-            </Content>
+                    ))}
+                  </div>
+                </Spin>
+              </Content>
+            </Layout>
           </Layout>
         </Layout>
-      </Layout>
+      </AntdApp>
     </AuthGuard>
   );
 }
