@@ -7,10 +7,11 @@ import AppHeader from '../../../components/AppHeader';
 import React from 'react';
 import AuthGuard from '@/components/AuthGuard';
 import { useEffect, useState, useRef } from 'react';
-import { DeleteOutlined, UploadOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlayCircleOutlined, UploadOutlined } from '@ant-design/icons';
 import { Button, Upload, Input } from 'antd';
 import type { UploadChangeParam, UploadFile } from 'antd/es/upload/interface';
 import { App as AntdApp } from 'antd';
+import { useUser } from '../../../hooks/AppGuardUserAdmin';
 
 const { Header, Content } = Layout;
 
@@ -18,6 +19,9 @@ export default function IncomingRequest() {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+
+  const user = useUser();
+  const isAdmin = user?.accessLevel === 'ADMIN';
 
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const uploadRef = useRef<any>(null);
@@ -136,6 +140,7 @@ export default function IncomingRequest() {
                     }}
                   >
                     <Upload
+                      disabled={!isAdmin}
                       name="file"
                       ref={uploadRef}
                       action="http://localhost:3001/videos/upload"
@@ -190,13 +195,15 @@ export default function IncomingRequest() {
                       }}
                       showUploadList={false}
                     >
-                      <Button
-                        type="primary"
-                        icon={<UploadOutlined />}
-                        style={{ float: 'right', marginBottom: 8 }}
-                      >
-                        Загрузить видео
-                      </Button>
+                      {isAdmin && (
+                        <Button
+                          type="primary"
+                          icon={<UploadOutlined />}
+                          style={{ float: 'right', marginBottom: 8 }}
+                        >
+                          Загрузить видео
+                        </Button>
+                      )}
                     </Upload>
 
                     {fileList.map((file) => (
@@ -213,23 +220,29 @@ export default function IncomingRequest() {
                           }}
                         >
                           {file.uid === editingFileUid ? (
-                            <Input
-                              autoFocus
-                              value={newFileName}
-                              onChange={(e) => setNewFileName(e.target.value)}
-                              onBlur={() => saveNewName(file)}
-                              onPressEnter={() => saveNewName(file)}
-                              style={{ width: 300 }}
-                            />
+                            isAdmin && (
+                              <Input
+                                autoFocus
+                                value={newFileName}
+                                onChange={(e) => setNewFileName(e.target.value)}
+                                onBlur={() => saveNewName(file)}
+                                onPressEnter={() => saveNewName(file)}
+                                style={{ width: 300 }}
+                              />
+                            )
                           ) : (
                             <span
-                              style={{ cursor: 'pointer', color: 'rgba(0, 0, 0, 0.8)' }}
+                              style={{
+                                cursor: isAdmin ? 'pointer' : 'default',
+                                color: 'rgba(0, 0, 0, 0.8)',
+                              }}
                               onClick={(e) => {
+                                if (!isAdmin) return;
                                 e.preventDefault();
                                 e.stopPropagation();
                                 startEditing(file);
                               }}
-                              title="Нажмите, чтобы переименовать"
+                              title={isAdmin ? 'Нажмите, чтобы переименовать' : ''}
                             >
                               {file.name}
                             </span>
@@ -238,6 +251,7 @@ export default function IncomingRequest() {
                             {file.url && (
                               <Button
                                 type="primary"
+                                icon={<PlayCircleOutlined />}
                                 ghost
                                 style={{ marginRight: 8 }}
                                 href={file.url}
@@ -247,18 +261,19 @@ export default function IncomingRequest() {
                                 Открыть
                               </Button>
                             )}
-
-                            <Button
-                              type="primary"
-                              icon={<DeleteOutlined />}
-                              danger
-                              ghost
-                              onClick={() => {
-                                handleDelete(file);
-                              }}
-                            >
-                              Удалить
-                            </Button>
+                            {isAdmin && (
+                              <Button
+                                type="primary"
+                                icon={<DeleteOutlined />}
+                                danger
+                                ghost
+                                onClick={() => {
+                                  handleDelete(file);
+                                }}
+                              >
+                                Удалить
+                              </Button>
+                            )}
                           </span>
                         </div>
                       </div>
