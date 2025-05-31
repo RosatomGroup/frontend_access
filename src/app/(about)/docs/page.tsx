@@ -9,6 +9,7 @@ import { DeleteOutlined, DownloadOutlined, UploadOutlined } from '@ant-design/ic
 import { Button, Upload } from 'antd';
 import type { UploadChangeParam, UploadFile } from 'antd/es/upload/interface';
 import { Input } from 'antd';
+import { useUser } from '../../../hooks/AppGuardUserAdmin';
 
 const { Header, Content } = Layout;
 const { Title } = Typography;
@@ -17,6 +18,8 @@ export default function DocsPage() {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+  const user = useUser();
+  const isAdmin = user?.accessLevel === 'ADMIN';
 
   const nameOfPage = 'Документы';
 
@@ -120,6 +123,7 @@ export default function DocsPage() {
                   }}
                 >
                   <Upload
+                    disabled={!isAdmin}
                     ref={uploadRef}
                     action="http://localhost:3001/documents/upload"
                     listType="picture"
@@ -162,7 +166,7 @@ export default function DocsPage() {
                       }
                     }}
                     showUploadList={{
-                      showRemoveIcon: true,
+                      showRemoveIcon: isAdmin,
                       showDownloadIcon: false,
                       showPreviewIcon: false,
                     }}
@@ -180,7 +184,7 @@ export default function DocsPage() {
                           }}
                         >
                           {file.uid === editingFileUid ? (
-                            <>
+                            isAdmin && (
                               <Input
                                 autoFocus
                                 value={newFileName}
@@ -189,16 +193,20 @@ export default function DocsPage() {
                                 onPressEnter={() => saveNewName(file)}
                                 style={{ width: 300 }}
                               />
-                            </>
+                            )
                           ) : (
                             <span
-                              style={{ cursor: 'pointer', color: 'rgba(0, 0, 0, 0.8)' }}
+                              style={{
+                                cursor: isAdmin ? 'pointer' : 'default',
+                                color: 'rgba(0, 0, 0, 0.8)',
+                              }}
                               onClick={(e) => {
+                                if (!isAdmin) return;
                                 e.preventDefault();
                                 e.stopPropagation();
                                 startEditing(file);
                               }}
-                              title="Нажмите, чтобы переименовать"
+                              title={isAdmin ? 'Нажмите, чтобы переименовать' : ''}
                             >
                               {file.name}
                             </span>
@@ -215,28 +223,31 @@ export default function DocsPage() {
                             >
                               Скачать
                             </Button>
-
-                            <Button
-                              type="primary"
-                              icon={<DeleteOutlined />}
-                              danger
-                              ghost
-                              onClick={() => actions.remove?.()}
-                            >
-                              Удалить
-                            </Button>
+                            {isAdmin && (
+                              <Button
+                                type="primary"
+                                icon={<DeleteOutlined />}
+                                danger
+                                ghost
+                                onClick={() => actions.remove?.()}
+                              >
+                                Удалить
+                              </Button>
+                            )}
                           </span>
                         </div>
                       );
                     }}
                   >
-                    <Button
-                      type="primary"
-                      icon={<UploadOutlined />}
-                      style={{ float: 'right', marginBottom: 8 }}
-                    >
-                      Загрузить документ
-                    </Button>
+                    {isAdmin && (
+                      <Button
+                        type="primary"
+                        icon={<UploadOutlined />}
+                        style={{ float: 'right', marginBottom: 8 }}
+                      >
+                        Загрузить документ
+                      </Button>
+                    )}
                   </Upload>
                 </div>
               </Spin>

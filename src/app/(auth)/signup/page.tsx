@@ -33,7 +33,7 @@ const Registration: React.FC = () => {
         {
           surname: values.surname,
           name: values.name,
-          middle_name: values.middle_name,
+          middleName: values.middle_name,
           email: normalizedEmail,
           password: values.password,
         },

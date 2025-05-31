@@ -78,8 +78,9 @@ export default function AppHeader() {
     try {
       await axios.post('http://localhost:3001/auth/logout', {}, { withCredentials: true });
       localStorage.removeItem('userEmail');
-      router.push('/login');
-      router.refresh();
+      if (router) {
+        router.replace('/login');
+      }
     } catch (error) {
       console.error('Ошибка при выходе из системы:', error);
     }
