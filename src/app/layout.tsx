@@ -4,7 +4,7 @@ import './globals.css';
 import 'antd/dist/reset.css';
 
 export const metadata: Metadata = {
-  title: 'ИС ВЕКТОР',
+  title: 'ВЕКТОР',
   description: 'Система верификации и единого контроля токенов, операций и ролей',
 };
 

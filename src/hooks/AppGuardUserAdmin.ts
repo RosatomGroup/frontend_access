@@ -1,28 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-
-// Расширенный интерфейс User, соответствующий данным схемы призма на бекенд
-interface User {
-  id: number;
-  email: string;
-  name: string | null;
-  surname: string | null;
-  middleName: string | null;
-  phone: string | null;
-  avatarUrl: string | null;
-  birthDate: string | null; 
-  subdivision: string | null;
-  rang: string | null;
-  serviceNumber?: number;
-  accessLevel: string;
-  roleId: number | null;
-  role: {
-    id: number;
-    name: string;
-    description: string;
-    resourceId: number;
-  } | null;
-}
+import { User } from '../types/user' 
 
 export function useUser() {
   const [user, setUser] = useState<User | null>(null);

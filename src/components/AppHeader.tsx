@@ -11,21 +11,10 @@ import dayjs from 'dayjs';
 import '@ant-design/v5-patch-for-react-19';
 import axios from 'axios';
 import {api} from "@/api/axios.config";
+import { User } from '../types/user'
 
 const {Header} = Layout;
 const {Text} = Typography;
-
-interface User {
-    email: string;
-    name: string;
-    surname: string;
-    middle_name?: string;
-    phone?: string;
-    number?: string;
-    role?: string;
-    date?: dayjs.Dayjs;
-    avatar?: string;
-}
 
 interface Notification {
     id: number;
@@ -50,8 +39,8 @@ export default function AppHeader() {
 
     const formatUserName = useCallback((user: User | null) => {
         if (!user) return 'Гость';
-        return user.surname && user.name && user.middle_name
-            ? `${user.surname} ${user.name[0]}.${user.middle_name[0]}.`
+        return user.surname && user.name && user.middleName
+            ? `${user.surname} ${user.name[0]}.${user.middleName[0]}.`
             : user.surname && user.name
                 ? `${user.surname} ${user.name[0]}.`
                 : user.name || (user.email ? user.email.split('@')[0] : 'Гость');
@@ -222,7 +211,7 @@ export default function AppHeader() {
                                 color: colorBgContainer,
                             }}
                         >
-                            ИС ВЕКТОР
+                            ВЕКТОР
                         </Typography.Title>
                     </Link>
                     <div style={{display: 'flex', alignItems: 'center', gap: 25}}>
@@ -243,7 +232,7 @@ export default function AppHeader() {
                             <a onClick={(e) => e.preventDefault()}>
                                 <Space>
                                     <Avatar
-                                        src={currentUser?.avatar}
+                                        src={currentUser?.avatarUrl}
                                         // src={currentUser?.avatar || '/images/defaults.webp'}
                                         icon={<UserOutlined style={{fontSize: '20px'}}/>}
                                         style={{backgroundColor: '#1677ff'}}

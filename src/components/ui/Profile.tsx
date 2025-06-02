@@ -4,30 +4,31 @@ import { Button, Divider, Avatar, Upload, Col, DatePicker, Drawer, Form, Input, 
 import dayjs from 'dayjs';
 import { UserOutlined, UploadOutlined } from '@ant-design/icons';
 import type { UploadProps, RcFile, UploadChangeParam } from 'antd/es/upload';
+import { User } from '../../types/user';
 
-interface UserData {
-  email: string;
-  name: string;
-  surname: string;
-  middle_name?: string;
-  phone?: string;
-  number?: string;
-  role?: string;
-  date?: dayjs.Dayjs;
-  avatar?: string;
-  job?: string;
-  otdel?: string;
-}
+// interface User {
+//   email: string;
+//   name: string;
+//   surname: string;
+//   middle_name?: string;
+//   phone?: string;
+//   number?: string;
+//   role?: string;
+//   date?: dayjs.Dayjs;
+//   avatar?: string;
+//   job?: string;
+//   otdel?: string;
+// }
 
 interface ProfileProps {
   open: boolean;
   onClose: () => void;
-  onUserUpdate?: (user: UserData) => void;
+  onUserUpdate?: (user: User) => void;
 }
 
 const Profile: React.FC<ProfileProps> = ({ open, onClose, onUserUpdate }) => {
-  const [form] = Form.useForm<UserData>();
-  const [initialValues, setInitialValues] = useState<UserData>({} as UserData);
+  const [form] = Form.useForm<User>();
+  const [initialValues, setInitialValues] = useState<User>({} as User);
   const [isDirty, setIsDirty] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -72,7 +73,7 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose, onUserUpdate }) => {
 
   const resetForm = useCallback(() => {
     setIsDirty(false);
-    setInitialValues({} as UserData);
+    setInitialValues({} as User);
     setAvatar('');
   }, [form]);
 
@@ -87,17 +88,17 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose, onUserUpdate }) => {
   const handleValuesChange = useCallback(() => {
     const currentValues = form.getFieldsValue();
     const hasChanges = Object.keys(currentValues).some(
-      key => JSON.stringify(currentValues[key as keyof UserData]) !==
-        JSON.stringify(initialValues[key as keyof UserData])
+      key => JSON.stringify(currentValues[key as keyof User]) !==
+        JSON.stringify(initialValues[key as keyof User])
     );
     setIsDirty(hasChanges);
   }, [initialValues, form]);
 
-  const onEditProfile = useCallback(async (values: UserData) => {
+  const onEditProfile = useCallback(async (values: User) => {
     try {
       const formattedValues = {
         ...values,
-        date: values.date?.format('YYYY-MM-DD'),
+        date: values.birthDate,
         avatar
       };
 
