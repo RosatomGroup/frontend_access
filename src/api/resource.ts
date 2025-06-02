@@ -1,17 +1,24 @@
 import axios from 'axios';
 
-export interface Role {
-    id: number;
-    name: string;
-    description: string;
-    resourceId: number;
-    resourceName: string;
-}
-
 export interface Resource {
     id: number;
     name: string;
     description: string;
+    link: string;
+    owner: string;
+}
+
+export interface CreateResourceDto {
+    name: string;
+    description: string;
+    link: string;
+    owner: string;
+}
+
+export interface UpdateResourceDto {
+    name?: string;
+    description?: string;
+    owner?: string;
 }
 
 const api = axios.create({
@@ -32,16 +39,6 @@ api.interceptors.request.use((config) => {
     return Promise.reject(error);
 });
 
-export const fetchRoles = async (): Promise<Role[]> => {
-    try {
-        const response = await api.get('/management/roles');
-        return response.data;
-    } catch (error) {
-        handleApiError(error);
-        return [];
-    }
-};
-
 export const fetchResources = async (): Promise<Resource[]> => {
     try {
         const response = await api.get('/management/resources');
@@ -52,14 +49,39 @@ export const fetchResources = async (): Promise<Resource[]> => {
     }
 };
 
-export const createRole = async (roleData: {
-    name: string;
-    description: string;
-    resourceId: number;
-}): Promise<Role> => {
+export const fetchResourceById = async (id: number): Promise<Resource | null> => {
     try {
-        const response = await api.post('/management/roles', roleData);
+        const response = await api.get(`/management/resources/${id}`);
         return response.data;
+    } catch (error) {
+        handleApiError(error);
+        return null;
+    }
+};
+
+export const createResource = async (resourceData: CreateResourceDto): Promise<Resource> => {
+    try {
+        const response = await api.post('/management/resources', resourceData);
+        return response.data;
+    } catch (error) {
+        handleApiError(error);
+        throw error;
+    }
+};
+
+export const updateResource = async (id: number, resourceData: UpdateResourceDto): Promise<Resource> => {
+    try {
+        const response = await api.patch(`/management/resources/${id}`, resourceData);
+        return response.data;
+    } catch (error) {
+        handleApiError(error);
+        throw error;
+    }
+};
+
+export const deleteResource = async (id: number): Promise<void> => {
+    try {
+        await api.delete(`/management/resources/${id}`);
     } catch (error) {
         handleApiError(error);
         throw error;

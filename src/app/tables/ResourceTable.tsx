@@ -1,31 +1,30 @@
 import React, {useEffect, useState} from 'react';
-import {ConfigProvider, message, Spin, Table, TableColumnsType} from 'antd';
+import {ConfigProvider, Table, TableColumnsType, Spin, message} from 'antd';
 import useBreakpoint from "antd/es/grid/hooks/useBreakpoint";
-import {fetchRoles, Role} from '@/api/roles';
+import {fetchResources, Resource} from "@/api/resource";
 
-interface DataType extends Role {
+interface DataType extends Resource {
     key: React.Key;
 }
 
-interface TableRoleProps {
-    loading?: boolean;
+interface TableResourceProps {
     refreshTrigger?: number;
 }
 
-const TableRole: React.FC<TableRoleProps> = ({ loading: externalLoading, refreshTrigger }) => {
+const TableResource: React.FC<TableResourceProps> = ({ refreshTrigger }) => {
     const screens = useBreakpoint();
     const [pageSize, setPageSize] = useState<number>(10);
-    const [columns, setColumns] = useState<TableColumnsType<DataType>>([]);
     const [data, setData] = useState<DataType[]>([]);
-    const [internalLoading, setInternalLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [columns, setColumns] = useState<TableColumnsType<DataType>>([]);
 
     const loadData = async () => {
         try {
-            setInternalLoading(true);
-            const roles = await fetchRoles();
-            const formattedData = roles.map((role) => ({
-                ...role,
-                key: role.id,
+            setLoading(true);
+            const resources = await fetchResources();
+            const formattedData = resources.map((resource) => ({
+                ...resource,
+                key: resource.id,
             }));
             setData(formattedData);
             createDynamicFilters(formattedData);
@@ -33,7 +32,7 @@ const TableRole: React.FC<TableRoleProps> = ({ loading: externalLoading, refresh
             message.error('Ошибка загрузки данных');
             console.error(error);
         } finally {
-            setInternalLoading(false);
+            setLoading(false);
         }
     };
 
@@ -43,9 +42,9 @@ const TableRole: React.FC<TableRoleProps> = ({ loading: externalLoading, refresh
             value: name,
         }));
 
-        const uniqueResources = [...new Set(data.map(item => item.resourceName))].map(resource => ({
-            text: resource,
-            value: resource,
+        const uniqueOwners = [...new Set(data.map(item => item.owner))].map(owner => ({
+            text: owner,
+            value: owner,
         }));
 
         const newColumns: TableColumnsType<DataType> = [
@@ -57,25 +56,31 @@ const TableRole: React.FC<TableRoleProps> = ({ loading: externalLoading, refresh
                 filters: uniqueName,
                 onFilter: (value, record) => record.name.includes(value as string),
                 sorter: (a, b) => a.name.localeCompare(b.name),
-                width: screens.xs ? 180 : screens.md ? '25%' : '20%',
-                fixed: screens.xs ? 'left' : false,
-                ellipsis: true,
+                width: screens.xs ? '30%' : '25%',
             },
             {
                 title: 'Описание',
                 dataIndex: 'description',
-                width: screens.xs ? 150 : screens.md ? '30%' : '25%',
+                width: screens.xs ? '40%' : '35%',
             },
             {
-                title: 'Система',
-                dataIndex: 'resourceName',
-                filters: uniqueResources,
-                onFilter: (value, record) => record.resourceName === value,
-                filterSearch: true,
-                sorter: (a, b) => a.resourceName?.localeCompare(b.resourceName || '') || 0,
-                width: screens.xs ? 120 : screens.md ? '25%' : '20%',
-                ellipsis: true,
-            }
+                title: 'Ссылка',
+                dataIndex: 'link',
+                render: (text) => (
+                    <a href={text} target="_blank" rel="noopener noreferrer">
+                        {text}
+                    </a>
+                ),
+                width: '20%',
+            },
+            {
+                title: 'Владелец',
+                dataIndex: 'owner',
+                filters: uniqueOwners,
+                onFilter: (value, record) => record.owner === value,
+                sorter: (a, b) => a.owner.localeCompare(b.owner),
+                width: screens.xs ? '30%' : '20%',
+            },
         ];
 
         setColumns(newColumns);
@@ -89,27 +94,22 @@ const TableRole: React.FC<TableRoleProps> = ({ loading: externalLoading, refresh
         setPageSize(size);
     };
 
-    const isLoading = externalLoading || internalLoading;
-
     return (
         <ConfigProvider
             theme={{
                 components: {
                     Table: {
-                        cellPaddingBlock: screens.xs ? 8 : 12,
+                        cellPaddingBlock: screens.xs ? 8 : 16,
                         cellPaddingInline: screens.xs ? 8 : 16,
                     },
                 },
             }}
         >
-            <Spin spinning={isLoading}>
+            <Spin spinning={loading}>
                 <Table<DataType>
                     dataSource={data}
                     columns={columns}
-                    scroll={{
-                        x: screens.xs ? 800 : undefined,
-                        y: screens.xs ? 'calc(100vh - 200px)' : undefined
-                    }}
+                    scroll={screens.xs ? {x: 800} : undefined}
                     pagination={{
                         pageSize: pageSize,
                         showSizeChanger: true,
@@ -123,11 +123,10 @@ const TableRole: React.FC<TableRoleProps> = ({ loading: externalLoading, refresh
                     }}
                     size={screens.xs ? 'small' : 'middle'}
                     bordered={!screens.xs}
-                    sticky={screens.xs}
                 />
             </Spin>
         </ConfigProvider>
     );
 };
 
-export default TableRole;
+export default TableResource;
