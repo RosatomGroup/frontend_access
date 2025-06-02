@@ -1,54 +1,63 @@
-import { useState, useEffect } from 'react';
-import rolesData from '@/app/roles.json';
+import {useEffect, useState} from 'react';
+import {api} from "@/api/axios.config";
 
-interface RoleItem {
-  description: string;
-  applicationName: string;
+interface Resource {
+    id: number;
+    name: string;
+    description: string;
 }
 
-interface RolesData {
-  items: RoleItem[];
+interface Role {
+    id: number;
+    name: string;
+    description: string;
+    resourceId: number;
 }
 
 interface InitialValues {
-  lastName: string;
-  firstName: string;
-  middleName?: string;
+    lastName: string;
+    firstName: string;
+    middleName?: string;
+    email: string;
 }
 
 export function useRequestForm(initialValues: InitialValues) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [availableSystems, setAvailableSystems] = useState<string[]>([]);
-  const [allRoles, setAllRoles] = useState<RoleItem[]>([]);
-  const [filteredRoles, setFilteredRoles] = useState<RoleItem[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [resources, setResources] = useState<Resource[]>([]);
+    const [roles, setRoles] = useState<Role[]>([]);
+    const [filteredRoles, setFilteredRoles] = useState<Role[]>([]);
 
-  useEffect(() => {
-    setIsLoading(true);
-    const typedRolesData = rolesData as RolesData;
-    const roleItems = typedRolesData?.items || [];
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoading(true);
+            try {
+                const [resourcesRes, rolesRes] = await Promise.all([
+                    api.get('/requests/resources'),
+                    api.get('/requests/roles'),
+                ]);
 
-    const systemsArray = Array.from(new Set(roleItems.map(item => item.applicationName)));
-    const uniqueSystems = systemsArray.sort((firstSystem: string, secondSystem: string) => 
-      firstSystem.localeCompare(secondSystem)
-    );
+                setResources(resourcesRes.data);
+                setRoles(rolesRes.data);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
 
-    setAvailableSystems(uniqueSystems);
-    setAllRoles(roleItems);
-    setIsLoading(false);
-  }, []);
+        fetchData();
+    }, []);
 
-  const handleSystemChange = (selectedSystem: string) => {
-    const rolesForSelectedSystem = allRoles.filter(
-      role => role.applicationName === selectedSystem
-    );
-    setFilteredRoles(rolesForSelectedSystem);
-  };
+    const handleResourceChange = (resourceId: number) => {
+        const rolesForResource = roles.filter(role => role.resourceId === resourceId);
+        setFilteredRoles(rolesForResource);
+    };
 
-  return {
-    isLoading,
-    availableSystems,
-    filteredRoles,
-    handleSystemChange,
-    initialValues // Добавляем начальные значения в возвращаемый объект
-  };
+    return {
+        isLoading,
+        resources,
+        filteredRoles,
+        handleResourceChange,
+        initialValues
+    };
 }

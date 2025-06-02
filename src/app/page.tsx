@@ -6,16 +6,17 @@ import AppLayout from '@/components/AppLayout';
 import AuthGuard from '../components/AuthGuard';
 
 export default function Home() {
-  return (
-    <AuthGuard>
-      <Layout>
-        <AppHeader />
-        <Layout style={{ minHeight: '100vh' }}>
-          <AppSider />
-          <AppLayout />
-        </Layout>
-      </Layout>
-    </AuthGuard>
-  );
+    return (
+        <AuthGuard>
+            {(currentUser) => (
+                <Layout>
+                    <AppHeader currentUser={currentUser} />
+                    <Layout style={{ minHeight: '100vh' }}>
+                        <AppSider userRole={currentUser?.role || 'user'} />
+                        <AppLayout currentUser={currentUser} lastRequests={[]} />
+                    </Layout>
+                </Layout>
+            )}
+        </AuthGuard>
+    );
 }
-

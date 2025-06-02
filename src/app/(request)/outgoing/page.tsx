@@ -8,7 +8,7 @@ export default function OutgoingRequest() {
   return (
     <AuthGuard>
       <BaseLayout
-        title="Исходящие заявки"
+        title="Мои заявки"
         breadcrumbs={[{ title: 'Заявки', href: '/' }, { title: 'Исходящие' }]}
       >
         <OutReqTable />
