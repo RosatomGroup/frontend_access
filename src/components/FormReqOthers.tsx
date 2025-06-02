@@ -1,11 +1,11 @@
 // 'use client';
 
 // import { notification } from 'antd';
-// import '@ant-design/v5-patch-for-react-19';
 // import type { SizeType } from 'antd/es/config-provider/SizeContext';
 // import { useRequestForm } from '@/hooks/useRequestForm';
 // import { RequestForm } from './RequestForm';
-// import React, { useState } from 'react';
+// import React, { useState, useEffect } from 'react';
+// import { useAuthFetch } from '@/hooks/useAuthFetch';
 
 // interface FormSubmitValues {
 //   lastName: string;
@@ -27,38 +27,62 @@
 //   userId?: number;
 // }
 
-// const API_BASE_URL = 'http://localhost:3001';
+// interface UserData {
+//   id: number;
+//   email: string;
+// }
+
+// const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
 
 // export default function FormReqOthers({ onClose }: { onClose: () => void }) {
-//   const [componentSize, setComponentSize] = useState<SizeType>('default' as SizeType);
+//   const [componentSize, setComponentSize] = useState<SizeType>('default');
 //   const [notificationApi, notificationContextHolder] = notification.useNotification();
-//   const [isRequestForOtherUser, setIsRequestForOtherUser] = useState(false);
+//   const [isRequestForOtherUser, setIsRequestForOtherUser] = useState<boolean>(false);
+//   const [currentUser, setCurrentUser] = useState<UserData | null>(null);
+//   const { fetchWithAuth } = useAuthFetch();
 
 //   const {
 //     isLoading,
 //     availableSystems,
 //     filteredRoles,
 //     handleSystemChange,
-//     initialValues
+//     initialValues,
+//     allRoles
 //   } = useRequestForm({
 //     lastName: 'Иванов',
 //     firstName: 'Иван',
 //     middleName: 'Иванович'
 //   });
 
-//   const handleSubmit = async (values: FormSubmitValues) => {
-//     const payload: CreateRequestPayload = {
-//       surname: values.lastName,
-//       name: values.firstName,
-//       middleName: values.middleName || '', // Отправляем пустую строку, если не заполнено
-//       email: values.email,
-//       resourceId: values.system,
-//       roleId: values.role,
-//       requestType: 'GRANT_ACCESS',
+//   useEffect(() => {
+//     const fetchCurrentUser = async () => {
+//       try {
+//         const user = await fetchWithAuth(`${API_BASE_URL}/auth/me`);
+//         setCurrentUser(user);
+//       } catch (error) {
+//         console.error('Failed to fetch current user:', error);
+//       }
 //     };
 
+//     fetchCurrentUser();
+//   }, [fetchWithAuth]);
+
+//   const handleSubmit = async (values: FormSubmitValues) => {
 //     try {
-//       const response = await fetch(`${API_BASE_URL}/requests`, {
+//       const payload: CreateRequestPayload = {
+//         surname: values.lastName,
+//         name: values.firstName,
+//         middleName: values.middleName || '',
+//         email: values.email,
+//         resourceId: values.system,
+//         roleId: values.role,
+//         requestType: 'GRANT_ACCESS',
+//         userId: currentUser?.id
+//       };
+
+//       console.log('Отправляемые данные:', payload);
+
+//       const response = await fetchWithAuth(`${API_BASE_URL}/requests`, {
 //         method: 'POST',
 //         headers: {
 //           'Content-Type': 'application/json',
@@ -66,25 +90,21 @@
 //         body: JSON.stringify(payload),
 //       });
 
-//       if (response.ok) {
-//         notificationApi.success({
-//           message: 'Заявка успешно создана',
-//           description: 'Заявка на предоставление доступа отправлена.',
-//         });
-//         onClose();
-//       } else {
+//       if (!response.ok) {
 //         const errorData = await response.json();
-//         console.error('Backend error:', errorData);
-//         notificationApi.error({
-//           message: 'Ошибка при создании заявки',
-//           description: errorData.message || 'Не удалось сохранить заявку. Попробуйте снова.',
-//         });
+//         throw new Error(errorData.message || 'Ошибка сервера при создании заявки');
 //       }
+
+//       notificationApi.success({
+//         message: 'Заявка успешно создана',
+//         description: 'Заявка на предоставление доступа отправлена.',
+//       });
+//       onClose();
 //     } catch (error) {
-//       console.error('Network or other error:', error);
+//       console.error('Error creating request:', error);
 //       notificationApi.error({
-//         message: 'Сетевая ошибка',
-//         description: 'Не удалось связаться с сервером. Проверьте ваше интернет-соединение.',
+//         message: 'Ошибка',
+//         description: error instanceof Error ? error.message : 'Не удалось создать заявку',
 //       });
 //     }
 //   };
@@ -119,15 +139,28 @@
 //   );
 // }
 
-// src/components/FormReqOthers.tsx
+
+
+
+
+
+
+
 'use client';
 
+import React, { useState, useEffect } from 'react';
 import { notification } from 'antd';
-import type { SizeType } from 'antd/es/config-provider/SizeContext';
 import { useRequestForm } from '@/hooks/useRequestForm';
 import { RequestForm } from './RequestForm';
-import React, { useState } from 'react';
 import { useAuthFetch } from '@/hooks/useAuthFetch';
+
+interface UserData {
+  id: number;
+  email: string;
+  name?: string;
+  surname?: string;
+  middleName?: string | null;
+}
 
 interface FormSubmitValues {
   lastName: string;
@@ -138,23 +171,12 @@ interface FormSubmitValues {
   role: number;
 }
 
-interface CreateRequestPayload {
-  name: string;
-  surname: string;
-  middleName: string;
-  email: string;
-  resourceId: number;
-  roleId: number;
-  requestType: 'GRANT_ACCESS' | 'REVOKE_ACCESS';
-  userId?: number;
-}
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
 
 export default function FormReqOthers({ onClose }: { onClose: () => void }) {
-  const [componentSize, setComponentSize] = useState<SizeType>('default' as SizeType);
-  const [notificationApi, notificationContextHolder] = notification.useNotification();
+  const [currentUser, setCurrentUser] = useState<UserData | null>(null);
   const [isRequestForOtherUser, setIsRequestForOtherUser] = useState(false);
+  const [notificationApi, notificationContextHolder] = notification.useNotification();
   const { fetchWithAuth } = useAuthFetch();
 
   const {
@@ -162,67 +184,111 @@ export default function FormReqOthers({ onClose }: { onClose: () => void }) {
     availableSystems,
     filteredRoles,
     handleSystemChange,
-    initialValues
+    initialValues,
+    allRoles
   } = useRequestForm({
     lastName: 'Иванов',
     firstName: 'Иван',
     middleName: 'Иванович'
   });
 
-  const handleSubmit = async (values: FormSubmitValues) => {
-    const payload: CreateRequestPayload = {
-      surname: values.lastName,
-      name: values.firstName,
-      middleName: values.middleName || '',
-      email: values.email,
-      resourceId: values.system,
-      roleId: values.role,
-      requestType: 'GRANT_ACCESS',
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const user = await fetchWithAuth(`${API_BASE_URL}/auth/me`);
+        console.log('Fetched current user:', user);
+        setCurrentUser(user);
+      } catch (error) {
+        console.error('Failed to fetch current user:', error);
+        notificationApi.error({
+          message: 'Ошибка',
+          description: 'Не удалось загрузить данные пользователя'
+        });
+      }
     };
 
+    fetchCurrentUser();
+  }, [fetchWithAuth, notificationApi]);
+
+  const handleSubmit = async (values: FormSubmitValues) => {
+    if (!currentUser) {
+      notificationApi.error({
+        message: 'Ошибка',
+        description: 'Не удалось определить текущего пользователя'
+      });
+      return;
+    }
+
+    const payload = {
+      surname: values.lastName,
+      name: values.firstName,
+      middleName: values.middleName || null,
+      email: values.email,
+      resourceId: Number(values.system),
+      roleId: Number(values.role),
+      requestType: 'GRANT_ACCESS' as const,
+      userId: Number(currentUser.id)
+    };
+
+    console.log('Submitting request with payload:', payload);
+
     try {
-      await fetchWithAuth(`${API_BASE_URL}/requests`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/requests`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(payload),
       });
 
       notificationApi.success({
-        message: 'Заявка успешно создана',
-        description: 'Заявка на предоставление доступа отправлена.',
+        message: 'Успех',
+        description: 'Заявка успешно создана',
+        duration: 3
       });
       onClose();
-    } catch (error) {
-      notificationApi.error({
-        message: 'Ошибка',
-        description: error instanceof Error ? error.message : 'Не удалось создать заявку',
-      });
+    } catch (error: any) {
+      console.error('Error creating request:', error);
+
+      if (error.message.includes('уже существует')) {
+        notificationApi.warning({
+          message: 'Заявка уже существует',
+          description: error.message,
+          duration: 5
+        });
+      } else {
+        notificationApi.error({
+          message: 'Ошибка',
+          description: error.message || 'Не удалось создать заявку',
+          duration: 5
+        });
+      }
     }
   };
 
-  const onFormLayoutChange = ({ size }: { size: SizeType }) => {
-    setComponentSize(size);
-  };
-
-  const handleInputClick = () => {
-    if (!isRequestForOtherUser) {
-      setIsRequestForOtherUser(true);
-    }
+  const handleCheckboxChange = (checked: boolean) => {
+    setIsRequestForOtherUser(checked);
   };
 
   return (
     <div style={{ maxWidth: '100%', margin: '0 50px' }}>
       {notificationContextHolder}
       <RequestForm
-        initialValues={initialValues}
+        initialValues={{
+          lastName: currentUser?.surname || initialValues.lastName,
+          firstName: currentUser?.name || initialValues.firstName,
+          middleName: currentUser?.middleName || initialValues.middleName,
+          email: currentUser?.email || ''
+        }}
         onFinish={handleSubmit}
-        onFormLayoutChange={onFormLayoutChange}
-        componentSize={componentSize}
+        onFormLayoutChange={({ size }) => console.log('Form size changed:', size)}
+        componentSize="default"
         availableSystems={availableSystems}
         filteredRoles={filteredRoles}
         isLoading={isLoading}
         isRequestForOtherUser={isRequestForOtherUser}
-        onCheckboxChange={setIsRequestForOtherUser}
-        onInputClick={handleInputClick}
+        onCheckboxChange={handleCheckboxChange}
+        onInputClick={() => console.log('Input clicked')}
         onSystemChange={handleSystemChange}
       />
     </div>
