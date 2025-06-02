@@ -6,7 +6,7 @@ interface UserData {
     name: string;
     surname: string;
     middleName: string | null;
-    accessLevel: string;
+    accessLevel: 'ADMIN' | 'USER';
     phone: string | null;
     avatarUrl: string;
     birthDate: string | null;
@@ -14,9 +14,8 @@ interface UserData {
     rang: string;
 }
 
-export function useUser() {
+export function useUser(): UserData | null {
     const [user, setUser] = useState<UserData | null>(null);
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetch('http://localhost:3001/auth/me', {
@@ -29,9 +28,8 @@ export function useUser() {
             .then((data: UserData) => {
                 setUser(data);
             })
-            .catch(() => setUser(null))
-            .finally(() => setLoading(false));
+            .catch(() => setUser(null));
     }, []);
 
-    return { user, loading };
+    return user;
 }

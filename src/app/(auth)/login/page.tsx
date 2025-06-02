@@ -8,6 +8,7 @@ import Link from 'next/link';
 import '@ant-design/v5-patch-for-react-19';
 import AppTitleAuth from '../../../components/AppTitleAuth';
 import axios from 'axios';
+import AppLoadingComponent from '@/components/AppLoading';
 
 const LoginPage: React.FC = () => {
   const router = useRouter();
@@ -59,6 +60,7 @@ const LoginPage: React.FC = () => {
     <Flex vertical justify="center" align="center" style={{ height: '100vh' }} gap="middle">
       {contextHolder}
       <AppTitleAuth />
+      <AppLoadingComponent />
 
       <Card title="Авторизация" style={{ boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}>
         <Form

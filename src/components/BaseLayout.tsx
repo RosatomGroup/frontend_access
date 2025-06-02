@@ -1,13 +1,13 @@
 'use client';
 
-import {Breadcrumb, Layout, Spin, theme, Typography} from 'antd';
+import { Breadcrumb, Layout, theme, Typography } from 'antd';
 import Link from 'next/link';
 import AppHeader from './AppHeader';
 import AppSider from './AppSider';
-import {useUser} from "@/hooks/AppGuardUserAdmin";
+import { useUser } from "@/hooks/AppGuardUserAdmin";
 import styles from './BaseLayout.module.css';
 
-const {Header, Content} = Layout;
+const { Header, Content } = Layout;
 
 interface BreadcrumbItem {
     title: string;
@@ -26,53 +26,36 @@ export default function BaseLayout({
                                        children,
                                    }: BaseLayoutProps) {
     const {
-        token: {colorBgContainer, borderRadiusLG},
+        token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
 
-    const {user, loading} = useUser();
-
-    if (loading) {
-        return (
-            <div className={styles.loadingContainer}>
-                <Spin size="large" tip="Загрузка..."/>
-            </div>
-        );
-    }
+    const user = useUser();
 
     return (
-        <Layout className={styles.layout}>
-            <AppHeader/>
-            <Layout className={styles.contentLayout}>
-                <AppSider userRole={user?.accessLevel}/>
-                <Layout>
-                    <Header className={styles.pageHeader} style={{background: colorBgContainer}}>
-                        <div className={styles.headerContent}>
-                            <Breadcrumb
-                                items={breadcrumbs.map(item => ({
-                                    title: item.href ? (
-                                        <Link href={item.href}>{item.title}</Link>
-                                    ) : (
-                                        item.title
-                                    ),
-                                }))}
-                            />
-                            <Typography.Title level={4} className={styles.pageTitle}>
-                                {title}
-                            </Typography.Title>
-                        </div>
-                    </Header>
-                    <Content className={styles.pageContent}>
-                        <div
-                            className={styles.contentContainer}
-                            style={{
-                                background: colorBgContainer,
-                                borderRadius: borderRadiusLG,
-                            }}
-                        >
-                            {children}
-                        </div>
-                    </Content>
-                </Layout>
+        <Layout style={{ minHeight: '100vh' }}>
+            <AppSider
+                userRole={user?.accessLevel as 'ADMIN' | 'USER' | null}
+                isLoading={!user}
+            />
+            <Layout>
+                <Header style={{ background: colorBgContainer, borderRadius: borderRadiusLG, margin: 16 }}>
+                    <AppHeader />
+                </Header>
+                <Content style={{ margin: '0 16px' }}>
+                    <Breadcrumb style={{ margin: '16px 0' }}>
+                        {breadcrumbs.map((item, idx) =>
+                            item.href ? (
+                                <Breadcrumb.Item key={idx}>
+                                    <Link href={item.href}>{item.title}</Link>
+                                </Breadcrumb.Item>
+                            ) : (
+                                <Breadcrumb.Item key={idx}>{item.title}</Breadcrumb.Item>
+                            )
+                        )}
+                    </Breadcrumb>
+                    <Typography.Title level={2}>{title}</Typography.Title>
+                    <div className={styles.content}>{children}</div>
+                </Content>
             </Layout>
         </Layout>
     );

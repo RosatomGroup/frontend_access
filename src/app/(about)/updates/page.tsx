@@ -6,6 +6,7 @@ import AppSider from '../../../components/AppSider';
 import AppHeader from '../../../components/AppHeader';
 import ComingSoonPage from '../../../components/AppComingSoon';
 import AuthGuard from '@/components/AuthGuard';
+import AppLoadingComponent from '@/components/AppLoading';
 
 const { Header, Content } = Layout;
 
@@ -17,6 +18,7 @@ export default function IncomingRequest() {
   return (
     <AuthGuard>
       <Layout>
+        <AppLoadingComponent />
         <AppHeader />
         <Layout style={{ minHeight: '100vh' }}>
           <AppSider />

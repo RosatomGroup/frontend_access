@@ -7,6 +7,7 @@ import AppTitleAuth from '@/components/AppTitleAuth';
 import Link from 'next/link';
 import '@ant-design/v5-patch-for-react-19';
 import React from 'react';
+import AppLoadingComponent from '@/components/AppLoading';
 
 interface FormValues {
   surname: string;
@@ -32,7 +33,7 @@ const Registration: React.FC = () => {
         {
           surname: values.surname,
           name: values.name,
-          middle_name: values.middle_name,
+          middleName: values.middle_name,
           email: normalizedEmail,
           password: values.password,
         },
@@ -68,6 +69,7 @@ const Registration: React.FC = () => {
       gap="middle"
     >
       {contextHolder}
+      <AppLoadingComponent />
       <AppTitleAuth />
       <Card
         title="Регистрация"
