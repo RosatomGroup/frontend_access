@@ -12,7 +12,7 @@ import AppLoadingComponent from '@/components/AppLoading';
 interface FormValues {
   surname: string;
   name: string;
-  middle_name: string;
+  middleName: string;
   email: string;
   password: string;
 }
@@ -33,7 +33,7 @@ const Registration: React.FC = () => {
         {
           surname: values.surname,
           name: values.name,
-          middleName: values.middle_name,
+          middleName: values.middleName,
           email: normalizedEmail,
           password: values.password,
         },

@@ -1,11 +1,11 @@
 import axios from 'axios';
 
 export interface User {
-    key: number;
+    id: number;
     name: string;
     rang: string;
     subdivision: string;
-    address: string;
+    email: string;
 }
 
 const api = axios.create({
@@ -19,7 +19,7 @@ const api = axios.create({
 
 export const fetchUsers = async (): Promise<User[]> => {
     try {
-        const response = await api.get('/users/management');
+        const response = await api.get('/management/users/');
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
