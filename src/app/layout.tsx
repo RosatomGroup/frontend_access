@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import './globals.css';
 import 'antd/dist/reset.css';
+import {AuthProvider} from '../context/AuthContext';
 
 export const metadata: Metadata = {
   title: 'ВЕКТОР',
@@ -16,9 +17,11 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <body>
-        <AntdRegistry>
-          {children}
-        </AntdRegistry>
+        <AuthProvider >
+          <AntdRegistry>
+            {children}
+          </AntdRegistry>
+          </AuthProvider>
       </body>
     </html>
   );

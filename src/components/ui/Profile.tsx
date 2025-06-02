@@ -6,20 +6,6 @@ import { UserOutlined, UploadOutlined } from '@ant-design/icons';
 import type { UploadProps, RcFile, UploadChangeParam } from 'antd/es/upload';
 import { User } from '../../types/user';
 
-// interface User {
-//   email: string;
-//   name: string;
-//   surname: string;
-//   middle_name?: string;
-//   phone?: string;
-//   number?: string;
-//   role?: string;
-//   date?: dayjs.Dayjs;
-//   avatar?: string;
-//   job?: string;
-//   otdel?: string;
-// }
-
 interface ProfileProps {
   open: boolean;
   onClose: () => void;
