@@ -18,7 +18,7 @@ export default function DocsPage() {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
-  const user = useUser();
+  const { user, isLoading: isUserLoading, error: userError } = useUser();
   const isAdmin = user?.accessLevel === 'ADMIN';
 
   const nameOfPage = 'Документы';
@@ -62,7 +62,7 @@ export default function DocsPage() {
       return;
     }
     try {
-      const response = await fetch(`http://localhost:3001/documents/${file.filename}/rename`, {
+      const response = await fetch(`http://localhost:3001/documents/${file.fileName}/rename`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ newName: newFileName.trim() }),
@@ -130,11 +130,11 @@ export default function DocsPage() {
                     fileList={fileList}
                     onRemove={async (file) => {
                       try {
-                        if (!file.filename) {
+                        if (!file.fileName) {
                           message.error('Неизвестное имя файла для удаления');
                           return;
                         }
-                        await fetch(`http://localhost:3001/documents/${file.filename}`, {
+                        await fetch(`http://localhost:3001/documents/${file.fileName}`, {
                           method: 'DELETE',
                         });
                         setFileList((prev) => prev.filter((item) => item.uid !== file.uid));

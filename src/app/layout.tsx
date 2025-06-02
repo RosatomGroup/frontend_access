@@ -4,8 +4,8 @@ import './globals.css';
 import 'antd/dist/reset.css';
 
 export const metadata: Metadata = {
-  title: 'RBAC',
-  description: 'Система автоматизации доступа к корпоративным ресурсам',
+  title: 'ИС ВЕКТОР',
+  description: 'Система верификации и единого контроля токенов, операций и ролей',
 };
 
 export default function RootLayout({

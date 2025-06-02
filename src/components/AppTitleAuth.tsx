@@ -4,7 +4,7 @@ import { Flex } from 'antd';
 export default function AppTitleAuth() {
   return (
     <Flex vertical align="center" justify="center" style={{ margin: '1rem 0' }}>
-      <Image width={50} preview={false} src="/favicon.ico" alt="RBAC" />
+      <Image width={50} preview={false} src="/favicon.ico" alt="Логотип ИС ВЕКТОР" />
       <Typography.Title
         level={2}
         style={{

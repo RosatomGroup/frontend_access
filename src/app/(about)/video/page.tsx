@@ -20,9 +20,9 @@ export default function IncomingRequest() {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const user = useUser();
+  const { user, isLoading: isUserLoading, error: userError } = useUser();
   const isAdmin = user?.accessLevel === 'ADMIN';
-
+  console.log(isAdmin)
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const uploadRef = useRef<any>(null);
   const [editingFileUid, setEditingFileUid] = useState<string | null>(null);
@@ -62,7 +62,7 @@ export default function IncomingRequest() {
       return;
     }
     try {
-      const response = await fetch(`http://localhost:3001/videos/${file.filename}/rename`, {
+      const response = await fetch(`http://localhost:3001/videos/${file.fileName}/rename`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ newName: newFileName.trim() }),
@@ -93,11 +93,11 @@ export default function IncomingRequest() {
 
   const handleDelete = async (file: UploadFile) => {
     try {
-      if (!file.filename) {
+      if (!file.fileName) {
         message.error('Неизвестное имя файла для удаления');
         return;
       }
-      await fetch(`http://localhost:3001/videos/${file.filename}`, {
+      await fetch(`http://localhost:3001/videos/${file.fileName}`, {
         method: 'DELETE',
       });
       setFileList((prev) => prev.filter((item) => item.uid !== file.uid));
@@ -155,11 +155,11 @@ export default function IncomingRequest() {
                       }}
                       onRemove={async (file) => {
                         try {
-                          if (!file.filename) {
+                          if (!file.fileName) {
                             message.error('Неизвестное имя файла для удаления');
                             return;
                           }
-                          await fetch(`http://localhost:3001/videos/${file.filename}`, {
+                          await fetch(`http://localhost:3001/videos/${file.fileName}`, {
                             method: 'DELETE',
                           });
                           setFileList((prev) => prev.filter((item) => item.uid !== file.uid));
@@ -178,7 +178,7 @@ export default function IncomingRequest() {
                               return {
                                 ...f,
                                 name: file.response.originalname,
-                                filename: file.response.filename,
+                                filename: file.response.fileame,
                                 url: file.response.url,
                                 status: 'done',
                               };

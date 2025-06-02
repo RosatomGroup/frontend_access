@@ -211,7 +211,7 @@ export default function AppHeader() {
                     }}
                 >
                     <Link href={'/'} style={{display: 'flex'}}>
-                        <Image width={35} preview={false} src="/./favicon.ico" alt="RBAC"/>
+                        <Image width={35} preview={false} src="/./favicon.ico" alt="Логотип ИС ВЕКТОР"/>
                         <Typography.Title
                             level={3}
                             style={{
@@ -222,7 +222,7 @@ export default function AppHeader() {
                                 color: colorBgContainer,
                             }}
                         >
-                            RBAC
+                            ИС ВЕКТОР
                         </Typography.Title>
                     </Link>
                     <div style={{display: 'flex', alignItems: 'center', gap: 25}}>
