@@ -1,61 +1,59 @@
 'use client';
 
-import { Breadcrumb, Layout, theme, Typography } from 'antd';
+import {Breadcrumb, Layout, theme, Typography} from 'antd';
 import Link from 'next/link';
 import AppHeader from './AppHeader';
 import AppSider from './AppSider';
-import { useUser } from "@/hooks/AppGuardUserAdmin";
-import styles from './BaseLayout.module.css';
 
-const { Header, Content } = Layout;
+const {Header, Content} = Layout;
 
-interface BreadcrumbItem {
-    title: string;
-    href?: string;
-}
-
-interface BaseLayoutProps {
-    title: string;
-    breadcrumbs: BreadcrumbItem[];
-    children: React.ReactNode;
-}
-
+/**
+ * Базовый макет для страниц приложения
+ * @param title - Заголовок страницы
+ * @param breadcrumbs - Хлебные крошки
+ * @param children - Дочерние элементы
+ */
 export default function BaseLayout({
                                        title,
                                        breadcrumbs,
                                        children,
-                                   }: BaseLayoutProps) {
+                                   }: {
+    title: string;
+    breadcrumbs: Array<{ title: string; href?: string }>;
+    children: React.ReactNode;
+}) {
     const {
-        token: { colorBgContainer, borderRadiusLG },
+        token: {colorBgContainer, borderRadiusLG},
     } = theme.useToken();
 
-    const user = useUser();
-
     return (
-        <Layout style={{ minHeight: '100vh' }}>
-            <AppSider
-                userRole={user?.accessLevel as 'ADMIN' | 'USER' | null}
-                isLoading={!user}
-            />
-            <Layout>
-                <Header style={{ background: colorBgContainer, borderRadius: borderRadiusLG, margin: 16 }}>
-                    <AppHeader />
-                </Header>
-                <Content style={{ margin: '0 16px' }}>
-                    <Breadcrumb style={{ margin: '16px 0' }}>
-                        {breadcrumbs.map((item, idx) =>
-                            item.href ? (
-                                <Breadcrumb.Item key={idx}>
-                                    <Link href={item.href}>{item.title}</Link>
-                                </Breadcrumb.Item>
-                            ) : (
-                                <Breadcrumb.Item key={idx}>{item.title}</Breadcrumb.Item>
-                            )
-                        )}
-                    </Breadcrumb>
-                    <Typography.Title level={2}>{title}</Typography.Title>
-                    <div className={styles.content}>{children}</div>
-                </Content>
+        <Layout>
+            <AppHeader/>
+            <Layout style={{minHeight: '100vh'}}>
+                <AppSider/>
+                <Layout>
+                    <Header style={{paddingLeft: 16, background: colorBgContainer, height: '100px'}}>
+                        <Breadcrumb
+                            style={{margin: '16px 0'}}
+                            items={breadcrumbs.map(item => ({
+                                title: item.href ? <Link href={item.href}>{item.title}</Link> : item.title,
+                            }))}
+                        />
+                        <Typography.Title level={4}>{title}</Typography.Title>
+                    </Header>
+                    <Content style={{margin: '0 16px', paddingTop: '16px'}}>
+                        <div
+                            style={{
+                                padding: 24,
+                                minHeight: 360,
+                                background: colorBgContainer,
+                                borderRadius: borderRadiusLG,
+                            }}
+                        >
+                            {children}
+                        </div>
+                    </Content>
+                </Layout>
             </Layout>
         </Layout>
     );

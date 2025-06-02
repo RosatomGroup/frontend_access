@@ -9,8 +9,7 @@ import { DeleteOutlined, DownloadOutlined, UploadOutlined } from '@ant-design/ic
 import { Button, Upload } from 'antd';
 import type { UploadChangeParam, UploadFile } from 'antd/es/upload/interface';
 import { Input } from 'antd';
-import { useUser } from '../../../hooks/AppGuardUserAdmin';
-
+import {useUser} from "@/components/UserContext";
 const { Header, Content } = Layout;
 const { Title } = Typography;
 
@@ -18,7 +17,7 @@ export default function DocsPage() {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
-  const user = useUser();
+  const { user, isLoading } = useUser();
   const isAdmin = user?.accessLevel === 'ADMIN';
 
   const nameOfPage = 'Документы';
