@@ -1,47 +1,65 @@
+// src/hooks/useRequestForm.ts
 import { useState, useEffect } from 'react';
-import rolesData from '@/app/roles.json';
+import { useAuthFetch } from './useAuthFetch';
 
-interface RoleItem {
+interface BackendResource {
+  id: number;
+  name: string;
   description: string;
-  applicationName: string;
+  link?: string;
 }
 
-interface RolesData {
-  items: RoleItem[];
+interface BackendRole {
+  id: number;
+  name: string;
+  description: string;
+  resourceId: number;
 }
 
 interface InitialValues {
   lastName: string;
   firstName: string;
-  middleName?: string;
+  middleName: string;
 }
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
 
 export function useRequestForm(initialValues: InitialValues) {
   const [isLoading, setIsLoading] = useState(false);
-  const [availableSystems, setAvailableSystems] = useState<string[]>([]);
-  const [allRoles, setAllRoles] = useState<RoleItem[]>([]);
-  const [filteredRoles, setFilteredRoles] = useState<RoleItem[]>([]);
+  const [availableSystems, setAvailableSystems] = useState<BackendResource[]>([]);
+  const [allRoles, setAllRoles] = useState<BackendRole[]>([]);
+  const [filteredRoles, setFilteredRoles] = useState<BackendRole[]>([]);
+  const { fetchWithAuth } = useAuthFetch();
 
   useEffect(() => {
-    setIsLoading(true);
-    const typedRolesData = rolesData as RolesData;
-    const roleItems = typedRolesData?.items || [];
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const [resourcesData, rolesData] = await Promise.all([
+          fetchWithAuth(`${API_BASE_URL}/management/resources`),
+          fetchWithAuth(`${API_BASE_URL}/management/roles`),
+        ]);
 
-    const systemsArray = Array.from(new Set(roleItems.map(item => item.applicationName)));
-    const uniqueSystems = systemsArray.sort((firstSystem: string, secondSystem: string) => 
-      firstSystem.localeCompare(secondSystem)
-    );
+        const sortedSystems = [...resourcesData].sort((a, b) => a.name.localeCompare(b.name));
+        setAvailableSystems(sortedSystems);
+        setAllRoles(rolesData);
+      } catch (error) {
+        console.error("Error fetching data for request form:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    setAvailableSystems(uniqueSystems);
-    setAllRoles(roleItems);
-    setIsLoading(false);
-  }, []);
+    fetchData();
+  }, [fetchWithAuth]);
 
-  const handleSystemChange = (selectedSystem: string) => {
+  const handleSystemChange = (selectedSystemId: number | string) => {
+    const systemId = Number(selectedSystemId);
     const rolesForSelectedSystem = allRoles.filter(
-      role => role.applicationName === selectedSystem
+      (role) => role.resourceId === systemId
     );
-    setFilteredRoles(rolesForSelectedSystem);
+    const sortedRoles = [...rolesForSelectedSystem].sort((a, b) => a.name.localeCompare(b.name));
+    setFilteredRoles(sortedRoles);
   };
 
   return {
@@ -49,6 +67,6 @@ export function useRequestForm(initialValues: InitialValues) {
     availableSystems,
     filteredRoles,
     handleSystemChange,
-    initialValues // Добавляем начальные значения в возвращаемый объект
+    initialValues,
   };
 }

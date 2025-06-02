@@ -23,8 +23,6 @@ const AppSider = () => {
         label: 'Заявки',
         icon: <TableOutlined />,
         children: [
-          { key: 'incoming', label: 'Входящие' },
-          { key: 'outgoing', label: 'Исходящие' },
           { key: 'all', label: 'Все заявки' },
         ],
       },

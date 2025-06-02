@@ -1,28 +1,39 @@
+// src/components/FormReqRevoke.tsx
 'use client';
 
 import { notification } from 'antd';
 import type { SizeType } from 'antd/es/config-provider/SizeContext';
-import { reqOutdata } from '@/app/reqOut';
 import { useRequestForm } from '@/hooks/useRequestForm';
 import { RequestForm } from './RequestForm';
 import React, { useState } from 'react';
 
-interface RequestData {
-  id: number;
-  name: string;
-  requestSubject: string;
-  role: string;
-  status: string;
-  system: string;
-  submissionTime: string;
+interface FormSubmitValues {
+  lastName: string;
+  firstName: string;
+  middleName: string;
   email: string;
+  system: number;
+  role: number;
 }
+
+interface CreateRequestPayload {
+  name: string;
+  surname: string;
+  middleName: string;
+  email: string;
+  resourceId: number;
+  roleId: number;
+  requestType: 'GRANT_ACCESS' | 'REVOKE_ACCESS';
+  userId?: number;
+}
+
+const API_BASE_URL = 'http://localhost:3001';
 
 export default function FormReqRevoke({ onClose }: { onClose: () => void }) {
   const [componentSize, setComponentSize] = useState<SizeType>('default' as SizeType);
   const [notificationApi, notificationContextHolder] = notification.useNotification();
   const [isRequestForOtherUser, setIsRequestForOtherUser] = useState(false);
-  
+
   const {
     isLoading,
     availableSystems,
@@ -35,50 +46,46 @@ export default function FormReqRevoke({ onClose }: { onClose: () => void }) {
     middleName: 'Иванович'
   });
 
-  const handleSubmit = async (values: {
-    lastName: string;
-    firstName: string;
-    middleName?: string;
-    email: string;
-    system: string;
-    role: string;
-  }) => {
+  const handleSubmit = async (values: FormSubmitValues) => {
+    const payload: CreateRequestPayload = {
+      surname: values.lastName,
+      name: values.firstName,
+      middleName: values.middleName || '', // Отправляем пустую строку, если не заполнено
+      email: values.email,
+      resourceId: values.system,
+      roleId: values.role,
+      requestType: 'REVOKE_ACCESS',
+    };
+
     try {
-      const newRequest: RequestData = {
-        id: reqOutdata.length + 1,
-        name: `${values.lastName} ${values.firstName} ${values.middleName || ''}`.trim(),
-        requestSubject: "Отозвать доступ",
-        role: values.role,
-        status: 'в работе',
-        system: values.system,
-        submissionTime: new Date().toISOString(),
-        email: values.email
-      };
-
-      reqOutdata.unshift(newRequest);
-
-      const response = await fetch('/api/updateReqOut', {
+      const response = await fetch(`${API_BASE_URL}/requests`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(reqOutdata),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
         notificationApi.success({
           message: 'Заявка успешно создана',
-          description: 'Заявка на отзыв доступа отправлена',
+          description: 'Заявка на отзыв доступа отправлена.',
         });
         onClose();
       } else {
+        const errorData = await response.json();
+        console.error('Backend error:', errorData);
         notificationApi.error({
-          message: 'Ошибка',
-          description: 'Не удалось сохранить заявку',
+          message: 'Ошибка при создании заявки',
+          description: errorData.message || 'Не удалось сохранить заявку. Попробуйте снова.',
         });
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      console.error('Network or other error:', error);
+      notificationApi.error({
+        message: 'Сетевая ошибка',
+        description: 'Не удалось связаться с сервером. Проверьте ваше интернет-соединение.',
+      });
     }
   };
 
