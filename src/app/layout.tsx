@@ -17,11 +17,11 @@ export default function RootLayout({
     return (
         <html lang="ru">
         <body>
-        <UserProvider>
-            <AntdRegistry>
+        <AntdRegistry>
+            <UserProvider>
                 {children}
-            </AntdRegistry>
-        </UserProvider>
+            </UserProvider>
+        </AntdRegistry>
         </body>
         </html>
     );

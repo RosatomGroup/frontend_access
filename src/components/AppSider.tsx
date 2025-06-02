@@ -24,7 +24,6 @@ const AppSider: React.FC = () => {
     const pathname = usePathname();
     const [openKeys, setOpenKeys] = useState<string[]>([]);
     const [mounted, setMounted] = useState(false);
-
     const {user, isLoading} = useUser();
 
     useEffect(() => {
@@ -121,7 +120,6 @@ const AppSider: React.FC = () => {
         if (parentKey && !openKeys.includes(parentKey)) {
             setOpenKeys([parentKey]);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pathname, items, mounted, isLoading]);
 
     const handleMenuClick: MenuProps['onClick'] = ({key}) => {

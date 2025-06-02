@@ -1,7 +1,7 @@
 'use client';
 
-import React, {createContext, useContext, useEffect, useMemo, useState} from 'react';
-import {api} from '@/api/axios.config';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { api } from '@/api/axios.config';
 
 export interface UserData {
     id: number;
@@ -21,50 +21,44 @@ interface UserContextValue {
     user: UserData | null;
     isLoading: boolean;
     error: string | null;
-    refresh: () => void;
+    refresh: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextValue>({
     user: null,
     isLoading: true,
     error: null,
-    refresh: () => {
-    },
+    refresh: async () => {},
 });
 
-export const UserProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
+export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<UserData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchUser = () => {
+    const fetchUser = useCallback(async () => {
         setIsLoading(true);
         setError(null);
-        api
-            .get<UserData>('/auth/me')
-            .then((res) => setUser(res.data))
-            .catch((err) => {
-                setUser(null);
-                setError(err?.response?.data?.message || 'Ошибка загрузки пользователя');
-            })
-            .finally(() => setIsLoading(false));
-    };
+        try {
+            const res = await api.get<UserData>('/auth/me');
+            setUser(res.data);
+        } catch (err) {
+            setUser(null);
+            setError('Ошибка загрузки пользователя');
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
 
     useEffect(() => {
         fetchUser();
-    }, []);
+    }, [fetchUser]);
 
-    const contextValue = useMemo(
-        () => ({
-            user,
-            isLoading,
-            error,
-            refresh: fetchUser,
-        }),
-        [user, isLoading, error]
+    return (
+        <UserContext.Provider value={{ user, isLoading, error, refresh: fetchUser }}>
+            {children}
+        </UserContext.Provider>
     );
-
-    return <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>;
 };
 
 export function useUser() {

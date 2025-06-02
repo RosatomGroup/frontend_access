@@ -8,7 +8,6 @@ import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import AppLoadingComponent from '@/components/AppLoading';
 
 interface FormValues {
   email: string;
@@ -86,7 +85,6 @@ const ResetPassword: React.FC = () => {
       gap="middle"
     >
       {contextHolder}
-      <AppLoadingComponent />
 
       <AppTitleAuth />
 

@@ -1,16 +1,11 @@
 'use client';
 
-import { Typography } from 'antd';
-import { Breadcrumb, Layout, theme, message, Spin } from 'antd';
-import AppSider from '../../../components/AppSider';
-import AppHeader from '../../../components/AppHeader';
-import React from 'react';
-import AuthGuard from '@/components/AuthGuard';
-import { useEffect, useState, useRef } from 'react';
-import { DeleteOutlined, PlayCircleOutlined, UploadOutlined } from '@ant-design/icons';
-import { Button, Upload, Input } from 'antd';
-import type { UploadChangeParam, UploadFile } from 'antd/es/upload/interface';
-import { App as AntdApp } from 'antd';
+import {App as AntdApp, Breadcrumb, Button, Input, Layout, message, Spin, theme, Typography, Upload} from 'antd';
+import AppSider from '../../../../components/AppSider';
+import AppHeader from '../../../../components/AppHeader';
+import React, {useEffect, useRef, useState} from 'react';
+import {DeleteOutlined, PlayCircleOutlined, UploadOutlined} from '@ant-design/icons';
+import type {UploadChangeParam, UploadFile} from 'antd/es/upload/interface';
 import {useUser} from "@/components/UserContext";
 
 const { Header, Content } = Layout;
@@ -108,7 +103,6 @@ export default function IncomingRequest() {
   };
 
   return (
-    <AuthGuard>
       <AntdApp>
         <Layout>
           <AppHeader />
@@ -285,7 +279,6 @@ export default function IncomingRequest() {
           </Layout>
         </Layout>
       </AntdApp>
-    </AuthGuard>
   );
 }
 
