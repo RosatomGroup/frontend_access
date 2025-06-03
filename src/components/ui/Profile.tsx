@@ -8,22 +8,7 @@ import type { UploadProps, RcFile, UploadChangeParam } from 'antd/es/upload';
 import { useUser, UserData as UserContextData } from '../UserContext'; // Импортируем useUser и UserData из контекста
 import { api } from '@/api/axios.config'; // Используем настроенный axios инстанс
 import { AxiosError } from 'axios'; // <-- Добавляем импорт AxiosError
-
-// Определяем интерфейс для данных формы, который должен соответствовать UpdateUserDto на бэкенде
-// и данным из UserContextData.
-interface ProfileFormData {
-    id: number;
-    email: string;
-    name: string;
-    surname: string;
-    middleName: string | null;
-    phone: string | null;
-    avatarUrl: string;
-    birthDate: dayjs.Dayjs | null;
-    subdivision: string; 
-    rang: string;
-    accessLevel?: string;
-}
+import { User } from '../../types/user'; // Импортируем тип User, если он используется в других местах 
 
 interface ProfileProps {
     open: boolean;
@@ -33,8 +18,8 @@ interface ProfileProps {
 
 const Profile: React.FC<ProfileProps> = ({ open, onClose, onUserUpdate }) => {
     const { user, isLoading, refresh } = useUser(); // Получаем данные пользователя и функцию refresh из контекста
-    const [form] = Form.useForm<ProfileFormData>();
-    const [initialValues, setInitialValues] = useState<ProfileFormData>({} as ProfileFormData);
+    const [form] = Form.useForm<User>();
+    const [initialValues, setInitialValues] = useState<User>({} as User);
     const [isDirty, setIsDirty] = useState(false);
     const [confirmVisible, setConfirmVisible] = useState(false);
     const [savingLoading, setSavingLoading] = useState(false); // Отдельное состояние для сохранения данных формы
@@ -55,7 +40,7 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose, onUserUpdate }) => {
     // Функция для установки начальных значений формы из контекста
     const setFormInitialValues = useCallback(() => {
         if (user) {
-            const formattedUser: ProfileFormData = {
+            const formattedUser: User = {
                 id: user.id,
                 email: user.email,
                 name: user.name,
@@ -85,7 +70,7 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose, onUserUpdate }) => {
             form.resetFields();
             setIsDirty(false);
             setAvatarPreviewUrl('');
-            setInitialValues({} as ProfileFormData);
+            setInitialValues({} as User);
         }
     }, [open, user, isLoading, form, setFormInitialValues]);
 
@@ -93,8 +78,8 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose, onUserUpdate }) => {
         const currentValues = form.getFieldsValue();
         const hasChanges = Object.keys(currentValues).some(
             key => {
-                const initialValue = initialValues[key as keyof ProfileFormData];
-                const currentValue = currentValues[key as keyof ProfileFormData];
+                const initialValue = initialValues[key as keyof User];
+                const currentValue = currentValues[key as keyof User];
 
                 // Специальная обработка для Dayjs (birthDate)
                 if (key === 'birthDate') {
@@ -118,15 +103,13 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose, onUserUpdate }) => {
         setIsDirty(hasChanges);
     }, [initialValues, form]);
 
-    const onEditProfile = useCallback(async (values: ProfileFormData) => {
+    const onEditProfile = useCallback(async (values: User) => {
         if (!user?.id) {
             messageApi.error('ID пользователя не найден.');
             return;
         }
 
         try {
-            // Преобразуем поля формы в формат, ожидаемый бэкендом (UpdateUserDto)
-            // Убедитесь, что имена полей здесь совпадают с вашим UpdateUserDto
             const payload = {
                 name: values.name,
                 surname: values.surname,
@@ -211,8 +194,6 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose, onUserUpdate }) => {
 
                 const { url } = await uploadResponse.json();
 
-                // Шаг 2: Обновление URL аватара в профиле пользователя через ваш бэкенд
-                // Используем PATCH запрос к /users/:id для обновления только avatarUrl
                 const updateResponse = await api.patch<UserContextData>(`/users/${user.id}`, {
                     avatarUrl: url
                 });
