@@ -53,7 +53,7 @@ import { notification } from 'antd';
 import { useRouter } from 'next/navigation';
 
 export function useAuthFetch() {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const router = useRouter();
 
@@ -62,7 +62,6 @@ export function useAuthFetch() {
     setError(null);
     
     try {
-      console.log(`Making request to: ${url}`, options);
       const response = await fetch(url, {
         ...options,
         credentials: 'include',
@@ -72,43 +71,28 @@ export function useAuthFetch() {
         },
       });
 
-      console.log('Received response:', response);
-
-      if (response.ok) {
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-          const data = await response.json();
-          console.log('Response data:', data);
-          return data;
-        }
-        return null;
-      }
-
-      let errorData;
-      try {
-        errorData = await response.json();
-      } catch (jsonError) {
-        errorData = {
-          message: response.statusText || 'Request failed',
-          statusCode: response.status
-        };
-      }
-
-      console.error('Request failed with error:', errorData);
-
       if (response.status === 401) {
         notification.error({
-          message: 'Session expired',
-          description: 'Please login again',
+          message: 'Сессия истекла',
+          description: 'Пожалуйста, войдите снова',
         });
         router.push('/login');
+        throw new Error('Unauthorized');
       }
 
-      const errorMessage = errorData.message || `Request failed with status ${response.status}`;
-      throw new Error(errorMessage);
+      if (!response.ok) {
+        const errorText = await response.text();
+        try {
+          const errorData = JSON.parse(errorText);
+          throw new Error(errorData.message || 'Request failed');
+        } catch {
+          throw new Error(errorText || 'Request failed');
+        }
+      }
+
+      return await response.json();
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Unknown error');
-      console.error('Error in fetchWithAuth:', error);
       setError(error);
       throw error;
     } finally {

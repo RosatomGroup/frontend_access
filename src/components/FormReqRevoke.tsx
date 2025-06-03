@@ -139,6 +139,172 @@
 //   );
 // }
 
+
+
+
+
+
+
+
+// 'use client';
+
+// import { useState, useEffect } from 'react';
+// import { notification, Form } from 'antd';
+// import { useRequestForm } from '@/hooks/useRequestForm';
+// import { RequestForm } from './RequestForm';
+// import { useAuthFetch } from '@/hooks/useAuthFetch';
+
+// const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+
+// interface UserData {
+//   id: number;
+//   name: string;
+//   surname: string;
+//   middleName: string | null;
+//   email: string;
+// }
+
+// export default function FormReqRevoke({ onClose }: { onClose: () => void }) {
+//   const [form] = Form.useForm();
+//   const [isRequestForOtherUser, setIsRequestForOtherUser] = useState<boolean>(false);
+//   const [currentUser, setCurrentUser] = useState<UserData | null>(null);
+//   const [api, contextHolder] = notification.useNotification();
+//   const { fetchWithAuth } = useAuthFetch();
+
+//   const {
+//     isLoading,
+//     availableSystems,
+//     filteredRoles,
+//     handleSystemChange,
+//     allRoles,
+//   } = useRequestForm({
+//     lastName: '',
+//     firstName: '',
+//     middleName: '',
+//   });
+
+//   useEffect(() => {
+//     const fetchUser = async () => {
+//       try {
+//         const user = await fetchWithAuth(`${API_BASE_URL}/auth/me`);
+//         setCurrentUser({
+//           id: user.id,
+//           name: user.name,
+//           surname: user.surname,
+//           middleName: user.middleName,
+//           email: user.email,
+//         });
+//         form.setFieldsValue({
+//           lastName: user.surname,
+//           firstName: user.name,
+//           middleName: user.middleName || '',
+//           email: user.email,
+//         });
+//       } catch (error) {
+//         console.error('Failed to fetch user:', error);
+//         api.error({
+//           message: 'Ошибка',
+//           description: 'Не удалось загрузить данные пользователя',
+//           duration: 5,
+//         });
+//       }
+//     };
+//     fetchUser();
+//   }, [fetchWithAuth, form, api]);
+
+//   const handleSubmit = async (values: any) => {
+//     try {
+//       const middleName = values.middleName?.trim() || null;
+
+//       if (middleName && typeof middleName !== 'string') {
+//         throw new Error('Отчество должно быть строкой или пустым');
+//       }
+
+//       const payload = {
+//         surname: values.lastName,
+//         name: values.firstName,
+//         middleName: middleName,
+//         email: values.email,
+//         resourceId: Number(values.system),
+//         roleId: Number(values.role),
+//         requestType: 'REVOKE_ACCESS' as const,
+//         userId: currentUser?.id ? Number(currentUser.id) : undefined,
+//       };
+
+//       console.log('Submitting revoke request with payload:', payload);
+
+//       const response = await fetchWithAuth(`${API_BASE_URL}/requests`, {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify(payload),
+//       });
+
+//       if (!response.ok) {
+//         const errorData = await response.json();
+//         throw new Error(errorData.message || 'Ошибка при создании заявки');
+//       }
+
+//       api.success({
+//         message: 'Успех',
+//         description: 'Заявка на отзыв успешно создана',
+//         duration: 3,
+//       });
+//       onClose();
+//     } catch (error: any) {
+//       console.error('Error creating revoke request:', error);
+//       api.error({
+//         message: 'Ошибка',
+//         description: error.message || 'Не удалось создать заявку на отзыв',
+//         duration: 5,
+//       });
+//     }
+//   };
+
+//   const handleCheckboxChange = (checked: boolean) => {
+//     setIsRequestForOtherUser(checked);
+//     if (checked) {
+//       form.setFieldsValue({
+//         lastName: '',
+//         firstName: '',
+//         middleName: '',
+//       });
+//     } else if (currentUser) {
+//       form.setFieldsValue({
+//         lastName: currentUser.surname,
+//         firstName: currentUser.name,
+//         middleName: currentUser.middleName || '',
+//         email: currentUser.email,
+//       });
+//     }
+//   };
+
+//   return (
+//     <div style={{ maxWidth: '100%', margin: '0 50px' }}>
+//       {contextHolder}
+//       <RequestForm
+//         form={form}
+//         initialValues={{
+//           lastName: currentUser?.surname || '',
+//           firstName: currentUser?.name || '',
+//           middleName: currentUser?.middleName || null,
+//           email: currentUser?.email || ''
+//         }}
+//         onFinish={handleSubmit}
+//         componentSize="default"
+//         availableSystems={availableSystems}
+//         filteredRoles={filteredRoles}
+//         isLoading={isLoading}
+//         isRequestForOtherUser={isRequestForOtherUser}
+//         onCheckboxChange={handleCheckboxChange}
+//         onSystemChange={handleSystemChange}
+//       />
+//     </div>
+//   );
+// }
+
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -146,6 +312,7 @@ import { notification, Form } from 'antd';
 import { useRequestForm } from '@/hooks/useRequestForm';
 import { RequestForm } from './RequestForm';
 import { useAuthFetch } from '@/hooks/useAuthFetch';
+import type { SizeType } from 'antd/es/config-provider/SizeContext';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
 
@@ -157,19 +324,39 @@ interface UserData {
   email: string;
 }
 
+interface FormValues {
+  lastName: string;
+  firstName: string;
+  middleName: string;
+  email: string;
+  system: number;
+  role: number;
+}
+
+interface CreateRequestResponse {
+  id: number;
+  // другие поля ответа, если они есть
+}
+
 export default function FormReqRevoke({ onClose }: { onClose: () => void }) {
   const [form] = Form.useForm();
   const [isRequestForOtherUser, setIsRequestForOtherUser] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<UserData | null>(null);
   const [api, contextHolder] = notification.useNotification();
   const { fetchWithAuth } = useAuthFetch();
+  const [formValues, setFormValues] = useState<Omit<FormValues, 'system' | 'role'>>({
+    lastName: '',
+    firstName: '',
+    middleName: '',
+    email: ''
+  });
+  const [componentSize] = useState<SizeType>('default');
 
   const {
     isLoading,
     availableSystems,
     filteredRoles,
     handleSystemChange,
-    allRoles,
   } = useRequestForm({
     lastName: '',
     firstName: '',
@@ -187,12 +374,21 @@ export default function FormReqRevoke({ onClose }: { onClose: () => void }) {
           middleName: user.middleName,
           email: user.email,
         });
-        form.setFieldsValue({
-          lastName: user.surname,
-          firstName: user.name,
-          middleName: user.middleName || '',
-          email: user.email,
-        });
+        
+        if (!isRequestForOtherUser) {
+          setFormValues({
+            lastName: user.surname,
+            firstName: user.name,
+            middleName: user.middleName || '',
+            email: user.email,
+          });
+          form.setFieldsValue({
+            lastName: user.surname,
+            firstName: user.name,
+            middleName: user.middleName || '',
+            email: user.email,
+          });
+        }
       } catch (error) {
         console.error('Failed to fetch user:', error);
         api.error({
@@ -203,9 +399,9 @@ export default function FormReqRevoke({ onClose }: { onClose: () => void }) {
       }
     };
     fetchUser();
-  }, [fetchWithAuth, form, api]);
+  }, [fetchWithAuth, form, api, isRequestForOtherUser]);
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: FormValues): Promise<void> => {
     try {
       const middleName = values.middleName?.trim() || null;
 
@@ -224,9 +420,8 @@ export default function FormReqRevoke({ onClose }: { onClose: () => void }) {
         userId: currentUser?.id ? Number(currentUser.id) : undefined,
       };
 
-      console.log('Submitting revoke request with payload:', payload);
-
-      const response = await fetchWithAuth(`${API_BASE_URL}/requests`, {
+      // Убираем обработку ответа здесь, так как fetchWithAuth уже это делает
+      await fetchWithAuth(`${API_BASE_URL}/requests`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -234,22 +429,21 @@ export default function FormReqRevoke({ onClose }: { onClose: () => void }) {
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Ошибка при создании заявки');
-      }
-
       api.success({
         message: 'Успех',
         description: 'Заявка на отзыв успешно создана',
         duration: 3,
       });
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating revoke request:', error);
+      let errorMessage = 'Не удалось создать заявку на отзыв';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
       api.error({
         message: 'Ошибка',
-        description: error.message || 'Не удалось создать заявку на отзыв',
+        description: errorMessage,
         duration: 5,
       });
     }
@@ -258,12 +452,25 @@ export default function FormReqRevoke({ onClose }: { onClose: () => void }) {
   const handleCheckboxChange = (checked: boolean) => {
     setIsRequestForOtherUser(checked);
     if (checked) {
+      setFormValues({
+        lastName: '',
+        firstName: '',
+        middleName: '',
+        email: ''
+      });
       form.setFieldsValue({
         lastName: '',
         firstName: '',
         middleName: '',
+        email: ''
       });
     } else if (currentUser) {
+      setFormValues({
+        lastName: currentUser.surname || '',
+        firstName: currentUser.name || '',
+        middleName: currentUser.middleName || '',
+        email: currentUser.email || ''
+      });
       form.setFieldsValue({
         lastName: currentUser.surname,
         firstName: currentUser.name,
@@ -273,19 +480,22 @@ export default function FormReqRevoke({ onClose }: { onClose: () => void }) {
     }
   };
 
+  const handleValuesChange = (changedValues: Partial<FormValues>) => {
+    setFormValues(prev => ({
+      ...prev,
+      ...changedValues
+    }));
+  };
+
   return (
     <div style={{ maxWidth: '100%', margin: '0 50px' }}>
       {contextHolder}
       <RequestForm
         form={form}
-        initialValues={{
-          lastName: currentUser?.surname || '',
-          firstName: currentUser?.name || '',
-          middleName: currentUser?.middleName || null,
-          email: currentUser?.email || ''
-        }}
+        initialValues={formValues}
         onFinish={handleSubmit}
-        componentSize="default"
+        onValuesChange={handleValuesChange}
+        componentSize={componentSize}
         availableSystems={availableSystems}
         filteredRoles={filteredRoles}
         isLoading={isLoading}
