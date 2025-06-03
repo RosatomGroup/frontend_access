@@ -38,7 +38,7 @@ const Registration: React.FC = () => {
         },
         { withCredentials: true },
       );
-
+      console.log(response);
       messageApi.success(
         'Регистрация прошла успешно! Вы будете перенравлены на страницу авторизации',
       );

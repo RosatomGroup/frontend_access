@@ -70,6 +70,7 @@ const ResetPassword: React.FC = () => {
         }
       }
     } catch (err) {
+      console.log(err);
       messageApi.error('Произошла ошибка при отправке запроса');
     } finally {
       setIsLoading(false);

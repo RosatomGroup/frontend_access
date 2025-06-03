@@ -49,6 +49,7 @@ export default function RoleManagement() {
       const data = await fetchResources();
       setResources(data);
     } catch (error) {
+      console.error(error);
       message.error('Ошибка загрузки списка систем');
     } finally {
       setLoading(false);
