@@ -37,7 +37,7 @@ export default function VideoPage() {
 
   useEffect(() => {
     setLoading(true);
-    fetch('http://localhost:3001/videos')
+    fetch('http://localhost:3001/videos', { credentials: 'include' })
       .then((res) => res.json())
       .then((data) => {
         const formatted = data.map((file: any) => ({
@@ -71,6 +71,8 @@ export default function VideoPage() {
       const response = await fetch(`http://localhost:3001/videos/${file.filename}/rename`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+
         body: JSON.stringify({ newName: newFileName.trim() }),
       });
 
@@ -105,6 +107,7 @@ export default function VideoPage() {
       }
       await fetch(`http://localhost:3001/videos/${file.filename}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
       setFileList((prev) => prev.filter((item) => item.uid !== file.uid));
       message.success('Видео успешно удалено');
@@ -146,6 +149,7 @@ export default function VideoPage() {
                 >
                   <Upload
                     disabled={!isAdmin}
+                    withCredentials={true}
                     name="file"
                     ref={uploadRef}
                     action="http://localhost:3001/videos/upload"
@@ -166,6 +170,7 @@ export default function VideoPage() {
                         }
                         await fetch(`http://localhost:3001/videos/${file.filename}`, {
                           method: 'DELETE',
+                          credentials: 'include',
                         });
                         setFileList((prev) => prev.filter((item) => item.uid !== file.uid));
                         message.success('Видео успешно удалено');
@@ -249,7 +254,7 @@ export default function VideoPage() {
                             {file.name}
                           </span>
                         )}
-                        <span>
+                        <span style={{ display: 'flex', flexDirection: 'row' }}>
                           {file.url && (
                             <Button
                               type="primary"
