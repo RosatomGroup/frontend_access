@@ -200,9 +200,9 @@ export default function AppLayout() {
                         >
                             <FormReqRevoke onClose={closeForm}/>
                         </Modal>
-                        <Button type="primary" onClick={onClickViewRequests}>
-                            Просмотреть все заявки
-                        </Button>
+                        {/*<Button type="primary" onClick={onClickViewRequests}>*/}
+                        {/*    Просмотреть все заявки*/}
+                        {/*</Button>*/}
                     </Flex>
                 </div>
                 <Row>
