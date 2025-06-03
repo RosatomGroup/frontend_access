@@ -19,12 +19,57 @@ import {useUser} from "@/components/UserContext";
 
 type MenuItem = Required<MenuProps>['items'][number];
 
+<<<<<<< HEAD
 const AppSider: React.FC = () => {
     const router = useRouter();
     const pathname = usePathname();
     const [openKeys, setOpenKeys] = useState<string[]>([]);
     const [mounted, setMounted] = useState(false);
     const {user, isLoading} = useUser();
+=======
+  const items = useMemo(
+    () => [
+      {
+        key: 'request',
+        label: 'Заявки',
+        icon: <TableOutlined />,
+        children: [
+          { key: 'all', label: 'Все заявки' },
+        ],
+      },
+      {
+        key: 'management',
+        label: 'Управление',
+        icon: <ProfileOutlined />,
+        children: [
+          { key: 'users', label: 'Пользователи' },
+          { key: 'roles', label: 'Роли' },
+          { key: 'resources', label: 'Системы' },
+        ],
+      },
+      {
+        key: 'edit',
+        label: 'Изменения',
+        icon: <WarningOutlined />,
+        children: [
+          { key: 'logs', label: 'Логирование' },
+          { key: 'reports', label: 'Отчеты' },
+        ],
+      },
+      {
+        key: 'about',
+        label: 'О системе',
+        icon: <CheckCircleOutlined />,
+        children: [
+          { key: 'docs', label: 'Документы' },
+          { key: 'video', label: 'Видео' },
+          { key: 'updates', label: 'Обновления' },
+        ],
+      },
+    ],
+    [],
+  );
+>>>>>>> feature/requestwithback
 
     useEffect(() => {
         setMounted(true);
