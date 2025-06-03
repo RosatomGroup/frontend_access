@@ -12,25 +12,26 @@ interface TableRoleProps {
     refreshTrigger?: number;
 }
 
-const TableRole: React.FC<TableRoleProps> = ({ loading: externalLoading, refreshTrigger }) => {
+const TableRole: React.FC<TableRoleProps> = ({loading: externalLoading, refreshTrigger}) => {
     const screens = useBreakpoint();
     const [pageSize, setPageSize] = useState<number>(10);
     const [columns, setColumns] = useState<TableColumnsType<DataType>>([]);
     const [data, setData] = useState<DataType[]>([]);
     const [internalLoading, setInternalLoading] = useState<boolean>(true);
+    const [messageApi, contextHolder] = message.useMessage();
 
     const loadData = async () => {
         try {
             setInternalLoading(true);
             const roles = await fetchRoles();
-            const formattedData = roles.map((role) => ({
+            const formattedData = roles.map((role, index) => ({
                 ...role,
-                key: role.id,
+                key: role.id || `role-${index}`,
             }));
             setData(formattedData);
             createDynamicFilters(formattedData);
         } catch (error) {
-            message.error('Ошибка загрузки данных');
+            messageApi.error('Ошибка загрузки данных');
             console.error(error);
         } finally {
             setInternalLoading(false);
@@ -52,6 +53,7 @@ const TableRole: React.FC<TableRoleProps> = ({ loading: externalLoading, refresh
             {
                 title: 'Наименование',
                 dataIndex: 'name',
+                key: 'name',
                 filterMode: 'tree',
                 filterSearch: true,
                 filters: uniqueName,
@@ -64,11 +66,13 @@ const TableRole: React.FC<TableRoleProps> = ({ loading: externalLoading, refresh
             {
                 title: 'Описание',
                 dataIndex: 'description',
+                key: 'description',
                 width: screens.xs ? 150 : screens.md ? '30%' : '25%',
             },
             {
                 title: 'Система',
                 dataIndex: 'resourceName',
+                key: 'resourceName',
                 filters: uniqueResources,
                 onFilter: (value, record) => record.resourceName === value,
                 filterSearch: true,
@@ -102,10 +106,12 @@ const TableRole: React.FC<TableRoleProps> = ({ loading: externalLoading, refresh
                 },
             }}
         >
+            {contextHolder}
             <Spin spinning={isLoading}>
                 <Table<DataType>
                     dataSource={data}
                     columns={columns}
+                    rowKey={(record) => record.key}
                     scroll={{
                         x: screens.xs ? 800 : undefined,
                         y: screens.xs ? 'calc(100vh - 200px)' : undefined

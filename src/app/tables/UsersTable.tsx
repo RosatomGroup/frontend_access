@@ -18,19 +18,20 @@ const TableUser: React.FC<TableUserProps> = ({ refreshTrigger }) => {
     const [data, setData] = useState<DataType[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [columns, setColumns] = useState<TableColumnsType<DataType>>([]);
+    const [messageApi, contextHolder] = message.useMessage();
 
     const loadData = async () => {
         try {
             setLoading(true);
             const users = await fetchUsers();
-            const formattedData = users.map((user) => ({
+            const formattedData = users.map((user, index) => ({
                 ...user,
-                key: user.id,
+                key: user.id || `user-${index}`,
             }));
             setData(formattedData);
             createDynamicFilters(formattedData);
         } catch (error) {
-            message.error('Ошибка загрузки данных пользователей');
+            messageApi.error('Ошибка загрузки данных пользователей');
             console.error('Ошибка загрузки пользователей:', error);
         } finally {
             setLoading(false);
@@ -58,6 +59,7 @@ const TableUser: React.FC<TableUserProps> = ({ refreshTrigger }) => {
             {
                 title: 'ФИО',
                 dataIndex: 'name',
+                key: 'name',
                 filterMode: 'tree',
                 filterSearch: true,
                 onFilter: (value, record) => record.name.includes(value as string),
@@ -69,6 +71,7 @@ const TableUser: React.FC<TableUserProps> = ({ refreshTrigger }) => {
             {
                 title: 'Должность',
                 dataIndex: 'rang',
+                key: 'rang',
                 filters: uniqueRangs,
                 onFilter: (value, record) => record.rang === value,
                 sorter: (a, b) => (a.rang || '').localeCompare(b.rang || ''),
@@ -78,6 +81,7 @@ const TableUser: React.FC<TableUserProps> = ({ refreshTrigger }) => {
             {
                 title: 'Подразделение',
                 dataIndex: 'subdivision',
+                key: 'subdivision',
                 filters: uniqueSubdivisions,
                 onFilter: (value, record) => record.subdivision === value,
                 filterSearch: true,
@@ -88,6 +92,7 @@ const TableUser: React.FC<TableUserProps> = ({ refreshTrigger }) => {
             {
                 title: 'Почта',
                 dataIndex: 'email',
+                key: 'email',
                 sorter: (a, b) => (a.email || '').localeCompare(b.email || ''),
                 width: screens.xs ? 150 : undefined,
                 ellipsis: true,
@@ -126,10 +131,12 @@ const TableUser: React.FC<TableUserProps> = ({ refreshTrigger }) => {
                 },
             }}
         >
+            {contextHolder}
             <Spin spinning={loading}>
                 <Table<DataType>
                     dataSource={data}
                     columns={columns}
+                    rowKey={(record) => record.key}
                     scroll={screens.xs ? {x: 800} : undefined}
                     pagination={{
                         pageSize: pageSize,
