@@ -1,14 +1,14 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { Button, Divider, Avatar, Upload, Col, DatePicker, Drawer, Form, Input, Row, Space, Modal, message } from 'antd';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import {Avatar, Button, Col, DatePicker, Divider, Drawer, Form, Input, message, Modal, Row, Space, Upload} from 'antd';
 import dayjs from 'dayjs';
-import { UserOutlined, UploadOutlined } from '@ant-design/icons';
-import type { UploadProps, RcFile, UploadChangeParam } from 'antd/es/upload';
-import { useUser, UserData as UserContextData } from '../UserContext'; // Импортируем useUser и UserData из контекста
-import { api } from '@/api/axios.config'; // Используем настроенный axios инстанс
-import { AxiosError } from 'axios'; // <-- Добавляем импорт AxiosError
-import { User } from '../../types/user'; // Импортируем тип User, если он используется в других местах 
+import {UploadOutlined, UserOutlined} from '@ant-design/icons';
+import type {RcFile, UploadChangeParam, UploadProps} from 'antd/es/upload';
+import {UserData as UserContextData, useUser} from '../UserContext'; // Импортируем useUser и UserData из контекста
+import {AxiosError} from 'axios'; // <-- Добавляем импорт AxiosError
+import {User} from '../../types/user';
+import api from "@/api/axios.config"; // Импортируем тип User, если он используется в других местах
 
 interface ProfileProps {
     open: boolean;
@@ -16,8 +16,8 @@ interface ProfileProps {
     onUserUpdate?: () => void; // Вызывается после успешного обновления данных
 }
 
-const Profile: React.FC<ProfileProps> = ({ open, onClose, onUserUpdate }) => {
-    const { user, isLoading, refresh } = useUser(); // Получаем данные пользователя и функцию refresh из контекста
+const Profile: React.FC<ProfileProps> = ({open, onClose, onUserUpdate}) => {
+    const {user, isLoading, refresh} = useUser(); // Получаем данные пользователя и функцию refresh из контекста
     const [form] = Form.useForm<User>();
     const [initialValues, setInitialValues] = useState<User>({} as User);
     const [isDirty, setIsDirty] = useState(false);
@@ -192,7 +192,7 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose, onUserUpdate }) => {
                     throw new Error(`S3 upload failed: ${errorText}`);
                 }
 
-                const { url } = await uploadResponse.json();
+                const {url} = await uploadResponse.json();
 
                 const updateResponse = await api.patch<UserContextData>(`/users/${user.id}`, {
                     avatarUrl: url
@@ -280,7 +280,7 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose, onUserUpdate }) => {
                 onClose={handleCloseAttempt}
                 maskClosable={false}
                 keyboard={false}
-                styles={{ body: { paddingBottom: 80 } }}
+                styles={{body: {paddingBottom: 80}}}
                 extra={
                     <Space>
                         <Button onClick={handleCloseAttempt}>Отмена</Button>
@@ -297,19 +297,19 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose, onUserUpdate }) => {
             >
                 <Form layout="vertical" form={form} onValuesChange={handleValuesChange}>
                     <Divider orientation="left">Аватар</Divider>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
+                    <div style={{display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24}}>
                         <Avatar
                             size={72}
                             src={avatarPreviewUrl || null}
-                            icon={<UserOutlined style={{ fontSize: '24px' }} />}
-                            style={{ backgroundColor: '#1677ff' }}
+                            icon={<UserOutlined style={{fontSize: '24px'}}/>}
+                            style={{backgroundColor: '#1677ff'}}
                             onError={() => {
                                 console.warn('Ошибка загрузки аватара, используем дефолтное изображение.');
                                 return false;
                             }}
                         />
                         <Upload {...uploadProps}>
-                            <Button icon={<UploadOutlined />} loading={avatarUploadLoading}>
+                            <Button icon={<UploadOutlined/>} loading={avatarUploadLoading}>
                                 Загрузить новое фото
                             </Button>
                         </Upload>
@@ -318,36 +318,40 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose, onUserUpdate }) => {
                     <Divider orientation="left">Личная информация</Divider>
                     <Row gutter={16}>
                         <Col span={8}>
-                            <Form.Item name="name" label="Имя" rules={[{ required: true, message: 'Пожалуйста, введите имя' }]}>
-                                <Input placeholder="Введите имя" />
+                            <Form.Item name="name" label="Имя"
+                                       rules={[{required: true, message: 'Пожалуйста, введите имя'}]}>
+                                <Input placeholder="Введите имя"/>
                             </Form.Item>
                         </Col>
                         <Col span={8}>
                             <Form.Item name="middleName" label="Отчество">
-                                <Input placeholder="Введите отчество" />
+                                <Input placeholder="Введите отчество"/>
                             </Form.Item>
                         </Col>
                         <Col span={8}>
-                            <Form.Item name="surname" label="Фамилия" rules={[{ required: true, message: 'Пожалуйста, введите фамилию' }]}>
-                                <Input placeholder="Введите фамилию" />
+                            <Form.Item name="surname" label="Фамилия"
+                                       rules={[{required: true, message: 'Пожалуйста, введите фамилию'}]}>
+                                <Input placeholder="Введите фамилию"/>
                             </Form.Item>
                         </Col>
                     </Row>
 
                     <Row gutter={16}>
                         <Col span={12}>
-                            <Form.Item name="email" label="Email" rules={[{ required: true, message: 'Пожалуйста, введите email', type: 'email' }]}>
-                                <Input placeholder="Введите email" disabled />
+                            <Form.Item name="email" label="Email"
+                                       rules={[{required: true, message: 'Пожалуйста, введите email', type: 'email'}]}>
+                                <Input placeholder="Введите email" disabled/>
                             </Form.Item>
                         </Col>
                         <Col span={12}>
                             <Form.Item name="accessLevel" label="Роль в системе">
-                                <Input placeholder="User" disabled />
+                                <Input placeholder="User" disabled/>
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item name="phone" label="Телефон" rules={[{ required: true, message: 'Пожалуйста, введите телефон' }]}>
-                                <Input placeholder="Введите телефон" />
+                            <Form.Item name="phone" label="Телефон"
+                                       rules={[{required: true, message: 'Пожалуйста, введите телефон'}]}>
+                                <Input placeholder="Введите телефон"/>
                             </Form.Item>
                         </Col>
                         <Col span={12}>
@@ -355,7 +359,7 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose, onUserUpdate }) => {
                                 name="subdivision"
                                 label="Подразделение"
                             >
-                                <Input placeholder="Ваше подразделение" />
+                                <Input placeholder="Ваше подразделение"/>
                             </Form.Item>
                         </Col>
                         <Col span={12}>
@@ -363,12 +367,12 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose, onUserUpdate }) => {
                                 name="rang"
                                 label="Должность"
                             >
-                                <Input placeholder="Ваша должность" />
+                                <Input placeholder="Ваша должность"/>
                             </Form.Item>
                         </Col>
                         <Col span={12}>
                             <Form.Item name="birthDate" label="Дата рождения">
-                                <DatePicker format={dateFormatList} style={{ width: '100%' }} />
+                                <DatePicker format={dateFormatList} style={{width: '100%'}}/>
                             </Form.Item>
                         </Col>
                     </Row>

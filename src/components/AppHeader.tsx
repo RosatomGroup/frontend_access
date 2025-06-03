@@ -1,21 +1,21 @@
 'use client';
 
-import type { MenuProps } from 'antd';
-import { Avatar, Badge, Dropdown, Image, Layout, message, Modal, Space, theme, Typography } from 'antd';
-import { useRouter } from 'next/navigation';
+import type {MenuProps} from 'antd';
+import {Avatar, Badge, Dropdown, Image, Layout, message, Modal, Space, theme, Typography} from 'antd';
+import {useRouter} from 'next/navigation';
 import Link from 'next/link';
-import { BellOutlined, LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
-import { useCallback, useEffect, useState } from 'react';
+import {BellOutlined, LogoutOutlined, SettingOutlined, UserOutlined} from '@ant-design/icons';
+import {useCallback, useEffect, useState} from 'react';
 import Profile from '@/components/ui/Profile';
 import Settings from '@/components/ui/Settings';
 import '@ant-design/v5-patch-for-react-19';
 import axios from 'axios';
-import {api} from "@/api/axios.config";
-import { User } from '../types/user'
-import { useUser } from './UserContext';
+import api from "@/api/axios.config";
+import {User} from '../types/user'
+import {useUser} from './UserContext';
 
-const { Header } = Layout;
-const { Text } = Typography;
+const {Header} = Layout;
+const {Text} = Typography;
 
 interface Notification {
     id: number;
@@ -32,14 +32,14 @@ export default function AppHeader() {
     const [settingsOpen, setSettingsOpen] = useState(false);
 
     // Используем контекст пользователя
-    const { user, isLoading, refresh } = useUser(); // <-- Изменено: user, isLoading и refresh из контекста
+    const {user, isLoading, refresh} = useUser(); // <-- Изменено: user, isLoading и refresh из контекста
     // const [currentUser, setCurrentUser] = useState<User | null>(null); // <-- УДАЛЕНО
     console.log(user)
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
 
     const {
-        token: { colorBgContainer },
+        token: {colorBgContainer},
     } = theme.useToken();
 
     const formatUserName = useCallback((user: User | null) => {
@@ -103,7 +103,7 @@ export default function AppHeader() {
 
         try {
             const response = await api.get('/notifications', {
-                params: { email: user.email } // Используем email из user-объекта контекста
+                params: {email: user.email} // Используем email из user-объекта контекста
             });
             const data = response.data;
             setNotifications(data);
@@ -142,7 +142,7 @@ export default function AppHeader() {
             const unreadIds = notifications.filter(n => !n.read).map(n => n.id);
             if (unreadIds.length > 0) {
                 try {
-                    await api.post('/notifications/read-bulk', { ids: unreadIds });
+                    await api.post('/notifications/read-bulk', {ids: unreadIds});
                     await loadNotifications();
                 } catch (error) {
                     message.error('Не удалось отметить уведомления как прочитанные');
@@ -156,7 +156,7 @@ export default function AppHeader() {
     const itemsNotif: MenuProps['items'] = notifications.map((notif) => ({
         key: notif.id,
         label: (
-            <a style={notif.read ? {} : { fontWeight: 'bold' }}>
+            <a style={notif.read ? {} : {fontWeight: 'bold'}}>
                 {notif.message}
             </a>
         ),
@@ -174,17 +174,17 @@ export default function AppHeader() {
         {
             key: '2',
             label: <a onClick={showProfile}>Профиль</a>,
-            icon: <UserOutlined />,
+            icon: <UserOutlined/>,
         },
         {
             key: '3',
             label: <a onClick={showSettings}>Настройки</a>,
-            icon: <SettingOutlined />,
+            icon: <SettingOutlined/>,
         },
         {
             key: '4',
             label: <a onClick={() => setLogoutModalOpen(true)}>Выйти</a>,
-            icon: <LogoutOutlined />,
+            icon: <LogoutOutlined/>,
         },
     ];
 
@@ -198,7 +198,7 @@ export default function AppHeader() {
                 paddingLeft: 28,
                 backgroundColor: colorBgContainer
             }}>
-                <Typography.Title level={3} style={{ margin: 0, color: 'white' }}>Загрузка...</Typography.Title>
+                <Typography.Title level={3} style={{margin: 0, color: 'white'}}>Загрузка...</Typography.Title>
             </Header>
         );
     }
@@ -213,8 +213,8 @@ export default function AppHeader() {
                 paddingLeft: 28,
                 backgroundColor: colorBgContainer
             }}>
-                <Link href={'/'} style={{ display: 'flex' }}>
-                    <Image width={35} preview={false} src="/./favicon.ico" alt="RBAC" />
+                <Link href={'/'} style={{display: 'flex'}}>
+                    <Image width={35} preview={false} src="/./favicon.ico" alt="RBAC"/>
                     <Typography.Title
                         level={3}
                         style={{
@@ -229,7 +229,7 @@ export default function AppHeader() {
                     </Typography.Title>
                 </Link>
                 <Link href="/login">
-                    <Text style={{ color: colorBgContainer }}>Войти</Text>
+                    <Text style={{color: colorBgContainer}}>Войти</Text>
                 </Link>
             </Header>
         );
@@ -261,33 +261,33 @@ export default function AppHeader() {
                             ВЕКТОР
                         </Typography.Title>
                     </Link>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 25 }}>
+                    <div style={{display: 'flex', alignItems: 'center', gap: 25}}>
                         <Dropdown
-                            menu={{ items: itemsNotif }}
+                            menu={{items: itemsNotif}}
                             onOpenChange={handleNotifDropdownOpen}
                             trigger={['click']}
                         >
                             <Badge count={unreadCount}>
                                 <a onClick={e => e.preventDefault()}>
                                     <Space>
-                                        <BellOutlined style={{ color: colorBgContainer, fontSize: 24 }} />
+                                        <BellOutlined style={{color: colorBgContainer, fontSize: 24}}/>
                                     </Space>
                                 </a>
                             </Badge>
                         </Dropdown>
 
-                        <Dropdown menu={{ items }}>
+                        <Dropdown menu={{items}}>
                             <a onClick={(e) => e.preventDefault()}>
                                 <Space>
                                     <Avatar
                                         // Используем user из контекста
                                         src={user?.avatarUrl} // <-- Использовать avatarUrl из UserData
-                                        icon={<UserOutlined style={{ fontSize: '20px' }} />}
-                                        style={{ backgroundColor: '#1677ff' }}
+                                        icon={<UserOutlined style={{fontSize: '20px'}}/>}
+                                        style={{backgroundColor: '#1677ff'}}
                                         shape="circle"
                                         onError={() => false}
                                     />
-                                    <Text style={{ color: colorBgContainer }}>{formatUserName()}</Text>
+                                    <Text style={{color: colorBgContainer}}>{formatUserName()}</Text>
                                 </Space>
                             </a>
                         </Dropdown>
@@ -309,8 +309,8 @@ export default function AppHeader() {
 
             {/* Profile теперь должен принимать user из контекста, если ему нужны данные */}
             {/* И вызывать refresh из useUser() после обновления данных */}
-            <Profile open={profileOpen} onClose={closeProfile} onUserUpdate={updateUserData} />
-            <Settings open={settingsOpen} onClose={closeSettings} />
+            <Profile open={profileOpen} onClose={closeProfile} onUserUpdate={updateUserData}/>
+            <Settings open={settingsOpen} onClose={closeSettings}/>
         </>
     );
 }

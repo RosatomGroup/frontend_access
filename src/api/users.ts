@@ -1,5 +1,4 @@
-import axios from 'axios';
-import {api} from "@/api/axios.config";
+import api from "@/api/axios.config";
 
 export interface User {
     id: number;
@@ -15,15 +14,6 @@ export const fetchUsers = async (): Promise<User[]> => {
         const response = await api.get('/management/users/');
         return response.data;
     } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.error('Axios error:', error.message);
-            if (error.response) {
-                console.error('Status:', error.response.status);
-                console.error('Data:', error.response.data);
-            }
-        } else {
-            console.error('Unexpected error:', error);
-        }
         return [];
     }
 };

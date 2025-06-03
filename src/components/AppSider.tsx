@@ -53,7 +53,7 @@ const AppSider: React.FC = () => {
     ];
 
     const generateUserItems = (): MenuItem[] => [
-        {key: 'my-accesses', label: 'Мои доступы', icon: <CheckCircleOutlined/>},
+        {key: 'accesses', label: 'Мои доступы', icon: <CheckCircleOutlined/>},
         {key: 'outgoing', label: 'Мои заявки', icon: <ProfileOutlined/>},
         {key: 'resources', label: 'Системы', icon: <TableOutlined/>},
         {key: 'roles', label: 'Роли', icon: <UserOutlined/>},
