@@ -102,9 +102,7 @@ export default function AppHeader() {
         }
 
         try {
-            const response = await api.get('/notifications', {
-                params: {email: user.email} // Используем email из user-объекта контекста
-            });
+            const response = await api.get('/notifications', {params: {email: user.email}})
             const data = response.data;
             setNotifications(data);
             setUnreadCount(data.filter((n: Notification) => !n.read).length);
