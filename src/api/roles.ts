@@ -1,4 +1,5 @@
 import axios from 'axios';
+import {api} from "@/api/axios.config";
 
 export interface Role {
     id: number;
@@ -14,23 +15,6 @@ export interface Resource {
     description: string;
 }
 
-const api = axios.create({
-    baseURL: 'http://localhost:3001',
-    timeout: 5000,
-    headers: {
-        'Content-Type': 'application/json',
-    },
-});
-
-api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-}, (error) => {
-    return Promise.reject(error);
-});
 
 export const fetchRoles = async (): Promise<Role[]> => {
     try {

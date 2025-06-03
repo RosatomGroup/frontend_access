@@ -1,4 +1,5 @@
 import axios from 'axios';
+import {api} from "@/api/axios.config";
 
 export interface User {
     id: number;
@@ -7,14 +8,6 @@ export interface User {
     subdivision: string;
     email: string;
 }
-
-const api = axios.create({
-    baseURL: 'http://localhost:3001',
-    timeout: 5000,
-    headers: {
-        'Content-Type': 'application/json',
-    },
-});
 
 
 export const fetchUsers = async (): Promise<User[]> => {

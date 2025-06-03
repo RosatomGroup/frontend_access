@@ -1,11 +1,9 @@
 'use client';
 
-import { Typography } from 'antd';
-import { Breadcrumb, Layout, theme } from 'antd';
-import AppSider from '../../../components/AppSider';
-import AppHeader from '../../../components/AppHeader';
+import {Breadcrumb, Layout, theme, Typography} from 'antd';
+import AppSider from '../../../../components/AppSider';
+import AppHeader from '../../../../components/AppHeader';
 import ComingSoonPage from '@/components/AppComingSoon';
-import AuthGuard from '@/components/AuthGuard';
 
 const { Header, Content } = Layout;
 
@@ -15,7 +13,6 @@ export default function IncomingRequest() {
   } = theme.useToken();
 
   return (
-    <AuthGuard>
       <Layout>
         <AppHeader />
         <Layout style={{ minHeight: '100vh' }}>
@@ -29,11 +26,11 @@ export default function IncomingRequest() {
                     title: 'Изменения',
                   },
                   {
-                    title: 'Отчеты',
+                    title: 'Логирование',
                   },
                 ]}
               />
-              <Typography.Title level={4}>Отчеты</Typography.Title>
+              <Typography.Title level={4}>Логирование</Typography.Title>
             </Header>
             <Content style={{ margin: '0 16px', paddingTop: '16px' }}>
               <div
@@ -50,7 +47,6 @@ export default function IncomingRequest() {
           </Layout>
         </Layout>
       </Layout>
-    </AuthGuard>
   );
 }
 

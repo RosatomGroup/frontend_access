@@ -11,7 +11,7 @@ import { DeleteOutlined, PlayCircleOutlined, UploadOutlined } from '@ant-design/
 import { Button, Upload, Input } from 'antd';
 import type { UploadChangeParam, UploadFile } from 'antd/es/upload/interface';
 import { App as AntdApp } from 'antd';
-import { useUser } from '../../../hooks/AppGuardUserAdmin';
+import { useUser } from '@/components/UserContext';
 
 const { Header, Content } = Layout;
 

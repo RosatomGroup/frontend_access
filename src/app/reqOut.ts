@@ -11,6 +11,16 @@ interface DataType {
 
 export const reqOutdata: DataType[] = [
   {
+    "id": 8,
+    "name": "Иванов Иван Иванович",
+    "requestSubject": "Предоставить доступ",
+    "role": "Общая базовая роль СВК (GRC)",
+    "status": "в работе",
+    "system": "ИС ВДНМ",
+    "submissionTime": "2025-06-02T18:21:20.370Z",
+    "email": "glazinet1208@gmail.com"
+  },
+  {
     "id": 7,
     "name": "Иванов Иван Иванович",
     "requestSubject": "Предоставить доступ",
