@@ -1,54 +1,91 @@
-import { useState, useEffect } from 'react';
-import rolesData from '@/app/roles.json';
+import {useEffect, useState} from 'react';
+import {useAuthFetch} from './useAuthFetch';
 
-interface RoleItem {
-  description: string;
-  applicationName: string;
+interface BackendResource {
+    id: number;
+    name: string;
+    description: string;
+    link?: string;
+    owner: string;
 }
 
-interface RolesData {
-  items: RoleItem[];
+interface BackendRole {
+    id: number;
+    name: string;
+    description: string;
+    resourceId: number;
+    resourceName: string;
 }
 
 interface InitialValues {
-  lastName: string;
-  firstName: string;
-  middleName?: string;
+    lastName: string;
+    firstName: string;
+    middleName: string;
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+
 export function useRequestForm(initialValues: InitialValues) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [availableSystems, setAvailableSystems] = useState<string[]>([]);
-  const [allRoles, setAllRoles] = useState<RoleItem[]>([]);
-  const [filteredRoles, setFilteredRoles] = useState<RoleItem[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [rolesLoading, setRolesLoading] = useState<boolean>(false);
+    const [availableSystems, setAvailableSystems] = useState<BackendResource[]>([]);
+    const [allRoles, setAllRoles] = useState<BackendRole[]>([]);
+    const [filteredRoles, setFilteredRoles] = useState<BackendRole[]>([]);
+    const {fetchWithAuth} = useAuthFetch();
 
-  useEffect(() => {
-    setIsLoading(true);
-    const typedRolesData = rolesData as RolesData;
-    const roleItems = typedRolesData?.items || [];
+    useEffect(() => {
+        const fetchInitialData = async () => {
+            setIsLoading(true);
+            try {
+                const [systemsResponse, rolesResponse] = await Promise.all([
+                    fetchWithAuth(`${API_BASE_URL}/management/resources`),
+                    fetchWithAuth(`${API_BASE_URL}/management/roles`),
+                ]);
 
-    const systemsArray = Array.from(new Set(roleItems.map(item => item.applicationName)));
-    const uniqueSystems = systemsArray.sort((firstSystem: string, secondSystem: string) => 
-      firstSystem.localeCompare(secondSystem)
-    );
+                const sortedSystems = [...systemsResponse].sort((a, b) =>
+                    a.name.localeCompare(b.name)
+                );
 
-    setAvailableSystems(uniqueSystems);
-    setAllRoles(roleItems);
-    setIsLoading(false);
-  }, []);
+                // Добавляем ID ролям, если их нет в ответе
+                const rolesWithIds = rolesResponse.map((role: any, index: number) => ({
+                    ...role,
+                    id: role.id || index + 1, // Используем index как fallback
+                    resourceId: systemsResponse.find(sys => sys.name === role.resourceName)?.id || 0
+                }));
 
-  const handleSystemChange = (selectedSystem: string) => {
-    const rolesForSelectedSystem = allRoles.filter(
-      role => role.applicationName === selectedSystem
-    );
-    setFilteredRoles(rolesForSelectedSystem);
-  };
+                setAvailableSystems(sortedSystems);
+                setAllRoles(rolesWithIds);
+            } catch (error) {
+                console.error('Error fetching initial form data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
 
-  return {
-    isLoading,
-    availableSystems,
-    filteredRoles,
-    handleSystemChange,
-    initialValues // Добавляем начальные значения в возвращаемый объект
-  };
+        fetchInitialData();
+    }, [fetchWithAuth]);
+
+    const handleSystemChange = async (systemId: number) => {
+        try {
+            setRolesLoading(true);
+            const rolesForSystem = allRoles.filter(role => role.resourceId === systemId);
+            const sortedRoles = [...rolesForSystem].sort((a, b) =>
+                a.name.localeCompare(b.name)
+            );
+            setFilteredRoles(sortedRoles);
+        } catch (error) {
+            console.error('Error filtering roles:', error);
+        } finally {
+            setRolesLoading(false);
+        }
+    };
+
+    return {
+        isLoading: isLoading || rolesLoading,
+        availableSystems,
+        filteredRoles,
+        allRoles,
+        handleSystemChange,
+        initialValues,
+    };
 }

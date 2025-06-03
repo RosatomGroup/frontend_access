@@ -7,23 +7,19 @@ import AppSider from './AppSider';
 
 const {Header, Content} = Layout;
 
-/**
- * Базовый макет для страниц приложения
- * @param title - Заголовок страницы
- * @param breadcrumbs - Хлебные крошки
- * @param children - Дочерние элементы
- */
+interface BaseLayoutProps {
+    title: string;
+    breadcrumbs: Array<{ title: string; href?: string }>;
+    children: React.ReactNode;
+}
+
 export default function BaseLayout({
                                        title,
                                        breadcrumbs,
                                        children,
-                                   }: {
-    title: string;
-    breadcrumbs: Array<{ title: string; href?: string }>;
-    children: React.ReactNode;
-}) {
+                                   }: BaseLayoutProps) {
     const {
-        token: {colorBgContainer, borderRadiusLG},
+        token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
 
     return (
