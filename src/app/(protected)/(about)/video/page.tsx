@@ -25,13 +25,7 @@ export default function VideoPage() {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
-<<<<<<< HEAD:src/app/(about)/docs/page.tsx
   const { user, isLoading: isUserLoading, error: userError } = useUser();
-  const isAdmin = user?.accessLevel === 'ADMIN';
-=======
->>>>>>> feature/appsider:src/app/(protected)/(about)/video/page.tsx
-
-  const { user, isLoading } = useUser();
   const isAdmin = user?.accessLevel === 'ADMIN';
 
   const [fileList, setFileList] = useState<UploadFile[]>([]);
@@ -73,11 +67,7 @@ export default function VideoPage() {
       return;
     }
     try {
-<<<<<<< HEAD:src/app/(about)/docs/page.tsx
       const response = await fetch(`http://localhost:3001/documents/${file.fileName}/rename`, {
-=======
-      const response = await fetch(`http://localhost:3001/videos/${file.filename}/rename`, {
->>>>>>> feature/appsider:src/app/(protected)/(about)/video/page.tsx
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -110,11 +100,11 @@ export default function VideoPage() {
 
   const handleDelete = async (file: UploadFile) => {
     try {
-      if (!file.filename) {
+      if (!file.fileName) {
         message.error('Неизвестное имя файла для удаления');
         return;
       }
-      await fetch(`http://localhost:3001/videos/${file.filename}`, {
+      await fetch(`http://localhost:3001/videos/${file.fileName}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -177,11 +167,7 @@ export default function VideoPage() {
                           message.error('Неизвестное имя файла для удаления');
                           return;
                         }
-<<<<<<< HEAD:src/app/(about)/docs/page.tsx
                         await fetch(`http://localhost:3001/documents/${file.fileName}`, {
-=======
-                        await fetch(`http://localhost:3001/videos/${file.filename}`, {
->>>>>>> feature/appsider:src/app/(protected)/(about)/video/page.tsx
                           method: 'DELETE',
                           credentials: 'include',
                         });
