@@ -8,7 +8,7 @@ const ComingSoonPage: React.FC = () => {
   const [timer, setTimer] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
-    const countdownDate = new Date('2025-06-06T00:00:00').getTime();
+    const countdownDate = new Date('2025-06-15T12:00:00').getTime();
 
     const interval = setInterval(() => {
       const now = new Date().getTime();
@@ -39,7 +39,7 @@ const ComingSoonPage: React.FC = () => {
             alt="Coming Soon"
             width={500}
             height={300}
-            style={{ width: '100%', maxWidth: '500px', height: 'auto' }} // Стили для адаптивности
+            style={{ width: '100%', maxWidth: '500px', height: 'auto' }}
           />
         </Col>
         <Col>

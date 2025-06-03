@@ -22,13 +22,13 @@ const LoginPage: React.FC = () => {
       setLoading(true);
       const normalizedEmail = values.email.toLowerCase().trim();
       await axios.post(
-          'http://localhost:3001/auth/login',
-          {
-            email: normalizedEmail,
-            password: values.password,
-            rememberMe: values.remember,
-          },
-          { withCredentials: true }
+        'http://localhost:3001/auth/login',
+        {
+          email: normalizedEmail,
+          password: values.password,
+          rememberMe: values.remember,
+        },
+        { withCredentials: true },
       );
       await refresh(); // обновляем пользователя в контексте
       messageApi.success('Вы вошли в систему!');
@@ -54,47 +54,55 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-      <>
-        {contextHolder}
-        <Flex justify="center" align="center" style={{ minHeight: '100vh' }}>
-          <Card>
-            <AppTitleAuth />
-            <Form form={form} onFinish={handleSubmit} layout="vertical">
-              <Form.Item
-                  name="email"
-                  rules={[{ required: true, message: 'Введите почту' }]}
+    <>
+      {contextHolder}
+      <Flex
+        justify="center"
+        align="center"
+        style={{ minHeight: '100vh', flexDirection: 'column' }}
+        gap="middle"
+      >
+        <AppTitleAuth />
+        <Card
+          title="Авторизация"
+          style={{ width: '100%', maxWidth: 360, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}
+        >
+          <Form form={form} onFinish={handleSubmit} layout="vertical">
+            <Form.Item name="email" rules={[{ required: true, message: 'Введите email' }]}>
+              <Input prefix={<UserOutlined style={{ color: '#0958d9' }} />} placeholder="Почта" />
+            </Form.Item>
+            <Form.Item name="password" rules={[{ required: true, message: 'Введите пароль' }]}>
+              <Input.Password
+                prefix={<LockOutlined style={{ color: '#0958d9' }} />}
+                placeholder="Пароль"
+              />
+            </Form.Item>
+
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loading}
+                block
+                style={{ marginBottom: '1rem' }}
               >
-                <Input prefix={<UserOutlined />} placeholder="Почта" />
-              </Form.Item>
-              <Form.Item
-                  name="password"
-                  rules={[{ required: true, message: 'Введите пароль' }]}
-              >
-                <Input.Password prefix={<LockOutlined />} placeholder="Пароль" />
-              </Form.Item>
-              <Form.Item name="remember" valuePropName="checked" initialValue={true}>
+                Войти
+              </Button>
+              или <Link href="/signup">Зарегистрироваться сейчас</Link>
+            </Form.Item>
+
+            <Flex justify="space-between" align="center">
+              <Form.Item name="remember" valuePropName="checked" noStyle>
                 <Checkbox>Запомнить меня</Checkbox>
               </Form.Item>
-              <Form.Item>
-                <Button
-                    type="primary"
-                    htmlType="submit"
-                    loading={loading}
-                    block
-                >
-                  Войти
-                </Button>
-              </Form.Item>
-              <Form.Item>
-                <Link href="/register">или Зарегистрироваться сейчас</Link>
-                <br />
-                <Link href="/reset-password">Изменить пароль</Link>
-              </Form.Item>
-            </Form>
-          </Card>
-        </Flex>
-      </>
+              <Link href="/reset">Изменить пароль</Link>
+            </Flex>
+          </Form>
+        </Card>
+      </Flex>
+    </>
   );
 };
 
 export default LoginPage;
+
