@@ -1,8 +1,8 @@
-import React, {useEffect, useState} from 'react';
-import {ConfigProvider, Grid, message, Spin, Table, TableColumnsType} from 'antd';
-import {fetchUsers, User} from "@/api/users";
+import React, { useEffect, useState, useCallback } from 'react'; // Добавлен useCallback
+import { ConfigProvider, Grid, message, Spin, Table, TableColumnsType } from 'antd';
+import { fetchUsers, User } from "@/api/users";
 
-const {useBreakpoint} = Grid;
+const { useBreakpoint } = Grid;
 
 interface DataType extends User {
     key: React.Key;
@@ -20,35 +20,21 @@ const TableUser: React.FC<TableUserProps> = ({ refreshTrigger }) => {
     const [columns, setColumns] = useState<TableColumnsType<DataType>>([]);
     const [messageApi, contextHolder] = message.useMessage();
 
-    const loadData = async () => {
-        try {
-            setLoading(true);
-            const users = await fetchUsers();
-            const formattedData = users.map((user, index) => ({
-                ...user,
-                key: user.id || `user-${index}`,
-            }));
-            setData(formattedData);
-            createDynamicFilters(formattedData);
-        } catch (error) {
-            messageApi.error('Ошибка загрузки данных пользователей');
-            console.error('Ошибка загрузки пользователей:', error);
-        } finally {
-            setLoading(false);
+    // Оборачиваем createDynamicFilters в useCallback
+    const createDynamicFilters = useCallback((currentData: DataType[]) => { // Переименовал data в currentData, чтобы избежать конфликта с состоянием data
+        if (!currentData || currentData.length === 0) {
+            setColumns([]); // Устанавливаем пустые колонки, если нет данных
+            return;
         }
-    };
 
-    const createDynamicFilters = (data: DataType[]) => {
-        if (!data || data.length === 0) return;
-
-        const uniqueRangs = [...new Set(data.map(item => item.rang))]
+        const uniqueRangs = [...new Set(currentData.map(item => item.rang))]
             .filter(Boolean)
             .map(rang => ({
                 text: rang as string,
                 value: rang as string,
             }));
 
-        const uniqueSubdivisions = [...new Set(data.map(item => item.subdivision))]
+        const uniqueSubdivisions = [...new Set(currentData.map(item => item.subdivision))]
             .filter(Boolean)
             .map(subdivision => ({
                 text: subdivision as string,
@@ -62,7 +48,7 @@ const TableUser: React.FC<TableUserProps> = ({ refreshTrigger }) => {
                 key: 'name',
                 filterMode: 'tree',
                 filterSearch: true,
-                onFilter: (value, record) => record.name.includes(value as string),
+                onFilter: (value, record) => (record.name || '').includes(value as string),
                 sorter: (a, b) => (a.name || '').localeCompare(b.name || ''),
                 width: screens.xs ? 150 : '30%',
                 fixed: screens.xs ? 'left' : false,
@@ -104,17 +90,40 @@ const TableUser: React.FC<TableUserProps> = ({ refreshTrigger }) => {
             baseColumns.filter(col => !col.responsive || (col.responsive && screens.md)) :
             baseColumns
         );
-    };
+    }, [screens]); // Зависимости для createDynamicFilters: screens и setColumns (setColumns стабилен)
 
+    // Оборачиваем loadData в useCallback
+    const loadData = useCallback(async () => {
+        try {
+            setLoading(true);
+            const users = await fetchUsers();
+            const formattedData = users.map((user, index) => ({
+                ...user,
+                key: user.id || `user-${index}`,
+            }));
+            setData(formattedData);
+            // createDynamicFilters(formattedData); // Этот вызов будет в useEffect ниже
+        } catch (error) {
+            messageApi.error('Ошибка загрузки данных пользователей');
+            console.error('Ошибка загрузки пользователей:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [messageApi]); // Зависимости для loadData: messageApi
+
+    // Первый useEffect: загрузка данных при изменении refreshTrigger
     useEffect(() => {
         loadData();
-    }, [refreshTrigger]);
+    }, [refreshTrigger, loadData]); // Добавлена loadData в массив зависимостей
 
+    // Второй useEffect: создание динамических фильтров при изменении данных или screens
     useEffect(() => {
         if (data.length > 0) {
             createDynamicFilters(data);
+        } else {
+            setColumns([]); // Очищаем колонки, если данных нет
         }
-    }, [screens]);
+    }, [screens, data, createDynamicFilters]); // Добавлены createDynamicFilters и data в массив зависимостей
 
     const handlePageSizeChange = (current: number, size: number) => {
         setPageSize(size);
@@ -137,7 +146,7 @@ const TableUser: React.FC<TableUserProps> = ({ refreshTrigger }) => {
                     dataSource={data}
                     columns={columns}
                     rowKey={(record) => record.key}
-                    scroll={screens.xs ? {x: 800} : undefined}
+                    scroll={screens.xs ? { x: 800 } : undefined}
                     pagination={{
                         pageSize: pageSize,
                         showSizeChanger: true,

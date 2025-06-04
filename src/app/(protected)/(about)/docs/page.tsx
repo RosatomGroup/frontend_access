@@ -11,17 +11,29 @@ import { useUser } from '@/components/UserContext';
 const { Header, Content } = Layout;
 const { Title } = Typography;
 
+interface Document {
+  id: number;
+  originalname: string;
+  filename: string;
+  url: string;
+}
+
+interface CustomUploadFile extends UploadFile {
+  filename: string;
+  url: string;
+}
+
 export default function DocsPage() {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
-  const { user, isLoading } = useUser();
+  const { user } = useUser();
   const isAdmin = user?.accessLevel === 'ADMIN';
 
   const nameOfPage = 'Документы';
 
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
-  const uploadRef = useRef<any>(null);
+  const [fileList, setFileList] = useState<CustomUploadFile[]>([]);
+  const uploadRef = useRef<unknown>(null);
   const [editingFileUid, setEditingFileUid] = useState<string | null>(null);
   const [newFileName, setNewFileName] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
@@ -30,12 +42,12 @@ export default function DocsPage() {
     setLoading(true);
     fetch('http://localhost:3001/documents')
       .then((res) => res.json())
-      .then((data) => {
-        const formatted = data.map((file: any) => ({
+      .then((data: Document[]) => {
+        const formatted = data.map((file) => ({
           uid: file.id.toString(),
           name: file.originalname,
           filename: file.filename,
-          status: 'done',
+          status: 'done' as const,
           url: file.url,
         }));
         setFileList(formatted);
@@ -53,7 +65,7 @@ export default function DocsPage() {
     setNewFileName(file.name || '');
   };
 
-  const saveNewName = async (file: UploadFile) => {
+  const saveNewName = async (file: CustomUploadFile) => {
     if (!newFileName.trim()) {
       message.error('Имя файла не может быть пустым');
       return;
@@ -68,7 +80,7 @@ export default function DocsPage() {
 
       if (!response.ok) throw new Error('Ошибка сервера');
 
-      const updated = await response.json();
+      const updated: Document = await response.json();
 
       setFileList((prev) =>
         prev.map((f) =>
@@ -85,6 +97,7 @@ export default function DocsPage() {
       message.success('Имя файла обновлено');
       setEditingFileUid(null);
     } catch (error) {
+      console.error(error);
       message.error('Ошибка при переименовании файла');
     }
   };
@@ -126,19 +139,21 @@ export default function DocsPage() {
                   action="http://localhost:3001/documents/upload"
                   listType="picture"
                   fileList={fileList}
-                  onRemove={async (file) => {
+                  onRemove={async (file: UploadFile) => {
                     try {
-                      if (!file.filename) {
+                      const customFile = file as CustomUploadFile;
+                      if (!customFile.filename) {
                         message.error('Неизвестное имя файла для удаления');
                         return;
                       }
-                      await fetch(`http://localhost:3001/documents/${file.filename}`, {
+                      await fetch(`http://localhost:3001/documents/${customFile.filename}`, {
                         method: 'DELETE',
                         credentials: 'include',
                       });
                       setFileList((prev) => prev.filter((item) => item.uid !== file.uid));
                       message.success('Файл успешно удален');
                     } catch (error) {
+                      console.error(error);
                       message.error('Ошибка при удалении файла');
                     }
                   }}
@@ -152,16 +167,16 @@ export default function DocsPage() {
                             filename: file.response.filename,
                             url: file.response.url,
                             status: 'done',
-                          };
+                          } as CustomUploadFile;
                         }
                         return f;
                       });
-                      setFileList(updatedList);
+                      setFileList(updatedList as CustomUploadFile[]);
                       message.success('Файл успешно загружен');
                     } else if (file.status === 'error') {
                       message.error(`Ошибка при загрузке файла: ${file.name}`);
                     } else {
-                      setFileList(newFileList);
+                      setFileList(newFileList as CustomUploadFile[]);
                     }
                   }}
                   showUploadList={{
@@ -170,6 +185,7 @@ export default function DocsPage() {
                     showPreviewIcon: false,
                   }}
                   itemRender={(originNode, file, fileList, actions) => {
+                    const customFile = file as CustomUploadFile;
                     return (
                       <div
                         style={{
@@ -182,14 +198,14 @@ export default function DocsPage() {
                           borderRadius: '8px',
                         }}
                       >
-                        {file.uid === editingFileUid ? (
+                        {customFile.uid === editingFileUid ? (
                           isAdmin && (
                             <Input
                               autoFocus
                               value={newFileName}
                               onChange={(e) => setNewFileName(e.target.value)}
-                              onBlur={() => saveNewName(file)}
-                              onPressEnter={() => saveNewName(file)}
+                              onBlur={() => saveNewName(customFile)}
+                              onPressEnter={() => saveNewName(customFile)}
                               style={{ width: 300 }}
                             />
                           )

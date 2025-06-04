@@ -1,10 +1,10 @@
 'use client';
 
-import React, {useEffect, useState} from 'react';
-import {notification} from 'antd';
-import {useRequestForm} from '@/hooks/useRequestForm';
-import {RequestForm} from './RequestForm';
-import {useAuthFetch} from '@/hooks/useAuthFetch';
+import React, { useEffect, useState } from 'react';
+import { notification } from 'antd';
+import { useRequestForm } from '@/hooks/useRequestForm';
+import { RequestForm } from './RequestForm';
+import { useAuthFetch } from '@/hooks/useAuthFetch';
 
 interface UserData {
     id: number;
@@ -23,51 +23,52 @@ interface FormSubmitValues {
     role: number;
 }
 
+interface ChangedValues {
+    lastName?: string;
+    firstName?: string;
+    middleName?: string;
+    email?: string;
+}
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
 
-export default function FormReqOthers({onClose}: { onClose: () => void }) {
+export default function FormReqOthers({ onClose }: { onClose: () => void }) {
     const [currentUser, setCurrentUser] = useState<UserData | null>(null);
     const [isRequestForOtherUser, setIsRequestForOtherUser] = useState(false);
     const [notificationApi, notificationContextHolder] = notification.useNotification();
-    const {fetchWithAuth} = useAuthFetch();
+    const { fetchWithAuth, postWithAuth } = useAuthFetch(); // Добавлен postWithAuth
     const [formValues, setFormValues] = useState({
         lastName: '',
         firstName: '',
         middleName: '',
-        email: ''
+        email: '',
     });
 
-    const {
-        isLoading,
-        availableSystems,
-        filteredRoles,
-        handleSystemChange,
-        initialValues,
-        allRoles
-    } = useRequestForm({
+    const { isLoading, availableSystems, filteredRoles, handleSystemChange } = useRequestForm({
         lastName: '',
         firstName: '',
-        middleName: ''
+        middleName: '',
     });
 
     useEffect(() => {
         const fetchCurrentUser = async () => {
             try {
-                const user = await fetchWithAuth(`${API_BASE_URL}/auth/me`);
+                // Исправлено: Явно указываем тип UserData для fetchWithAuth
+                const user = await fetchWithAuth<UserData>(`${API_BASE_URL}/auth/me`);
                 setCurrentUser(user);
                 if (!isRequestForOtherUser) {
                     setFormValues({
                         lastName: user.surname || '',
                         firstName: user.name || '',
                         middleName: user.middleName || '',
-                        email: user.email || ''
+                        email: user.email || '',
                     });
                 }
             } catch (error) {
                 console.error('Failed to fetch current user:', error);
                 notificationApi.error({
                     message: 'Ошибка',
-                    description: 'Не удалось загрузить данные пользователя'
+                    description: 'Не удалось загрузить данные пользователя',
                 });
             }
         };
@@ -79,7 +80,7 @@ export default function FormReqOthers({onClose}: { onClose: () => void }) {
         if (!currentUser) {
             notificationApi.error({
                 message: 'Ошибка',
-                description: 'Не удалось определить текущего пользователя'
+                description: 'Не удалось определить текущего пользователя',
             });
             return;
         }
@@ -92,37 +93,35 @@ export default function FormReqOthers({onClose}: { onClose: () => void }) {
             resourceId: Number(values.system),
             roleId: Number(values.role),
             requestType: 'GRANT_ACCESS' as const,
-            userId: Number(currentUser.id)
+            userId: Number(currentUser.id),
         };
 
         try {
-            const response = await fetchWithAuth(`${API_BASE_URL}/requests`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
-            });
+            // Используем postWithAuth для POST запроса
+            await postWithAuth(`${API_BASE_URL}/requests`, payload);
 
             notificationApi.success({
                 message: 'Успех',
                 description: 'Заявка успешно создана',
-                duration: 3
+                duration: 3,
             });
             onClose();
-        } catch (error: any) {
+            setTimeout(() => location.reload(), 1500);
+        } catch (error: unknown) {
             console.error('Error creating request:', error);
-            if (error.message.includes('уже существует')) {
+            const errorMessage = error instanceof Error ? error.message : 'Не удалось создать заявку';
+
+            if (errorMessage.includes('уже существует')) {
                 notificationApi.warning({
                     message: 'Заявка уже существует',
-                    description: error.message,
-                    duration: 5
+                    description: errorMessage,
+                    duration: 5,
                 });
             } else {
                 notificationApi.error({
                     message: 'Ошибка',
-                    description: error.message || 'Не удалось создать заявку',
-                    duration: 5
+                    description: errorMessage || 'Не удалось создать заявку',
+                    duration: 5,
                 });
             }
         }
@@ -135,34 +134,34 @@ export default function FormReqOthers({onClose}: { onClose: () => void }) {
                 lastName: '',
                 firstName: '',
                 middleName: '',
-                email: ''
+                email: '',
             });
         } else if (currentUser) {
             setFormValues({
                 lastName: currentUser.surname || '',
                 firstName: currentUser.name || '',
                 middleName: currentUser.middleName || '',
-                email: currentUser.email || ''
+                email: currentUser.email || '',
             });
         }
     };
 
-    const handleValuesChange = (changedValues: any, allValues: any) => {
-        setFormValues(prev => ({
+    const handleValuesChange = (changedValues: ChangedValues) => {
+        setFormValues((prev) => ({
             ...prev,
-            ...changedValues
+            ...changedValues,
         }));
     };
 
     return (
-        <div style={{maxWidth: '100%', margin: '0 50px'}}>
+        <div style={{ maxWidth: '100%', margin: '0 50px' }}>
             {notificationContextHolder}
             <RequestForm
                 initialValues={formValues}
                 onFinish={handleSubmit}
                 onValuesChange={handleValuesChange}
-                onFormLayoutChange={({size}) => console.log('Form size changed:', size)}
-                componentSize="default"
+                onFormLayoutChange={({ size }) => console.log('Form size changed:', size)}
+                componentSize="middle"
                 availableSystems={availableSystems}
                 filteredRoles={filteredRoles}
                 isLoading={isLoading}

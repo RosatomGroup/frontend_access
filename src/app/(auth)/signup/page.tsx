@@ -38,7 +38,7 @@ const Registration: React.FC = () => {
         },
         { withCredentials: true },
       );
-
+      console.log(response);
       messageApi.success(
         'Регистрация прошла успешно! Вы будете перенравлены на страницу авторизации',
       );
@@ -94,7 +94,7 @@ const Registration: React.FC = () => {
           </Form.Item>
           <Form.Item
             label="Отчество"
-            name="middle_name"
+            name="middleName"
             rules={[{ required: false, message: 'Пожалуйста, введите отчество' }]}
           >
             <Input />

@@ -1,7 +1,7 @@
-import React, {useEffect, useState} from 'react';
-import {ConfigProvider, message, Spin, Table, TableColumnsType} from 'antd';
+import React, { useEffect, useState, useCallback } from 'react'; // Добавлен useMemo
+import { ConfigProvider, message, Spin, Table, TableColumnsType } from 'antd';
 import useBreakpoint from "antd/es/grid/hooks/useBreakpoint";
-import {fetchRoles, Role} from '@/api/roles';
+import { fetchRoles, Role } from '@/api/roles';
 
 interface DataType extends Role {
     key: React.Key;
@@ -12,7 +12,7 @@ interface TableRoleProps {
     refreshTrigger?: number;
 }
 
-const TableRole: React.FC<TableRoleProps> = ({loading: externalLoading, refreshTrigger}) => {
+const TableRole: React.FC<TableRoleProps> = ({ loading: externalLoading, refreshTrigger }) => {
     const screens = useBreakpoint();
     const [pageSize, setPageSize] = useState<number>(10);
     const [columns, setColumns] = useState<TableColumnsType<DataType>>([]);
@@ -20,25 +20,8 @@ const TableRole: React.FC<TableRoleProps> = ({loading: externalLoading, refreshT
     const [internalLoading, setInternalLoading] = useState<boolean>(true);
     const [messageApi, contextHolder] = message.useMessage();
 
-    const loadData = async () => {
-        try {
-            setInternalLoading(true);
-            const roles = await fetchRoles();
-            const formattedData = roles.map((role, index) => ({
-                ...role,
-                key: role.id || `role-${index}`,
-            }));
-            setData(formattedData);
-            createDynamicFilters(formattedData);
-        } catch (error) {
-            messageApi.error('Ошибка загрузки данных');
-            console.error(error);
-        } finally {
-            setInternalLoading(false);
-        }
-    };
-
-    const createDynamicFilters = (data: DataType[]) => {
+    // Оборачиваем createDynamicFilters в useCallback
+    const createDynamicFilters = useCallback((data: DataType[]) => {
         const uniqueName = [...new Set(data.map(item => item.name))].map(name => ({
             text: name,
             value: name,
@@ -83,11 +66,30 @@ const TableRole: React.FC<TableRoleProps> = ({loading: externalLoading, refreshT
         ];
 
         setColumns(newColumns);
-    };
+    }, [screens]); // Зависимости для createDynamicFilters: screens и setColumns (setColumns стабилен)
+
+    // Оборачиваем loadData в useCallback
+    const loadData = useCallback(async () => {
+        try {
+            setInternalLoading(true);
+            const roles = await fetchRoles();
+            const formattedData = roles.map((role, index) => ({
+                ...role,
+                key: role.id || `role-${index}`,
+            }));
+            setData(formattedData);
+            createDynamicFilters(formattedData); // Используем стабильную версию createDynamicFilters
+        } catch (error) {
+            messageApi.error('Ошибка загрузки данных');
+            console.error(error);
+        } finally {
+            setInternalLoading(false);
+        }
+    }, [messageApi, createDynamicFilters]); // Зависимости для loadData: messageApi и createDynamicFilters
 
     useEffect(() => {
-        loadData();
-    }, [refreshTrigger]);
+        loadData(); // Теперь loadData является стабильной функцией
+    }, [refreshTrigger, loadData]); // Добавлена loadData в массив зависимостей
 
     const handlePageSizeChange = (current: number, size: number) => {
         setPageSize(size);

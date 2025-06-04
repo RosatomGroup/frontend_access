@@ -1,7 +1,7 @@
-import React, {useEffect, useState} from 'react';
-import {ConfigProvider, Table, TableColumnsType, Spin, message} from 'antd';
-import useBreakpoint from "antd/es/grid/hooks/useBreakpoint";
-import {fetchResources, Resource} from "@/api/resource";
+import React, { useEffect, useState, useCallback } from 'react';
+import { ConfigProvider, Table, TableColumnsType, Spin, message } from 'antd';
+import useBreakpoint from 'antd/es/grid/hooks/useBreakpoint';
+import { fetchResources, Resource } from '@/api/resource';
 
 interface DataType extends Resource {
     key: React.Key;
@@ -17,32 +17,16 @@ const TableResource: React.FC<TableResourceProps> = ({ refreshTrigger }) => {
     const [data, setData] = useState<DataType[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [columns, setColumns] = useState<TableColumnsType<DataType>>([]);
+    const [messageApi, contextHolder] = message.useMessage(); // Инициализация messageApi
 
-    const loadData = async () => {
-        try {
-            setLoading(true);
-            const resources = await fetchResources();
-            const formattedData = resources.map((resource) => ({
-                ...resource,
-                key: resource.id,
-            }));
-            setData(formattedData);
-            createDynamicFilters(formattedData);
-        } catch (error) {
-            message.error('Ошибка загрузки данных');
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const createDynamicFilters = (data: DataType[]) => {
-        const uniqueName = [...new Set(data.map(item => item.name))].map(name => ({
+    // Оборачиваем createDynamicFilters в useCallback
+    const createDynamicFilters = useCallback((data: DataType[]) => {
+        const uniqueName = [...new Set(data.map((item) => item.name))].map((name) => ({
             text: name,
             value: name,
         }));
 
-        const uniqueOwners = [...new Set(data.map(item => item.owner))].map(owner => ({
+        const uniqueOwners = [...new Set(data.map((item) => item.owner))].map((owner) => ({
             text: owner,
             value: owner,
         }));
@@ -84,11 +68,30 @@ const TableResource: React.FC<TableResourceProps> = ({ refreshTrigger }) => {
         ];
 
         setColumns(newColumns);
-    };
+    }, [screens]); // Зависимости для createDynamicFilters: screens и setColumns (setColumns стабилен)
+
+    // Оборачиваем loadData в useCallback
+    const loadData = useCallback(async () => {
+        try {
+            setLoading(true);
+            const resources = await fetchResources();
+            const formattedData = resources.map((resource) => ({
+                ...resource,
+                key: resource.id,
+            }));
+            setData(formattedData);
+            createDynamicFilters(formattedData); // Используем стабильную версию createDynamicFilters
+        } catch (error) {
+            messageApi.error('Ошибка загрузки данных'); // Использован messageApi
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    }, [messageApi, createDynamicFilters]); // Зависимости для loadData: messageApi и createDynamicFilters
 
     useEffect(() => {
-        loadData();
-    }, [refreshTrigger]);
+        loadData(); // Теперь loadData является стабильной функцией
+    }, [refreshTrigger, loadData]); // Добавлена loadData в массив зависимостей
 
     const handlePageSizeChange = (current: number, size: number) => {
         setPageSize(size);
@@ -105,11 +108,13 @@ const TableResource: React.FC<TableResourceProps> = ({ refreshTrigger }) => {
                 },
             }}
         >
+            {contextHolder} {/* Добавлен contextHolder для messageApi */}
             <Spin spinning={loading}>
                 <Table<DataType>
                     dataSource={data}
                     columns={columns}
-                    scroll={screens.xs ? {x: 800} : undefined}
+                    rowKey={(record) => record.key}
+                    scroll={screens.xs ? { x: 800 } : undefined}
                     pagination={{
                         pageSize: pageSize,
                         showSizeChanger: true,

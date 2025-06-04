@@ -21,15 +21,21 @@ import { useUser } from '@/components/UserContext';
 
 const { Header, Content } = Layout;
 
+interface CustomUploadFile extends UploadFile {
+  filename: string;
+  url: string;
+  status: 'done' | 'uploading' | 'error' | 'removed';
+}
+
 export default function VideoPage() {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
-  const { user, isLoading: isUserLoading, error: userError } = useUser();
+  const { user } = useUser();
   const isAdmin = user?.accessLevel === 'ADMIN';
 
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
-  const uploadRef = useRef<any>(null);
+  const [fileList, setFileList] = useState<CustomUploadFile[]>([]);
+  const uploadRef = useRef<typeof Upload>(null);
   const [editingFileUid, setEditingFileUid] = useState<string | null>(null);
   const [newFileName, setNewFileName] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
@@ -39,13 +45,16 @@ export default function VideoPage() {
     fetch('http://localhost:3001/videos', { credentials: 'include' })
       .then((res) => res.json())
       .then((data) => {
-        const formatted = data.map((file: any) => ({
-          uid: file.id.toString(),
-          name: file.originalname,
-          filename: file.filename,
-          status: 'done',
-          url: file.url,
-        }));
+        const formatted = data.map(
+          (file: { id: number; originalname: string; filename: string; url: string }) =>
+            ({
+              uid: file.id.toString(),
+              name: file.originalname,
+              filename: file.filename,
+              status: 'done' as const,
+              url: file.url,
+            }) as CustomUploadFile,
+        );
         setFileList(formatted);
       })
       .catch(() => {
@@ -61,13 +70,13 @@ export default function VideoPage() {
     setNewFileName(file.name || '');
   };
 
-  const saveNewName = async (file: UploadFile) => {
+  const saveNewName = async (file: CustomUploadFile) => {
     if (!newFileName.trim()) {
       message.error('Имя видео не может быть пустым');
       return;
     }
     try {
-      const response = await fetch(`http://localhost:3001/documents/${file.fileName}/rename`, {
+      const response = await fetch(`http://localhost:3001/videos/${file.filename}/rename`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -82,35 +91,35 @@ export default function VideoPage() {
       setFileList((prev) =>
         prev.map((f) =>
           f.uid === file.uid
-            ? {
+            ? ({
                 ...f,
                 name: newFileName.trim(),
                 filename: updated.filename,
                 url: updated.url,
-              }
+              } as CustomUploadFile)
             : f,
         ),
       );
       message.success('Имя видео обновлено');
       setEditingFileUid(null);
-    } catch (error) {
+    } catch {
       message.error('Ошибка при переименовании видео');
     }
   };
 
-  const handleDelete = async (file: UploadFile) => {
+  const handleDelete = async (file: CustomUploadFile) => {
     try {
-      if (!file.fileName) {
+      if (!file.filename) {
         message.error('Неизвестное имя файла для удаления');
         return;
       }
-      await fetch(`http://localhost:3001/videos/${file.fileName}`, {
+      await fetch(`http://localhost:3001/videos/${file.filename}`, {
         method: 'DELETE',
         credentials: 'include',
       });
       setFileList((prev) => prev.filter((item) => item.uid !== file.uid));
       message.success('Видео успешно удалено');
-    } catch (error) {
+    } catch {
       message.error('Ошибка при удалении видео');
     }
   };
@@ -161,42 +170,48 @@ export default function VideoPage() {
                       }
                       return isVideo || Upload.LIST_IGNORE;
                     }}
-                    onRemove={async (file) => {
+                    onRemove={async (file: UploadFile) => {
                       try {
-                        if (!file.fileName) {
+                        const customFile = file as CustomUploadFile;
+                        if (!customFile.filename) {
                           message.error('Неизвестное имя файла для удаления');
                           return;
                         }
-                        await fetch(`http://localhost:3001/documents/${file.fileName}`, {
+                        await fetch(`http://localhost:3001/videos/${customFile.filename}`, {
                           method: 'DELETE',
                           credentials: 'include',
                         });
                         setFileList((prev) => prev.filter((item) => item.uid !== file.uid));
                         message.success('Видео успешно удалено');
-                      } catch (error) {
+                      } catch {
                         message.error('Ошибка при удалении видео');
                       }
                     }}
                     onChange={({ file, fileList: newFileList }: UploadChangeParam<UploadFile>) => {
                       if (file.status === 'done' && file.response) {
+                        const response = file.response as {
+                          originalname: string;
+                          filename: string;
+                          url: string;
+                        };
                         const updatedList = newFileList.map((f) => {
                           if (f.uid === file.uid) {
                             return {
                               ...f,
                               name: file.response.originalname,
-                              filename: file.response.filename,
-                              url: file.response.url,
-                              status: 'done',
-                            };
+                              filename: response.filename,
+                              url: response.url,
+                              status: 'done' as const,
+                            } as CustomUploadFile;
                           }
-                          return f;
+                          return f as CustomUploadFile;
                         });
                         setFileList(updatedList);
                         message.success('Видео успешно загружено');
                       } else if (file.status === 'error') {
                         message.error(`Ошибка при загрузке видео: ${file.name}`);
                       } else {
-                        setFileList(newFileList);
+                        setFileList(newFileList as CustomUploadFile[]);
                       }
                     }}
                     showUploadList={false}

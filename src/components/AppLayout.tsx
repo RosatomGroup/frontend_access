@@ -1,46 +1,56 @@
 'use client';
 
-import type {TableColumnsType} from 'antd';
-import {Breadcrumb, Button, Card, Col, Flex, Layout, Modal, notification, Row, Table, theme, Typography} from 'antd';
+import type { TableColumnsType } from 'antd';
+import {
+    Breadcrumb,
+    Button,
+    Card,
+    Col,
+    Flex,
+    Layout,
+    Modal,
+    notification,
+    Row,
+    Table,
+    theme,
+    Typography,
+} from 'antd';
 import FormReqOthers from './FormReqOthers';
 import FormReqRevoke from './FormReqRevoke';
-import {useRouter} from 'next/navigation';
-import React, {useEffect, useState} from 'react';
-import {useAuthFetch} from '@/hooks/useAuthFetch';
-import {BackendRequestDataType} from '@/api/requests';
+import React, { useEffect, useState } from 'react';
+import { useAuthFetch } from '@/hooks/useAuthFetch';
+import { BackendRequestDataType } from '@/api/requests'; // Убедитесь, что путь к BackendRequestDataType корректен
 
-const {Title} = Typography;
+const { Title } = Typography;
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
 
-interface LastRequestData extends BackendRequestDataType {
-}
-
 export default function AppLayout() {
-    const router = useRouter();
     const {
-        token: {colorBgContainer, borderRadiusLG},
+        token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
     const [isFormVisible, setIsFormVisible] = useState(false);
     const [currentForm, setCurrentForm] = useState<'grant' | 'revoke'>('grant');
-    const [lastRequests, setLastRequests] = useState<LastRequestData[]>([]);
+    const [lastRequests, setLastRequests] = useState<BackendRequestDataType[]>([]);
     const [loadingRequests, setLoadingRequests] = useState(true);
     const [api, contextHolder] = notification.useNotification();
-    const {fetchWithAuth} = useAuthFetch();
+    const { fetchWithAuth } = useAuthFetch();
 
     useEffect(() => {
         const fetchLastRequests = async () => {
             setLoadingRequests(true);
             try {
-                const data = await fetchWithAuth(
-                    `${API_BASE_URL}/requests?_sort=createDate&_order=desc&_limit=5`
+                // Исправлено: Явно указываем тип данных, которые ожидаем получить
+                const data = await fetchWithAuth<BackendRequestDataType[]>(
+                    `${API_BASE_URL}/requests?_sort=createDate&_order=desc&_limit=5`,
                 );
                 setLastRequests(data.slice(0, 5));
             } catch (error) {
                 console.error('Error fetching last requests:', error);
                 api.error({
                     message: 'Ошибка загрузки',
-                    description: error instanceof Error ? error.message : 'Не удалось загрузить последние заявки',
+                    description:
+                        error instanceof Error ? error.message : 'Не удалось загрузить последние заявки',
                 });
             } finally {
                 setLoadingRequests(false);
@@ -72,67 +82,69 @@ export default function AppLayout() {
         }
     };
 
-    const columns: TableColumnsType<LastRequestData> = [
+    const columns: TableColumnsType<BackendRequestDataType> = [
         {
             dataIndex: 'id',
             key: 'id',
             width: 83,
-            render: (id: number, record: LastRequestData) => (
-                <div style={{display: 'flex', flexDirection: 'column'}}>
-          <span style={{
-              paddingTop: '22px',
-              margin: '0',
-              color: '#1890ff',
-              fontWeight: '500',
-              fontSize: '13px',
-          }}>
-            Заявка №{id}
-          </span>
-                    <span style={{
-                        margin: '0',
-                        color: '#8c8c8c',
-                        fontSize: '12px',
-                        marginTop: '4px'
-                    }}>
-            {formatSubmissionTimeForDisplay(record.createDate)}
-          </span>
+            render: (id: number, record: BackendRequestDataType) => (
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span
+                        style={{
+                            paddingTop: '22px',
+                            margin: '0',
+                            color: '#1890ff',
+                            fontWeight: '500',
+                            fontSize: '13px',
+                        }}
+                    >
+                        Заявка №{id}
+                    </span>
+                    <span
+                        style={{
+                            margin: '0',
+                            color: '#8c8c8c',
+                            fontSize: '12px',
+                            marginTop: '4px',
+                        }}
+                    >
+                        {formatSubmissionTimeForDisplay(record.createDate)}
+                    </span>
                 </div>
-            )
+            ),
         },
         {
             dataIndex: 'fullName',
             key: 'name',
             width: 185,
-            render: (text: any, record: LastRequestData) => (
-                <div style={{padding: '0', margin: '0'}}>{record.surname} {record.name} {record.middleName || ''}</div>
-            )
+            render: (_: unknown, record: BackendRequestDataType) => (
+                <div style={{ padding: '0', margin: '0' }}>
+                    {record.surname} {record.name} {record.middleName || ''}
+                </div>
+            ),
         },
         {
             dataIndex: 'requestType',
             key: 'requestSubject',
             width: 135,
-            render: (type: LastRequestData['requestType']) => (
-                <div style={{padding: '0', margin: '0'}}>
+            render: (type: BackendRequestDataType['requestType']) => (
+                <div style={{ padding: '0', margin: '0' }}>
                     {type === 'GRANT_ACCESS' ? 'Предоставить доступ' : 'Отозвать доступ'}
                 </div>
-            )
+            ),
         },
         {
             dataIndex: 'resourceName',
             key: 'system',
             width: 100,
-            render: (system: string) => (
-                <div style={{padding: '0', margin: '0'}}>{system}</div>
-            )
+            render: (system: string) => <div style={{ padding: '0', margin: '0' }}>{system}</div>,
         },
         {
             dataIndex: 'roleName',
             key: 'role',
             width: 150,
-            render: (role: string) => (
-                <div style={{padding: '0', margin: '0'}}>{role}</div>
-            )
-        }
+            render: (role: string) => <div style={{ padding: '0', margin: '0' }}>{role}</div>,
+        },
     ];
 
     const showForm = (formType: 'grant' | 'revoke') => {
@@ -142,31 +154,24 @@ export default function AppLayout() {
 
     const closeForm = () => setIsFormVisible(false);
 
-    function onClickViewRequests() {
-        router.replace('/all');
-    }
-
     const modalTitleStyle = {
         textAlign: 'center' as const,
         fontSize: '20px',
         fontWeight: 500,
-        marginBottom: '20px'
+        marginBottom: '20px',
     };
 
     return (
         <Layout>
             {contextHolder}
-            <Layout.Header style={{paddingLeft: 16, background: colorBgContainer, height: '100px'}}>
+            <Layout.Header style={{ paddingLeft: 16, background: colorBgContainer, height: '100px' }}>
                 <Breadcrumb
-                    style={{margin: '16px 0'}}
-                    items={[
-                        {title: 'Главная'},
-                        {title: 'Заявки'},
-                    ]}
+                    style={{ margin: '16px 0' }}
+                    items={[{ title: 'Главная' }, { title: 'Заявки' }]}
                 />
                 <Title level={4}>Главная</Title>
             </Layout.Header>
-            <Layout.Content style={{margin: '0 16px', paddingTop: '16px'}}>
+            <Layout.Content style={{ margin: '0 16px', paddingTop: '16px' }}>
                 <div
                     style={{
                         padding: 24,
@@ -175,7 +180,7 @@ export default function AppLayout() {
                         marginBottom: 24,
                     }}
                 >
-                    <Flex gap="small" wrap style={{gap: 24, display: 'flex'}}>
+                    <Flex gap="small" wrap style={{ gap: 24, display: 'flex' }}>
                         <Button type="primary" onClick={() => showForm('grant')}>
                             Запросить доступ
                         </Button>
@@ -186,7 +191,7 @@ export default function AppLayout() {
                             footer={null}
                             centered
                         >
-                            <FormReqOthers onClose={closeForm}/>
+                            <FormReqOthers onClose={closeForm} />
                         </Modal>
                         <Button type="primary" onClick={() => showForm('revoke')}>
                             Отозвать доступ
@@ -198,11 +203,8 @@ export default function AppLayout() {
                             footer={null}
                             centered
                         >
-                            <FormReqRevoke onClose={closeForm}/>
+                            <FormReqRevoke onClose={closeForm} />
                         </Modal>
-                        {/*<Button type="primary" onClick={onClickViewRequests}>*/}
-                        {/*    Просмотреть все заявки*/}
-                        {/*</Button>*/}
                     </Flex>
                 </div>
                 <Row>
@@ -214,8 +216,8 @@ export default function AppLayout() {
                                 header: {
                                     textAlign: 'center',
                                     fontSize: '16px',
-                                    fontWeight: 500
-                                }
+                                    fontWeight: 500,
+                                },
                             }}
                         >
                             <Table
@@ -224,7 +226,7 @@ export default function AppLayout() {
                                 pagination={false}
                                 size="small"
                                 rowKey="id"
-                                scroll={{x: 600}}
+                                scroll={{ x: 600 }}
                                 showHeader={false}
                                 loading={loadingRequests}
                             />

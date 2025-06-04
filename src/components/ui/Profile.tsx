@@ -31,7 +31,7 @@ const Profile: React.FC<ProfileProps> = ({open, onClose, onUserUpdate}) => {
 
     // Генерация уникального имени файла для S3
     const generateS3FileName = useCallback((file: RcFile) => {
-        const userEmail = user?.email || 'unknown'; // Используем email из контекста
+        const userEmail = user?.email || 'unknown';
         const timestamp = Date.now();
         const extension = file.name.split('.').pop();
         return `avatars/${userEmail.split('@')[0]}-${timestamp}.${extension}`;
@@ -52,7 +52,7 @@ const Profile: React.FC<ProfileProps> = ({open, onClose, onUserUpdate}) => {
                 birthDate: user.birthDate,
                 subdivision: user.subdivision,
                 rang: user.rang,
-                accessLevel: user.accessLevel, // Добавляем accessLevel из контекста
+                accessLevel: user.accessLevel,
             };
             form.setFieldsValue(formattedUser);
             setInitialValues(formattedUser);
@@ -116,31 +116,28 @@ const Profile: React.FC<ProfileProps> = ({open, onClose, onUserUpdate}) => {
                 middleName: values.middleName,
                 phone: values.phone,
                 avatarUrl: avatarPreviewUrl, // Актуальный URL аватара
-                // birthDate: values.birthDate?.format('YYYY-MM-DD') || null, // Отправляем как 'YYYY-MM-DD' или null
+                birthDate: values.birthDate ? dayjs(values.birthDate).format('YYYY-MM-DD') : null, // Отправляем как 'YYYY-MM-DD' или null
                 subdivision: values.subdivision,
                 rang: values.rang,
             };
 
             // Используем PATCH запрос к /users/:id
-            const response = await api.patch<UserContextData>(`/users/${user.id}`, payload);
-
-            if (response.status !== 200) {
-                // Если статус не 200, ошибка может быть в response.data?.message
-                throw new Error(response.data?.message || 'Ошибка обновления профиля');
-            }
+            // Axios по умолчанию выбрасывает ошибку для статусов, отличных от 2xx
+            await api.patch<UserContextData>(`/users/${user.id}`, payload);
 
             messageApi.success('Данные успешно сохранены!');
             setIsDirty(false);
             onClose();
             refresh(); // Обновляем глобальное состояние пользователя
             onUserUpdate?.(); // Вызываем пропс для дополнительной логики в родительском компоненте
-        } catch (error) { // <-- Здесь ловим ошибку
+        } catch (error) { // Здесь ловим ошибку
             console.error('Ошибка сохранения:', error);
             let errorMessage = 'Неизвестная ошибка при сохранении данных';
 
-            if (error instanceof AxiosError) { // <-- Проверяем, является ли ошибка AxiosError
+            if (error instanceof AxiosError) { // Проверяем, является ли ошибка AxiosError
+                // Если это AxiosError, то данные об ошибке находятся в error.response.data
                 errorMessage = error.response?.data?.message || error.message;
-            } else if (error instanceof Error) { // <-- Или стандартной ошибкой
+            } else if (error instanceof Error) { // Или стандартной ошибкой
                 errorMessage = error.message;
             }
             messageApi.error(errorMessage);
@@ -192,22 +189,25 @@ const Profile: React.FC<ProfileProps> = ({open, onClose, onUserUpdate}) => {
                     throw new Error(`S3 upload failed: ${errorText}`);
                 }
 
-                const {url} = await uploadResponse.json();
+                const { url } = await uploadResponse.json();
 
-                const updateResponse = await api.patch<UserContextData>(`/users/${user.id}`, {
-                    avatarUrl: url
-                });
+                // const updateResponse = await api.patch<UserContextData>(`/users/${user.id}`, {
+                //     avatarUrl: url
+                // });
 
-                if (updateResponse.status !== 200) {
-                    throw new Error(updateResponse.data?.message || 'Не удалось обновить URL аватара пользователя в БД');
-                }
+                // Строка, которая вызывала ошибку в предыдущей версии, теперь удалена.
+                // Axios автоматически выбрасывает ошибку для статусов, отличных от 2xx,
+                // которая будет поймана в блоке catch.
+                // if (updateResponse.status !== 200) {
+                //     throw new Error(updateResponse.data?.message || 'Не удалось обновить URL аватара пользователя в БД');
+                // }
 
                 setAvatarPreviewUrl(url);
-                setIsDirty(true);
+                setIsDirty(true); // Указываем, что форма стала "грязной" после изменения аватара
                 messageApi.success('Аватар успешно обновлен');
 
-                refresh();
-                onUserUpdate?.();
+                refresh(); // Обновляем глобальное состояние пользователя
+                onUserUpdate?.(); // Вызываем пропс для дополнительной логики в родительском компоненте
 
             } catch (error) {
                 console.error('Error updating avatar:', error);

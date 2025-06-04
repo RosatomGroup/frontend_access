@@ -32,7 +32,7 @@ export default function UpdatesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const { user, isLoading } = useUser();
+  const { user } = useUser();
   const isAdmin = user?.accessLevel === 'ADMIN';
 
   const fetchNews = async () => {
@@ -41,6 +41,7 @@ export default function UpdatesPage() {
       const data = await res.json();
       setNewsList(data);
     } catch (err) {
+      console.error(err);
       message.error('Ошибка загрузки новостей');
     } finally {
       setLoading(false);
@@ -67,6 +68,7 @@ export default function UpdatesPage() {
       setIsModalOpen(false);
       fetchNews();
     } catch (err) {
+      console.error(err);
       message.error('Ошибка при сохранении новости');
     }
   };
@@ -78,6 +80,7 @@ export default function UpdatesPage() {
       });
       fetchNews();
     } catch (err) {
+      console.error(err);
       message.error('Ошибка при удалении новости');
     }
   };
@@ -109,6 +112,7 @@ export default function UpdatesPage() {
       setIsModalOpen(false);
       fetchNews();
     } catch (err) {
+      console.error(err);
       message.error('Ошибка при обновлении новости');
     }
   };
