@@ -11,8 +11,8 @@ export interface User {
     rang: string | null;
     serviceNumber?: number;
     accessLevel: string;
-    roleId: number | null;
-    role: {
+    roleId?: number | null;
+    role?: {
       id: number;
       name: string;
       description: string;

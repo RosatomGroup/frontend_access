@@ -49,7 +49,7 @@ const Profile: React.FC<ProfileProps> = ({open, onClose, onUserUpdate}) => {
                 phone: user.phone,
                 avatarUrl: user.avatarUrl,
                 // Преобразуем строковую дату в объект Dayjs для DatePicker
-                birthDate: user.birthDate ? dayjs(user.birthDate) : null,
+                birthDate: user.birthDate,
                 subdivision: user.subdivision,
                 rang: user.rang,
                 accessLevel: user.accessLevel, // Добавляем accessLevel из контекста
@@ -116,7 +116,7 @@ const Profile: React.FC<ProfileProps> = ({open, onClose, onUserUpdate}) => {
                 middleName: values.middleName,
                 phone: values.phone,
                 avatarUrl: avatarPreviewUrl, // Актуальный URL аватара
-                birthDate: values.birthDate?.format('YYYY-MM-DD') || null, // Отправляем как 'YYYY-MM-DD' или null
+                // birthDate: values.birthDate?.format('YYYY-MM-DD') || null, // Отправляем как 'YYYY-MM-DD' или null
                 subdivision: values.subdivision,
                 rang: values.rang,
             };
@@ -202,20 +202,20 @@ const Profile: React.FC<ProfileProps> = ({open, onClose, onUserUpdate}) => {
                     throw new Error(updateResponse.data?.message || 'Не удалось обновить URL аватара пользователя в БД');
                 }
 
-                setAvatarPreviewUrl(url); // Обновляем URL для предпросмотра
-                setIsDirty(true); // Форма технически изменилась, но мы сразу сохранили аватар
+                setAvatarPreviewUrl(url);
+                setIsDirty(true);
                 messageApi.success('Аватар успешно обновлен');
 
-                refresh(); // Обновляем глобальное состояние пользователя
+                refresh();
                 onUserUpdate?.();
 
-            } catch (error) { // <-- Здесь ловим ошибку
+            } catch (error) {
                 console.error('Error updating avatar:', error);
                 let errorMessage = 'Не удалось обновить аватар';
 
-                if (error instanceof AxiosError) { // <-- Проверяем, является ли ошибка AxiosError
+                if (error instanceof AxiosError) {
                     errorMessage = error.response?.data?.message || error.message;
-                } else if (error instanceof Error) { // <-- Или стандартной ошибкой
+                } else if (error instanceof Error) {
                     errorMessage = error.message;
                 }
                 messageApi.error(errorMessage);
@@ -267,7 +267,7 @@ const Profile: React.FC<ProfileProps> = ({open, onClose, onUserUpdate}) => {
 
     // Если пользователь не загружен или есть ошибка загрузки (из контекста)
     if (isLoading || !user) {
-        return null; // Или можно отобразить лоадер/сообщение об ошибке
+        return null;
     }
 
     return (
@@ -372,7 +372,7 @@ const Profile: React.FC<ProfileProps> = ({open, onClose, onUserUpdate}) => {
                         </Col>
                         <Col span={12}>
                             <Form.Item name="birthDate" label="Дата рождения">
-                                <DatePicker format={dateFormatList} style={{width: '100%'}}/>
+                                <DatePicker format={dateFormatList} style={{width: '100%'}} allowClear/>
                             </Form.Item>
                         </Col>
                     </Row>
