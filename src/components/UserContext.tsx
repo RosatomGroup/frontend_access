@@ -43,7 +43,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await api.get<UserData>('/auth/me');
       setUser(res.data);
     } catch (err) {
-      console.error(err);
+      console.log(err);
       setUser(null);
       setError('Ошибка загрузки пользователя');
     } finally {

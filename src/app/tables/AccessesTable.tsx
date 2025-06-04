@@ -2,12 +2,16 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { ConfigProvider, message, Spin, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import useBreakpoint from 'antd/es/grid/hooks/useBreakpoint';
-import { Accesses, fetchAccesses } from '@/api/requests';
+import { fetchAccesses } from '@/api/requests';
 import { useUser } from '@/components/UserContext';
 
-interface DataType extends Accesses {
+interface DataType {
   key: React.Key;
   index?: number;
+  system: string;
+  role: string;
+  submissionTime: string;
+  createDate: string;
 }
 
 const AccessTable: React.FC = () => {
@@ -44,7 +48,7 @@ const AccessTable: React.FC = () => {
       title: 'Время подачи',
       dataIndex: 'submissionTime',
       key: 'submissionTime',
-      sorter: (a, b) => new Date(a.createDate).getTime() - new Date(b.createDate).getTime(),
+      sorter: (a, b) => new Date(a.submissionTime).getTime() - new Date(b.submissionTime).getTime(),
       render: (time: string) => new Date(time).toLocaleString(),
       width: '15%',
       defaultSortOrder: 'descend',
@@ -55,8 +59,15 @@ const AccessTable: React.FC = () => {
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const accesses = await fetchAccesses(userContextValue.user?.id);
-      const sorted = accesses.sort(
+      const userId = userContextValue.user?.id;
+      if (!userId) {
+        message.warning('User information not available');
+        setData([]);
+        return;
+      }
+      const accesses = await fetchAccesses(userId);
+      const safeAccesses = accesses || [];
+      const sorted = safeAccesses.sort(
         (a, b) => new Date(b.createDate).getTime() - new Date(a.createDate).getTime(),
       );
       const formattedData = sorted.map((access) => ({
@@ -64,6 +75,7 @@ const AccessTable: React.FC = () => {
         role: access.roleName,
         system: access.resourceName,
         submissionTime: access.createDate,
+        createDate: access.createDate,
       }));
       setData(formattedData);
     } catch (error) {
@@ -119,3 +131,4 @@ const AccessTable: React.FC = () => {
 };
 
 export default AccessTable;
+

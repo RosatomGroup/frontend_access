@@ -42,7 +42,7 @@ export default function FormReqRevoke({ onClose }: { onClose: () => void }) {
     middleName: '',
     email: '',
   });
-  const [componentSize] = useState<SizeType>('default');
+  const [componentSize] = useState<SizeType>('middle');
 
   const { isLoading, availableSystems, filteredRoles, handleSystemChange } = useRequestForm({
     lastName: '',
@@ -121,6 +121,7 @@ export default function FormReqRevoke({ onClose }: { onClose: () => void }) {
         duration: 3,
       });
       onClose();
+      setTimeout(() => location.reload(), 1500);
     } catch (error: unknown) {
       console.error('Error creating revoke request:', error);
       let errorMessage = 'Не удалось создать заявку на отзыв';
@@ -177,7 +178,7 @@ export default function FormReqRevoke({ onClose }: { onClose: () => void }) {
     <div style={{ maxWidth: '100%', margin: '0 50px' }}>
       {contextHolder}
       <RequestForm
-        form={form}
+        // form={form}
         initialValues={formValues}
         onFinish={handleSubmit}
         onValuesChange={handleValuesChange}

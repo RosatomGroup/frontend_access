@@ -20,8 +20,8 @@ export interface BackendRequestDataType {
 
 export interface Accesses {
   id: number;
-  role: string;
-  system: string;
+  roleName: string;
+  resourceName: string;
   createDate: Date;
 }
 

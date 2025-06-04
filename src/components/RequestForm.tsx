@@ -1,6 +1,6 @@
 'use client';
 
-import { Form, Input, Select, Checkbox, Button } from 'antd';
+import { Form, Input, Select, Checkbox, Button, FormInstance } from 'antd';
 import type { SizeType } from 'antd/es/config-provider/SizeContext';
 import { useEffect, useState } from 'react';
 
@@ -56,7 +56,7 @@ interface RequestFormProps {
   onCheckboxChange: (checked: boolean) => void;
   onInputClick?: () => void;
   onSystemChange: (systemId: number) => void;
-  form?: typeof Form.useForm;
+  form?: FormInstance;
 }
 
 const inputStyles = {
@@ -85,7 +85,9 @@ export function RequestForm({
   onSystemChange,
   form: propForm,
 }: RequestFormProps) {
-  const [form] = Form.useForm(propForm);
+  const [internalForm] = Form.useForm();
+  const form = propForm || internalForm;
+
   const [selectedSystem, setSelectedSystem] = useState<number | null>(null);
 
   useEffect(() => {

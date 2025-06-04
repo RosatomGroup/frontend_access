@@ -22,7 +22,7 @@ import Settings from '@/components/ui/Settings';
 import '@ant-design/v5-patch-for-react-19';
 import axios from 'axios';
 import api from '@/api/axios.config';
-import { User } from '../types/user';
+
 import { useUser } from './UserContext';
 
 const { Header } = Layout;
@@ -54,15 +54,28 @@ export default function AppHeader() {
   } = theme.useToken();
 
   const formatUserName = useCallback(
-    (user: User | null) => {
+    (
+      user: {
+        surname?: string | null;
+        name?: string | null;
+        middleName?: string | null;
+        email?: string | null;
+      } | null,
+    ) => {
       if (!user) return 'Гость';
-      return user.surname && user.name && user.middleName
-        ? `${user.surname} ${user.name[0]}.${user.middleName[0]}.`
-        : user.surname && user.name
-          ? `${user.surname} ${user.name[0]}.`
-          : user.name || (user.email ? user.email.split('@')[0] : 'Гость');
+
+      const surname = user.surname ?? undefined;
+      const name = user.name ?? undefined;
+      const middleName = user.middleName ?? undefined;
+      const email = user.email ?? undefined;
+
+      return surname && name && middleName
+        ? `${surname} ${name[0]}.${middleName[0]}.`
+        : surname && name
+          ? `${surname} ${name[0]}.`
+          : name || (email ? email.split('@')[0] : 'Гость');
     },
-    [user],
+    [],
   );
 
   const updateUserData = useCallback(() => {
@@ -300,7 +313,7 @@ export default function AppHeader() {
                     shape="circle"
                     onError={() => false}
                   />
-                  <Text style={{ color: colorBgContainer }}>{formatUserName()}</Text>
+                  <Text style={{ color: colorBgContainer }}>{formatUserName(user)}</Text>
                 </Space>
               </a>
             </Dropdown>

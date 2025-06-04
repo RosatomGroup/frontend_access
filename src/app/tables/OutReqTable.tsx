@@ -105,7 +105,7 @@ const OutReqTable: React.FC = () => {
       sorter: (a, b) => a.status.localeCompare(b.status),
       render: (status: DataType['status']) => {
         let color = 'default';
-        let text = status;
+        let text: string;
         if (status === 'PENDING') {
           color = 'blue';
           text = 'В работе';
@@ -115,6 +115,8 @@ const OutReqTable: React.FC = () => {
         } else if (status === 'REJECTED') {
           color = 'red';
           text = 'Отклонено';
+        } else {
+          text = status;
         }
         return <Tag color={color}>{text}</Tag>;
       },

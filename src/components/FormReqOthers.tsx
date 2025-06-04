@@ -110,6 +110,7 @@ export default function FormReqOthers({ onClose }: { onClose: () => void }) {
         duration: 3,
       });
       onClose();
+      setTimeout(() => location.reload(), 1500);
     } catch (error: unknown) {
       console.error('Error creating request:', error);
       const errorMessage = error instanceof Error ? error.message : 'Не удалось создать заявку';
@@ -164,7 +165,7 @@ export default function FormReqOthers({ onClose }: { onClose: () => void }) {
         onFinish={handleSubmit}
         onValuesChange={handleValuesChange}
         onFormLayoutChange={({ size }) => console.log('Form size changed:', size)}
-        componentSize="default"
+        componentSize="middle"
         availableSystems={availableSystems}
         filteredRoles={filteredRoles}
         isLoading={isLoading}

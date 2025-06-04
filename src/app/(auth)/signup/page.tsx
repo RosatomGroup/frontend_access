@@ -94,7 +94,7 @@ const Registration: React.FC = () => {
           </Form.Item>
           <Form.Item
             label="Отчество"
-            name="middle_name"
+            name="middleName"
             rules={[{ required: false, message: 'Пожалуйста, введите отчество' }]}
           >
             <Input />
