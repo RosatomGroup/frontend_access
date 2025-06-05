@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { message, Spin, Table, Tag } from 'antd';
+import { Button, message, Popconfirm, Spin, Table, Tag } from 'antd';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
-import { BackendRequestDataType, fetchRequests } from '@/api/requests';
+import {
+  BackendRequestDataType,
+  fetchRequests,
+  updateRequestStatus,
+  UpdateRequestStatusDto,
+} from '@/api/requests';
 
 interface DataType extends BackendRequestDataType {
   key: number;
@@ -12,6 +17,23 @@ const OutReqTable: React.FC = () => {
   const [data, setData] = useState<DataType[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [actionLoading, setActionLoading] = useState<{ [key: number]: boolean }>({});
+
+  const handleStatusChange = async (id: number, status: UpdateRequestStatusDto['status']) => {
+    setActionLoading((prev) => ({ ...prev, [id]: true }));
+    try {
+      const dto: UpdateRequestStatusDto = { status };
+      await updateRequestStatus(id, dto);
+      setData((prevData) =>
+        prevData.map((item) => (item.id === id ? { ...item, status: dto.status } : item)),
+      );
+      message.success(status === 'APPROVED' ? 'Заявка принята' : 'Заявка отклонена');
+    } catch (error) {
+      message.error('Ошибка обновления статуса');
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [id]: false }));
+    }
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -145,6 +167,32 @@ const OutReqTable: React.FC = () => {
       defaultSortOrder: 'descend',
       sortDirections: ['descend', 'ascend'],
     },
+    {
+      title: 'Действия',
+      key: 'actions',
+      width: '15%',
+      render: (_, record: DataType) =>
+        record.status === 'PENDING' && (
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Popconfirm
+              title="Принять заявку?"
+              onConfirm={() => handleStatusChange(record.id, 'APPROVED')}
+            >
+              <Button type="primary" loading={!!actionLoading[record.id]} size="small">
+                Принять
+              </Button>
+            </Popconfirm>
+            <Popconfirm
+              title="Отклонить заявку?"
+              onConfirm={() => handleStatusChange(record.id, 'REJECTED')}
+            >
+              <Button danger loading={!!actionLoading[record.id]} size="small">
+                Отклонить
+              </Button>
+            </Popconfirm>
+          </div>
+        ),
+    },
   ];
 
   const handleTableChange = (pagination: TablePaginationConfig) => {
@@ -173,4 +221,3 @@ const OutReqTable: React.FC = () => {
 };
 
 export default OutReqTable;
-

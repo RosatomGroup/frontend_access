@@ -37,7 +37,7 @@ export interface CreateRequestDto {
 }
 
 export interface UpdateRequestStatusDto {
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  status: 'APPROVED' | 'REJECTED';
 }
 
 export const fetchRequests = async (): Promise<BackendRequestDataType[]> => {
@@ -85,10 +85,9 @@ export const updateRequestStatus = async (
   dto: UpdateRequestStatusDto,
 ): Promise<BackendRequestDataType> => {
   try {
-    const response = await api.patch<BackendRequestDataType>(`/request/${id}/status/`, dto);
+    const response = await api.patch<BackendRequestDataType>(`/requests/${id}/status`, dto);
     return response.data;
   } catch (error) {
     throw error;
   }
 };
-
