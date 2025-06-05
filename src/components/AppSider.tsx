@@ -1,172 +1,152 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState, useCallback } from 'react'; // Добавлен useCallback
-import type { MenuProps } from 'antd';
+import { useEffect, useMemo } from 'react';
 import { Layout, Menu, Spin } from 'antd';
+import type { MenuProps } from 'antd';
 import {
-    CheckCircleOutlined,
-    ExclamationCircleOutlined,
-    FileTextOutlined,
-    InfoCircleOutlined,
-    ProfileOutlined,
-    SyncOutlined,
-    TableOutlined,
-    UserOutlined,
-    VideoCameraOutlined,
-    WarningOutlined,
+  CheckCircleOutlined,
+  ExclamationCircleOutlined,
+  FileTextOutlined,
+  InfoCircleOutlined,
+  ProfileOutlined,
+  SyncOutlined,
+  TableOutlined,
+  UserOutlined,
+  VideoCameraOutlined,
 } from '@ant-design/icons';
 import { useUser } from '@/components/UserContext';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
-const AppSider: React.FC = () => {
-    const router = useRouter();
-    const pathname = usePathname();
-    const [openKeys, setOpenKeys] = useState<string[]>([]);
-    const [mounted, setMounted] = useState(false);
-    const { user, isLoading } = useUser();
+const getMenuItemsByRole = (role: string | undefined): MenuItem[] => {
+  const common: MenuItem[] = [
+    {
+      key: 'edit',
+      label: 'Изменения',
+      icon: <SyncOutlined />,
+      children: [
+        { key: 'logs', label: 'Логирование', icon: <FileTextOutlined /> },
+        { key: 'reports', label: 'Отчеты', icon: <ProfileOutlined /> },
+      ],
+    },
+    {
+      key: 'about',
+      label: 'О системе',
+      icon: <InfoCircleOutlined />,
+      children: [
+        { key: 'docs', label: 'Документы', icon: <FileTextOutlined /> },
+        { key: 'video', label: 'Видео', icon: <VideoCameraOutlined /> },
+        { key: 'updates', label: 'Объявления', icon: <ExclamationCircleOutlined /> },
+      ],
+    },
+  ];
 
-    useEffect(() => {
-        setMounted(true);
-    }, []);
+  const userItems: MenuItem[] = [
+    { key: 'accesses', label: 'Мои доступы', icon: <CheckCircleOutlined /> },
+    { key: 'outgoing', label: 'Мои заявки', icon: <ProfileOutlined /> },
+    { key: 'resources', label: 'Системы', icon: <TableOutlined /> },
+    { key: 'roles', label: 'Роли', icon: <UserOutlined /> },
+  ];
 
-    const generateCommonItems = useCallback((): MenuItem[] => [
-        {
-            key: 'edit',
-            label: 'Изменения',
-            icon: <SyncOutlined />,
-            children: [
-                { key: 'logs', label: 'Логирование', icon: <FileTextOutlined /> },
-                { key: 'reports', label: 'Отчеты', icon: <ProfileOutlined /> },
-            ],
-        },
-        {
-            key: 'about',
-            label: 'О системе',
-            icon: <InfoCircleOutlined />,
-            children: [
-                { key: 'docs', label: 'Документы', icon: <FileTextOutlined /> },
-                { key: 'video', label: 'Видео', icon: <VideoCameraOutlined /> },
-                { key: 'updates', label: 'Объявления', icon: <ExclamationCircleOutlined /> },
-            ],
-        },
-    ], []); // Зависимости отсутствуют, так как содержимое статично
-
-    const generateUserItems = useCallback((): MenuItem[] => [
-        { key: 'accesses', label: 'Мои доступы', icon: <CheckCircleOutlined /> },
-        { key: 'outgoing', label: 'Мои заявки', icon: <ProfileOutlined /> },
-        { key: 'resources', label: 'Системы', icon: <TableOutlined /> },
+  const adminItems: MenuItem[] = [
+    {
+      key: 'incoming',
+      label: 'Входящие заявки',
+      icon: <ProfileOutlined />,
+    },
+    {
+      key: 'management',
+      label: 'Управление',
+      icon: <UserOutlined />,
+      children: [
+        { key: 'users', label: 'Пользователи', icon: <UserOutlined /> },
         { key: 'roles', label: 'Роли', icon: <UserOutlined /> },
-    ], []); // Зависимости отсутствуют, так как содержимое статично
+        { key: 'resources', label: 'Системы', icon: <TableOutlined /> },
+      ],
+    },
+  ];
 
-    const generateAdminItems = useCallback((): MenuItem[] => [
-        {
-            key: 'requests',
-            label: 'Заявки',
-            icon: <ProfileOutlined />,
-            children: [
-                { key: 'incoming', label: 'Входящие заявки', icon: <WarningOutlined /> },
-                { key: 'outgoing', label: 'Мои заявки', icon: <ProfileOutlined /> },
-            ],
-        },
-        {
-            key: 'management',
-            label: 'Управление',
-            icon: <UserOutlined />,
-            children: [
-                { key: 'users', label: 'Пользователи', icon: <UserOutlined /> },
-                { key: 'roles', label: 'Роли', icon: <UserOutlined /> },
-                { key: 'resources', label: 'Системы', icon: <TableOutlined /> },
-            ],
-        },
-    ], []); // Зависимости отсутствуют, так как содержимое статично
+  if (role === 'ADMIN') return [...adminItems, ...common];
+  if (role === 'USER') return [...userItems, ...common];
+  return [];
+};
 
-    const items = useMemo(() => {
-        if (!user?.accessLevel) return [];
-        const commonItems = generateCommonItems();
-        switch (user.accessLevel) {
-            case 'USER':
-                return [...generateUserItems(), ...commonItems];
-            case 'ADMIN':
-                return [...generateAdminItems(), ...commonItems];
-            default:
-                return [];
-        }
-    }, [user, generateCommonItems, generateUserItems, generateAdminItems]); // Добавлены зависимости для функций-генераторов
-
-    // Обертываем findParentKey в useCallback
-    const findParentKey = useCallback((menuItems: MenuItem[], key: string): string | undefined => {
-        for (const item of menuItems) {
-            if (item && 'children' in item && item.children) {
-                if (item.children.some((child) => child && 'key' in child && child.key === key)) {
-                    return item.key as string;
-                }
-                // Рекурсивный поиск для вложенных меню
-                for (const child of item.children) {
-                    if (child && 'children' in child && child.children) {
-                        const found = findParentKey([child as MenuItem], key);
-                        if (found) return found;
-                    }
-                }
-            }
-        }
-        return undefined;
-    }, []); // Зависимости отсутствуют, так как логика не зависит от внешних переменных
-
-    useEffect(() => {
-        if (!mounted || !pathname || isLoading) return;
-        const segments = pathname.split('/').filter(Boolean);
-        const currentKey = segments[segments.length - 1]; // последний сегмент
-        const parentKey = findParentKey(items, currentKey); // Используем стабильную findParentKey
-        if (parentKey && !openKeys.includes(parentKey)) {
-            setOpenKeys([parentKey]);
-        }
-    }, [pathname, items, mounted, isLoading, findParentKey, openKeys]); // Добавлены findParentKey и openKeys в зависимости
-
-    const handleMenuClick: MenuProps['onClick'] = ({ key }) => {
-        router.push(`/${key}`);
-    };
-
-    const handleOpenChange: MenuProps['onOpenChange'] = (keys) => {
-        setOpenKeys(keys as string[]);
-    };
-
-    if (!mounted || isLoading) {
-        return (
-            <Layout.Sider>
-                <div>
-                    <Spin />
-                </div>
-            </Layout.Sider>
-        );
+const findSelectedKey = (items: MenuItem[], pathname: string): string | null => {
+  const lastSegment = pathname?.split('/').filter(Boolean).pop() || '';
+  for (const item of items) {
+    if (!item) continue;
+    if (item.key === lastSegment) return item.key as string;
+    if ('children' in item && item.children) {
+      const found = findSelectedKey(item.children as MenuItem[], pathname);
+      if (found) return found;
     }
+  }
+  return null;
+};
 
-    if (!user?.accessLevel) {
-        return (
-            <Layout.Sider>
-                <div>Доступ запрещен</div>
-            </Layout.Sider>
-        );
+const findOpenKey = (items: MenuItem[], selectedKey: string | null): string | null => {
+  if (!selectedKey) return null;
+  for (const item of items) {
+    if (!item) continue; // защита от null
+    if ('children' in item && item.children?.some((child) => child && child.key === selectedKey)) {
+      return item.key as string;
     }
+  }
+  return null;
+};
 
-    // Выделяем текущий пункт меню (последний сегмент)
-    const segments = pathname?.split('/').filter(Boolean);
-    const selectedKeys = [segments[segments.length - 1] || ''];
+const AppSider: React.FC = () => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const { user, isLoading } = useUser();
 
+  const menuItems = useMemo(() => getMenuItemsByRole(user?.accessLevel), [user?.accessLevel]);
+  const selectedKey = useMemo(() => findSelectedKey(menuItems, pathname), [menuItems, pathname]);
+  const openKey = useMemo(() => findOpenKey(menuItems, selectedKey), [menuItems, selectedKey]);
+
+  const handleClick: MenuProps['onClick'] = ({ key }) => {
+    router.push(`/${key}`);
+  };
+
+  useEffect(() => {
+    const active = document.activeElement as HTMLElement;
+    if (active?.classList?.contains('ant-menu-item')) {
+      active.blur();
+    }
+  }, []);
+
+  if (isLoading) {
     return (
-        <Layout.Sider width={240}>
-            <Menu
-                mode="inline"
-                selectedKeys={selectedKeys}
-                openKeys={openKeys}
-                onOpenChange={handleOpenChange}
-                onClick={handleMenuClick}
-                style={{ height: '100%', borderRight: 0 }}
-                items={items}
-            />
-        </Layout.Sider>
+      <Layout.Sider width={240}>
+        <div className="flex items-center justify-center h-full">
+          <Spin />
+        </div>
+      </Layout.Sider>
     );
+  }
+
+  if (!user?.accessLevel) {
+    return (
+      <Layout.Sider width={240}>
+        <div className="p-4">Доступ запрещен</div>
+      </Layout.Sider>
+    );
+  }
+
+  return (
+    <Layout.Sider width={240}>
+      <Menu
+        mode="inline"
+        selectedKeys={selectedKey ? [selectedKey] : []}
+        defaultOpenKeys={openKey ? [openKey] : []}
+        onClick={handleClick}
+        style={{ height: '100%', borderRight: 0 }}
+        items={menuItems}
+      />
+    </Layout.Sider>
+  );
 };
 
 export default AppSider;
+
