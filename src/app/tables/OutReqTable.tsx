@@ -7,6 +7,7 @@ import {
   updateRequestStatus,
   UpdateRequestStatusDto,
 } from '@/api/requests';
+import { useUser } from '@/components/UserContext';
 
 interface DataType extends BackendRequestDataType {
   key: number;
@@ -18,6 +19,8 @@ const OutReqTable: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [actionLoading, setActionLoading] = useState<{ [key: number]: boolean }>({});
+  const { user } = useUser();
+  const isAdmin = user?.accessLevel === 'ADMIN';
 
   const handleStatusChange = async (id: number, status: UpdateRequestStatusDto['status']) => {
     setActionLoading((prev) => ({ ...prev, [id]: true }));
@@ -28,7 +31,7 @@ const OutReqTable: React.FC = () => {
         prevData.map((item) => (item.id === id ? { ...item, status: dto.status } : item)),
       );
       message.success(status === 'APPROVED' ? 'Заявка принята' : 'Заявка отклонена');
-    } catch (error) {
+    } catch {
       message.error('Ошибка обновления статуса');
     } finally {
       setActionLoading((prev) => ({ ...prev, [id]: false }));
@@ -61,7 +64,7 @@ const OutReqTable: React.FC = () => {
     value: surname,
   }));
 
-  const columns: ColumnsType<DataType> = [
+  const baseColumns: ColumnsType<DataType> = [
     {
       title: '№',
       key: 'index',
@@ -167,33 +170,36 @@ const OutReqTable: React.FC = () => {
       defaultSortOrder: 'descend',
       sortDirections: ['descend', 'ascend'],
     },
-    {
-      title: 'Действия',
-      key: 'actions',
-      width: '15%',
-      render: (_, record: DataType) =>
-        record.status === 'PENDING' && (
-          <div style={{ display: 'flex', gap: 8 }}>
-            <Popconfirm
-              title="Принять заявку?"
-              onConfirm={() => handleStatusChange(record.id, 'APPROVED')}
-            >
-              <Button type="primary" loading={!!actionLoading[record.id]} size="small">
-                Принять
-              </Button>
-            </Popconfirm>
-            <Popconfirm
-              title="Отклонить заявку?"
-              onConfirm={() => handleStatusChange(record.id, 'REJECTED')}
-            >
-              <Button danger loading={!!actionLoading[record.id]} size="small">
-                Отклонить
-              </Button>
-            </Popconfirm>
-          </div>
-        ),
-    },
   ];
+
+  const actionColumn: ColumnsType<DataType>[number] = {
+    title: 'Действия',
+    key: 'actions',
+    width: '15%',
+    render: (_, record: DataType) =>
+      record.status === 'PENDING' && (
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Popconfirm
+            title="Принять заявку?"
+            onConfirm={() => handleStatusChange(record.id, 'APPROVED')}
+          >
+            <Button type="primary" loading={!!actionLoading[record.id]} size="small">
+              Принять
+            </Button>
+          </Popconfirm>
+          <Popconfirm
+            title="Отклонить заявку?"
+            onConfirm={() => handleStatusChange(record.id, 'REJECTED')}
+          >
+            <Button danger loading={!!actionLoading[record.id]} size="small">
+              Отклонить
+            </Button>
+          </Popconfirm>
+        </div>
+      ),
+  };
+
+  const finalColumns = isAdmin ? [...baseColumns, actionColumn] : baseColumns;
 
   const handleTableChange = (pagination: TablePaginationConfig) => {
     setCurrentPage(pagination.current || 1);
@@ -204,7 +210,7 @@ const OutReqTable: React.FC = () => {
     <Spin spinning={loading}>
       <Table
         scroll={{ x: 800 }}
-        columns={columns}
+        columns={finalColumns}
         dataSource={data}
         pagination={{
           pageSize,
@@ -221,3 +227,4 @@ const OutReqTable: React.FC = () => {
 };
 
 export default OutReqTable;
+
