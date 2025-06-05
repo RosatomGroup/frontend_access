@@ -26,11 +26,13 @@ interface FormValues {
   role: number;
 }
 
-// interface CreateRequestResponse {
-//     id: number;
-// }
-
-export default function FormReqRevoke({ onClose }: { onClose: () => void }) {
+export default function FormReqRevoke({
+                                        onClose,
+                                        onSuccess,
+                                      }: {
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
   const [form] = Form.useForm();
   const [isRequestForOtherUser, setIsRequestForOtherUser] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<UserData | null>(null);
@@ -120,8 +122,8 @@ export default function FormReqRevoke({ onClose }: { onClose: () => void }) {
         description: 'Заявка на отзыв успешно создана',
         duration: 3,
       });
-      onClose();
-      setTimeout(() => location.reload(), 1500);
+      onSuccess(); // обновляем таблицу
+      onClose();   // закрываем форму
     } catch (error: unknown) {
       console.error('Error creating revoke request:', error);
       let errorMessage = 'Не удалось создать заявку на отзыв';
