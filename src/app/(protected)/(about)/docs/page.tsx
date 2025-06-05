@@ -23,6 +23,8 @@ interface CustomUploadFile extends UploadFile {
   url: string;
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+
 export default function DocsPage() {
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -40,7 +42,7 @@ export default function DocsPage() {
 
   useEffect(() => {
     setLoading(true);
-    fetch('http://localhost:3001/documents')
+    fetch(`${API_BASE_URL}/documents`)
       .then((res) => res.json())
       .then((data: Document[]) => {
         const formatted = data.map((file) => ({
@@ -71,7 +73,7 @@ export default function DocsPage() {
       return;
     }
     try {
-      const response = await fetch(`http://localhost:3001/documents/${file.filename}/rename`, {
+      const response = await fetch(`${API_BASE_URL}/documents/${file.filename}/rename`, {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -136,7 +138,7 @@ export default function DocsPage() {
                   disabled={!isAdmin}
                   withCredentials={true}
                   ref={uploadRef}
-                  action="http://localhost:3001/documents/upload"
+                  action={`${API_BASE_URL}/documents/upload`}
                   listType="picture"
                   fileList={fileList}
                   onRemove={async (file: UploadFile) => {
@@ -146,7 +148,7 @@ export default function DocsPage() {
                         message.error('Неизвестное имя файла для удаления');
                         return;
                       }
-                      await fetch(`http://localhost:3001/documents/${customFile.filename}`, {
+                      await fetch(`${API_BASE_URL}/documents/${customFile.filename}`, {
                         method: 'DELETE',
                         credentials: 'include',
                       });

@@ -10,6 +10,8 @@ import AppTitleAuth from '../../../components/AppTitleAuth';
 import axios from 'axios';
 import { useUser } from '@/components/UserContext';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+
 const LoginPage: React.FC = () => {
   const router = useRouter();
   const [messageApi, contextHolder] = message.useMessage();
@@ -22,7 +24,7 @@ const LoginPage: React.FC = () => {
       setLoading(true);
       const normalizedEmail = values.email.toLowerCase().trim();
       await axios.post(
-        'http://localhost:3001/auth/login',
+        `${API_BASE_URL}/auth/login`,
         {
           email: normalizedEmail,
           password: values.password,

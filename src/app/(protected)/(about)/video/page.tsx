@@ -27,6 +27,8 @@ interface CustomUploadFile extends UploadFile {
   status: 'done' | 'uploading' | 'error' | 'removed';
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+
 export default function VideoPage() {
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -42,7 +44,7 @@ export default function VideoPage() {
 
   useEffect(() => {
     setLoading(true);
-    fetch('http://localhost:3001/videos', { credentials: 'include' })
+    fetch(`${API_BASE_URL}/videos`, { credentials: 'include' })
       .then((res) => res.json())
       .then((data) => {
         const formatted = data.map(
@@ -76,7 +78,7 @@ export default function VideoPage() {
       return;
     }
     try {
-      const response = await fetch(`http://localhost:3001/videos/${file.filename}/rename`, {
+      const response = await fetch(`${API_BASE_URL}/videos/${file.filename}/rename`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -113,7 +115,7 @@ export default function VideoPage() {
         message.error('Неизвестное имя файла для удаления');
         return;
       }
-      await fetch(`http://localhost:3001/videos/${file.filename}`, {
+      await fetch(`${API_BASE_URL}/videos/${file.filename}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -160,7 +162,7 @@ export default function VideoPage() {
                     withCredentials={true}
                     name="file"
                     ref={uploadRef}
-                    action="http://localhost:3001/videos/upload"
+                    action={`${API_BASE_URL}/videos/upload`}
                     listType="text"
                     fileList={fileList}
                     beforeUpload={(file) => {
@@ -177,7 +179,7 @@ export default function VideoPage() {
                           message.error('Неизвестное имя файла для удаления');
                           return;
                         }
-                        await fetch(`http://localhost:3001/videos/${customFile.filename}`, {
+                        await fetch(`${API_BASE_URL}/videos/${customFile.filename}`, {
                           method: 'DELETE',
                           credentials: 'include',
                         });

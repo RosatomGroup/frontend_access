@@ -16,6 +16,8 @@ interface FormValues {
   password: string;
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+
 const Registration: React.FC = () => {
   const [form] = Form.useForm<FormValues>();
   const router = useRouter();
@@ -28,7 +30,7 @@ const Registration: React.FC = () => {
       const normalizedEmail = values.email.toLowerCase().trim();
 
       const response = await axios.post(
-        'http://localhost:3001/auth/register',
+        `${API_BASE_URL}/auth/register`,
         {
           surname: values.surname,
           name: values.name,
