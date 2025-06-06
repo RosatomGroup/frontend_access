@@ -17,7 +17,7 @@ services:
       timeout: 5s
       retries: 10
     networks:
-      - rbac-net
+      - rbacnet
 
   backend:
     build:
@@ -27,7 +27,7 @@ services:
     ports:
       - "3001:3001"
     environment:
-      - DATABASE_URL=postgresql://admin:admin@rbac-db:5432/rbac?schema=public
+      - DATABASE_URL=${DATABASE_URL}
       - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
       - EMAIL_USER=${EMAIL_USER}
@@ -43,9 +43,9 @@ services:
         condition: service_healthy
     restart: always
     networks:
-      - rbac-net # Добавлено для связи с nginx
+      - rbacnet
 
-  rbac: # Перемещено в блок services
+  rbac:
     build: .
     container_name: rbac
     ports:
@@ -59,7 +59,7 @@ services:
     depends_on: # Добавлена зависимость от backend
       - backend
     networks:
-      - rbac-net
+      - rbacnet
 
   nginx:
     image: nginx:stable-alpine
@@ -78,7 +78,7 @@ services:
       - "80:80"
       # - "443:443"
     networks:
-      - rbac-net
+      - rbacnet
 
   # certbot:
   #   image: certbot/certbot
@@ -95,4 +95,5 @@ volumes:
 
 networks:
   rbac-net:
+    name: rbacnet
     driver: bridge
