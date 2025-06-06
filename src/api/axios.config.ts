@@ -6,7 +6,7 @@ interface ErrorResponse {
 }
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001',
+  baseURL: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001',
   timeout: 5000,
   withCredentials: true,
   headers: {
