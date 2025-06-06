@@ -7,7 +7,7 @@ export default function AppLoadingComponent() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 300);
+    }, 200);
 
     return () => clearTimeout(timer);
   }, []);
@@ -28,7 +28,7 @@ export default function AppLoadingComponent() {
           background: 'rgba(255, 255, 255, 0.7)',
         }}
       >
-        <Spin size="large" />
+        <Spin size="default" />
       </div>
     );
   }

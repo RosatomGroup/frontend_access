@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { randomUUID } from 'crypto';
 
-const filePath = path.resolve('./data/updates.json');
+const filePath = path.join(process.cwd(), 'data', 'updates.json');
 
 type NewsItem = {
   id: string;

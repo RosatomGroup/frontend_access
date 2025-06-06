@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Typography, Space } from 'antd';
 import Image from 'next/image';
+import AppLoadingComponent from './AppLoading';
 
 const { Title, Text } = Typography;
 
@@ -33,6 +34,7 @@ const ComingSoonPage: React.FC = () => {
   return (
     <div style={{ padding: '50px', textAlign: 'center', fontFamily: 'sans-serif' }}>
       <Row justify="center" align="middle" gutter={[32, 32]}>
+        <AppLoadingComponent />
         <Col>
           <Image
             src={'/images/Process.png'}

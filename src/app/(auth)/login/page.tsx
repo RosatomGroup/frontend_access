@@ -9,6 +9,7 @@ import '@ant-design/v5-patch-for-react-19';
 import AppTitleAuth from '../../../components/AppTitleAuth';
 import axios from 'axios';
 import { useUser } from '@/components/UserContext';
+import AppLoadingComponent from '@/components/AppLoading';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
 
@@ -65,6 +66,7 @@ const LoginPage: React.FC = () => {
         gap="middle"
       >
         <AppTitleAuth />
+        <AppLoadingComponent />
         <Card
           title="Авторизация"
           style={{ width: '100%', maxWidth: 360, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}
